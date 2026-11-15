@@ -76,7 +76,8 @@ dumps. Report bugs at <https://github.com/d-SEAMS/dseams-r/issues>.
 `bindings/cxx/seams_lang.h`), the `seams` CLI and the C++ reference
 `binding_oracle` live in [seams-core](https://github.com/d-SEAMS/seams-core).
 A changed result or a new analysis goes there first; this repository moves
-its pin to the seams-core revision that carries it.
+its pin to the seams-core revision that carries it. The contributing
+guide at the repository root is the contributor contract.
 
 Against a local seams-core checkout, at the pinned revision or any other:
 

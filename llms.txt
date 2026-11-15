@@ -2,7 +2,7 @@
 
 > dseams is the R package for d-SEAMS: CHILL and CHILL+ ice labels, primitive rings, hexagonal and double-diamond cages, Steinhardt order parameters, RDFs, hydrogen bonds and topological fingerprints of LAMMPS and XYZ frames, returned as data frames.
 
-The R package is `dseams`; its version is the seams-core release it binds. R 4.2 and a C++20 compiler build it. A source package carries a copy of the seams-core engine sources and installs with no network; a git checkout copies them from `SEAMS_CORE_SRC` or downloads the revision in `tools/seams-core.ref`. `SEAMS_LIBDIR` or `DSEAMS_SYSTEM_ENGINE=1` (pkg-config modules `seams` and `seams-lang`) link a built engine instead.
+The R package is `dseams`; its version is the seams-core release it binds. R 4.2 and a C++20 compiler build it. A source package carries a copy of the seams-core engine sources and installs with no network; a git checkout copies them from `SEAMS_CORE_SRC` or downloads the revision in `tools/seams-core.ref`. `SEAMS_LIBDIR` or `DSEAMS_SYSTEM_ENGINE=1` (pkg-config modules `seams` and `seams-lang`) link a built engine instead. Contributor instructions are in the contributing guide at the repository root.
 
 ## Package docs
 
