@@ -1,4 +1,7 @@
 # Copyright (c) d-SEAMS developers
+# Every seams_* function against binding_oracle, the C++ reference that a
+# seams-core build makes (bindings/binding_oracle). DSEAMS_ROOT is the
+# checkout of that build and SEAMS_CPP_ORACLE the executable.
 root <- Sys.getenv("DSEAMS_ROOT", unset = "")
 oracle <- Sys.getenv("SEAMS_CPP_ORACLE", unset = "")
 stopifnot(nzchar(root), nzchar(oracle))

@@ -1,7 +1,9 @@
 # Copyright (c) d-SEAMS developers
 # Read the GenIce sI cell, then the cutoff shell, q6, CHILL+, and rings.
-path <- commandArgs(trailingOnly = TRUE)[1]
-stopifnot(nzchar(path))
+# DSEAMS_ROOT is a seams-core checkout; the cell is its input/traj.
+root <- Sys.getenv("DSEAMS_ROOT", unset = "")
+stopifnot(nzchar(root))
+path <- file.path(root, "input", "traj", "genice_sI.lammpstrj")
 library(dseams)
 frame <- read_frame(path)
 shell <- steinhardt(frame, order_l = 6L, cutoff = 3.5)

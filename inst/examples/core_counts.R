@@ -2,7 +2,10 @@
 # Ice Ih and sII census through the dseams package.
 # Ice Ih: 128 hexagonal, 256 six-rings.
 # sII: 136 clathrate, 144 five-rings, 16 six-rings.
+# DSEAMS_ROOT is a seams-core checkout; the dumps are its input/traj.
 library(dseams)
+root <- Sys.getenv("DSEAMS_ROOT", unset = "")
+stopifnot(nzchar(root))
 
 census <- function(path) {
   frame <- read_frame(path)
@@ -12,10 +15,10 @@ census <- function(path) {
   )
 }
 
-ice <- census("input/traj/ice1h.lammpstrj")
+ice <- census(file.path(root, "input", "traj", "ice1h.lammpstrj"))
 stopifnot(sum(ice$ice$name == "hexagonal") == 128L)
 stopifnot(ice$rings$n[ice$rings$size == 6L] == 256L)
-sii <- census("input/traj/genice_sII.lammpstrj")
+sii <- census(file.path(root, "input", "traj", "genice_sII.lammpstrj"))
 stopifnot(sum(sii$ice$name == "clathrate") == 136L)
 stopifnot(sii$rings$n[sii$rings$size == 5L] == 144L)
 stopifnot(sii$rings$n[sii$rings$size == 6L] == 16L)

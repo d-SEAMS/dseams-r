@@ -1,4 +1,5 @@
 # Copyright (c) d-SEAMS developers
+# CHILL+ and q4/q6 on exampleTraj.lammpstrj of a seams-core checkout.
 root <- Sys.getenv("DSEAMS_ROOT", unset = "")
 stopifnot(nzchar(root))
 library(dseams)

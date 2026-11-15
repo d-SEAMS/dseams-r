@@ -1,22 +1,24 @@
 # Copyright (c) d-SEAMS developers
-# Science tutorials in R. Same numbers as science_tutorials.py.
-# Usage: Rscript science_tutorials.R ROOT WRAPPER.so
+# Science tutorials in R. Same numbers as science_tutorials.py in
+# seams-core, through the package's seams_* functions. DSEAMS_ROOT is a
+# seams-core checkout. DSEAMS_BRINE_T0 and DSEAMS_BRINE_TEND name the two
+# brine-front-230K frames, which are not in seams-core.
 
-args <- commandArgs(trailingOnly = TRUE)
-root <- args[[1]]
-dyn.load(args[[2]])
+root <- Sys.getenv("DSEAMS_ROOT", unset = "")
+stopifnot(nzchar(root))
+library(dseams)
 
 frame_of <- function(path) {
-  n <- .C("seams_r_n", path = path, n = as.integer(0), PACKAGE = "science_r")$n
+  sys <- seams_system_new()
+  n <- seams_system_read(sys, path, 1L, -1L)
   if (n < 1) stop(path)
-  got <- .C("seams_r_frame", path = path, n = as.integer(n),
-            labels = integer(n), counts = integer(9), PACKAGE = "science_r")
-  list(n = n, labels = got$labels, counts = got$counts)
+  list(n = n, counts = as.integer(seams_chill(sys, cutoff = 3.5)))
 }
 
 cages_of <- function(path, spec) {
-  .C("seams_r_cages", path = path, spec = spec, n = as.integer(0),
-     PACKAGE = "science_r")$n
+  sys <- seams_system_new()
+  if (seams_system_read(sys, path, 1L, -1L) < 1) stop(path)
+  as.integer(seams_signature_cages(sys, spec, cutoff = 3.5)[["n_cages"]])
 }
 
 iface <- file.path(root, "input", "traj", "interface_f0.lammpstrj")
@@ -50,9 +52,10 @@ hexagonal_oxygens <- function(path) {
   sum(vapply(strsplit(oxygen, " "), function(parts) parts[[5]] == "hexagonal", logical(1)))
 }
 
-if (length(args) >= 4 && file.exists(args[[3]]) && file.exists(args[[4]])) {
-  stopifnot(hexagonal_oxygens(args[[3]]) == 733L)
-  stopifnot(hexagonal_oxygens(args[[4]]) == 741L)
+brine <- c(Sys.getenv("DSEAMS_BRINE_T0"), Sys.getenv("DSEAMS_BRINE_TEND"))
+if (all(nzchar(brine)) && all(file.exists(brine))) {
+  stopifnot(hexagonal_oxygens(brine[[1]]) == 733L)
+  stopifnot(hexagonal_oxygens(brine[[2]]) == 741L)
   cat("brine t0 hexagonal 733\nbrine tend hexagonal 741\n")
 } else {
   cat("brine tutorial skipped: cannot fetch d-SEAMS/brine-front-230K at 4828e33ecf419c70643b2d466bfa4f283b4138dc\n")

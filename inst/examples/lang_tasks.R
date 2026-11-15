@@ -2,13 +2,11 @@
 # Neighbours, rings, and CHILL+ from R.
 # The package returns positions, the ring table, and the label column.
 # Directed cutoff pairs are counted from those positions with the
-# minimum image of the dump's orthorhombic box.
+# minimum image of the dump's orthorhombic box. DSEAMS_ROOT is a
+# seams-core checkout.
 
-args <- commandArgs(trailingOnly = TRUE)
 root <- Sys.getenv("DSEAMS_ROOT", "")
 if (!nzchar(root)) stop("DSEAMS_ROOT is unset")
-lib <- Sys.getenv("DSEAMS_R_LIB", "")
-if (nzchar(lib)) .libPaths(c(lib, .libPaths()))
 suppressPackageStartupMessages(library(dseams))
 
 path <- file.path(root, "input", "traj", "ice1h.lammpstrj")
