@@ -1,0 +1,32 @@
+# dseams-r
+
+> dseams is the R package for d-SEAMS: CHILL and CHILL+ ice labels, primitive rings, hexagonal and double-diamond cages, Steinhardt order parameters, RDFs, hydrogen bonds and topological fingerprints of LAMMPS and XYZ frames, returned as data frames.
+
+The R package is `dseams`; its version is the seams-core release it binds. R 4.2 and a C++20 compiler build it. A source package carries a copy of the seams-core engine sources and installs with no network; a git checkout copies them from `SEAMS_CORE_SRC` or downloads the revision in `tools/seams-core.ref`. `SEAMS_LIBDIR` or `DSEAMS_SYSTEM_ENGINE=1` (pkg-config modules `seams` and `seams-lang`) link a built engine instead.
+
+## Package docs
+
+- [README](https://github.com/d-SEAMS/dseams-r/blob/main/README.md): Install, how the package gets the engine, use, development against a seams-core checkout, release order.
+- [Function reference](https://docs.dseams.info/r/): The pkgdown site: every exported function and S3 method.
+- [Vignette: classifying ice](https://github.com/d-SEAMS/dseams-r/blob/main/vignettes/classifying-ice.Rmd): CHILL+, rings and cages on the shipped example dumps.
+- [API page](https://github.com/d-SEAMS/dseams-r/blob/main/docs/api/r.md): Frames, the `seams_*` C API wrappers, ownership, installing against a built engine.
+- [Tutorial](https://github.com/d-SEAMS/dseams-r/blob/main/docs/tutorials/r.md): Install from a checkout and run the tests against seams-core dumps.
+- [Language task](https://github.com/d-SEAMS/dseams-r/blob/main/docs/source/lang/task-r.rst): The ice Ih census every d-SEAMS language front prints, in R.
+- [Documentation conventions](https://github.com/d-SEAMS/dseams-r/blob/main/docs/source/lang/r.rst): roxygen2 sources and the Ice Ih example the R pages assert.
+- [Examples](https://github.com/d-SEAMS/dseams-r/tree/main/inst/examples): Scripts the site includes; the test suite runs each one.
+- [NEWS](https://github.com/d-SEAMS/dseams-r/blob/main/NEWS.md): Released changes; unreleased ones are under the development-version heading.
+- [Contributing](https://github.com/d-SEAMS/dseams-r/blob/main/CONTRIBUTING.md): Checks, the vendored engine copy, coverage.
+
+## Engine
+
+- [d-SEAMS/seams-core](https://github.com/d-SEAMS/seams-core): The C++ engine, the libseams C API, the language ABI, the CLI and the C++ oracle the tests compare against.
+- [seams.h](https://github.com/d-SEAMS/seams-core/blob/main/include/seams.h): The C API that `src/seams_call.c` and the `seams_*` functions bind.
+- [docs.dseams.info](https://docs.dseams.info): d-SEAMS documentation: analyses, C API reference and every language front.
+
+## Other language bindings
+
+- [PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib): Python.
+- [dseams-rs](https://github.com/d-SEAMS/dseams-rs): Rust.
+- [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl): Julia.
+- [dseams-fortran](https://github.com/d-SEAMS/dseams-fortran): Fortran.
+- [yodaStruct](https://github.com/d-SEAMS/yodaStruct): Lua.
