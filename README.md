@@ -71,16 +71,45 @@ dumps. Report bugs at <https://github.com/d-SEAMS/dseams-r/issues>.
 
 ## Development
 
+`dseams` is a front end only. The engine, its C API (`libseams`,
+`include/seams.h`), the wider language ABI (`libseams_lang`,
+`bindings/cxx/seams_lang.h`), the `seams` CLI and the C++ reference
+`binding_oracle` live in [seams-core](https://github.com/d-SEAMS/seams-core).
+A changed result or a new analysis goes there first; this repository moves
+its pin to the seams-core revision that carries it.
+
+Against a local seams-core checkout, at the pinned revision or any other:
+
 ```sh
-pixi run vendor            # SEAMS_CORE_SRC=/path/to/seams-core, or the pin
-pixi run build
-pixi run check
+SEAMS_CORE_SRC=/path/to/seams-core sh tools/vendor.sh   # copy its sources
+R CMD build .
+DSEAMS_ROOT=/path/to/seams-core R CMD check --as-cran dseams_*.tar.gz
 ```
 
-With `DSEAMS_ROOT` set to a seams-core checkout the test suite also reads
-the cubic ice dump in its `input/traj`; with `SEAMS_BIN` set to a `seams`
-executable of the same version it compares the cage census with the CLI.
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+To test against that checkout's own build instead of the bundled copy,
+build `src/libseams.so`, `bindings/libseams_lang.so`, `seams` and
+`bindings/binding_oracle` there with meson, then:
+
+```sh
+export DSEAMS_ROOT=/path/to/seams-core
+export SEAMS_LIBDIR=$DSEAMS_ROOT/build/bindings
+export SEAMS_BIN=$DSEAMS_ROOT/build/seams
+export SEAMS_CPP_ORACLE=$DSEAMS_ROOT/build/bindings/binding_oracle
+R CMD build . && R CMD check dseams_*.tar.gz
+```
+
+With `DSEAMS_ROOT` set the test suite also reads the seams-core dumps the
+package does not ship and runs the scripts in `inst/examples`;
+`SEAMS_BIN` compares the cage census with the CLI and `SEAMS_CPP_ORACLE`
+compares every `seams_*` function with the C++ reference. `pixi run
+vendor`, `pixi run build` and `pixi run check` provide R, the compilers
+and every Suggests package.
+
+The package version is the seams-core version it binds. A release follows
+the seams-core tag of the same version: seams-core tags `vX.Y.Z`, then
+`tools/seams-core.ref` moves to that tag, `DESCRIPTION` and
+`src/Makevars.win` move to `X.Y.Z`, CI passes on that commit, and this
+repository tags `vX.Y.Z` and submits the `R CMD build` tarball.
 
 The package is MIT licensed. Cite Goswami, Goswami and Singh (2020)
 <doi:10.1021/acs.jcim.0c00031>. `citation("dseams")` prints the record.
