@@ -1,19 +1,9 @@
 name: R-CMD-check
 on:
   push:
-    branches: [main, "release/**", "pkg/**"]
-    paths:
-      - "bindings/r/**"
-      - "bindings/cxx/**"
-      - "src/**"
-      - ".github/workflows/r-cmd-check.yml"
+    branches: [main, "release/**"]
   pull_request:
-    branches: [main, "release/**", "pkg/**"]
-    paths:
-      - "bindings/r/**"
-      - "bindings/cxx/**"
-      - "src/**"
-      - ".github/workflows/r-cmd-check.yml"
+    branches: [main, "release/**"]
   workflow_dispatch:
 
 concurrency:
@@ -21,8 +11,21 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
-  R-CMD-check:
-    name: ${{ matrix.config.os }} (R ${{ matrix.config.r }})
+  # tools/seams-core.ref is the one place the engine revision is written.
+  pin:
+    runs-on: ubuntu-latest
+    outputs:
+      repo: ${{ steps.pin.outputs.SEAMS_CORE_REPO }}
+      ref: ${{ steps.pin.outputs.SEAMS_CORE_REF }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: pin
+        run: grep -E '^SEAMS_CORE_(REPO|REF)=' tools/seams-core.ref >> "$GITHUB_OUTPUT"
+
+  # The source package with the engine copied in, as CRAN builds it.
+  bundled:
+    name: bundled ${{ matrix.config.os }} (R ${{ matrix.config.r }})
+    needs: pin
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
@@ -36,27 +39,75 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
       _R_CHECK_FORCE_SUGGESTS_: true
+      # The tests that read input/traj beyond the shipped examples.
+      DSEAMS_ROOT: ${{ github.workspace }}/seams-core
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ needs.pin.outputs.repo }}
+          ref: ${{ needs.pin.outputs.ref }}
+          path: seams-core
       - uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
       - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
-      - uses: r-lib/actions/setup-tinytex@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
-      # The source package carries a copy of the engine sources and the
-      # example data; R CMD build takes them from the checkout.
       - name: Copy the engine into the package
         shell: bash
-        run: sh bindings/r/dseams/tools/vendor.sh
+        run: sh tools/vendor.sh "$DSEAMS_ROOT"
       - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
-          working-directory: bindings/r/dseams
           extra-packages: any::rcmdcheck
           needs: check
       - uses: r-lib/actions/check-r-package@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
-          working-directory: bindings/r/dseams
           args: 'c("--no-manual", "--as-cran")'
           error-on: '"warning"'
           upload-snapshots: true
+
+  # seams-core built at the pin, and the package linked against its
+  # libseams and libseams_lang instead of compiling the copy.
+  linked:
+    name: linked against seams-core (ubuntu)
+    needs: pin
+    runs-on: ubuntu-latest
+    env:
+      _R_CHECK_FORCE_SUGGESTS_: true
+      DSEAMS_ROOT: ${{ github.workspace }}/seams-core
+      SEAMS_LIBDIR: ${{ github.workspace }}/seams-core/build/bindings
+      SEAMS_BIN: ${{ github.workspace }}/seams-core/build/seams
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: dseams
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ needs.pin.outputs.repo }}
+          ref: ${{ needs.pin.outputs.ref }}
+          path: seams-core
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          manifest-path: seams-core/pixi.toml
+          environments: default
+          cache-key: pixi-seams-core-
+      - name: Build seams-core
+        working-directory: seams-core
+        run: |
+          pixi run meson setup build -Dwith_python=false
+          pixi run ninja -C build seams src/libseams.so bindings/libseams_lang.so
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          manifest-path: dseams/pixi.toml
+          cache-key: pixi-dseams-
+      - name: R CMD check
+        working-directory: dseams
+        run: |
+          pixi run sh tools/vendor.sh "$DSEAMS_ROOT"
+          pixi run R CMD build --no-manual .
+          pixi run R CMD check --no-manual dseams_*.tar.gz
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: linked-check
+          path: dseams/dseams.Rcheck
