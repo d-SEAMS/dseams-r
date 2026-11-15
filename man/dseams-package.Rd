@@ -12,8 +12,9 @@ Structural analysis of water and ice in molecular dynamics trajectories, using t
 Useful links:
 \itemize{
   \item \url{https://docs.dseams.info}
+  \item \url{https://github.com/d-SEAMS/dseams-r}
   \item \url{https://github.com/d-SEAMS/seams-core}
-  \item Report bugs at \url{https://github.com/d-SEAMS/seams-core/issues}
+  \item Report bugs at \url{https://github.com/d-SEAMS/dseams-r/issues}
 }
 
 }

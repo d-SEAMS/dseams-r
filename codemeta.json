@@ -5,8 +5,8 @@
   "description": "Structural analysis of water and ice in molecular dynamics trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh (2020) <doi:10.1021/acs.jcim.0c00031>). Reads 'LAMMPS' dumps and 'XYZ' files and returns data frames of 'CHILL+' ice labels (Nguyen and Molinero (2015) <doi:10.1021/jp510289t>), primitive ring counts (Franzblau (1991) <doi:10.1103/PhysRevB.44.4925>), hexagonal and double-diamond cages, and Steinhardt bond-orientational order parameters (Steinhardt, Nelson and Ronchetti (1983) <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled C++ sources.",
   "name": "dseams: Ice Classification and Ring Statistics for Molecular Simulations",
   "relatedLink": "https://docs.dseams.info",
-  "codeRepository": "https://github.com/d-SEAMS/seams-core",
-  "issueTracker": "https://github.com/d-SEAMS/seams-core/issues",
+  "codeRepository": "https://github.com/d-SEAMS/dseams-r",
+  "issueTracker": "https://github.com/d-SEAMS/dseams-r/issues",
   "license": "https://spdx.org/licenses/MIT",
   "version": "2.14.0",
   "programmingLanguage": {
@@ -169,7 +169,7 @@
       "sameAs": "https://doi.org/10.1021/acs.jcim.0c00031"
     }
   ],
-  "releaseNotes": "https://github.com/d-SEAMS/seams-core/blob/main/NEWS.md",
-  "readme": "https://github.com/d-SEAMS/seams-core/blob/main/README.md",
+  "releaseNotes": "https://github.com/d-SEAMS/dseams-r/blob/main/NEWS.md",
+  "readme": "https://github.com/d-SEAMS/dseams-r/blob/main/README.md",
   "keywords": ["molecular-dynamics-simulation", "molecular-dynamics", "trajectory-analysis", "lua", "nix", "d-seams", "analysis-framework", "trajectories", "clathrate-hydrates", "cpp20", "ice", "nauty", "plumed", "topology"]
 }
