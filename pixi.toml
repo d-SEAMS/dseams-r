@@ -25,4 +25,6 @@ ca-certificates = "*"
 # SEAMS_CORE_SRC, when set, is copied instead of downloading the pin.
 vendor = "sh tools/vendor.sh"
 build = "R CMD build ."
-check = "R CMD check --as-cran --no-manual dseams_2.14.0.tar.gz"
+# conda-forge's R adds -march=nocona to every compile; that flag is the
+# toolchain's, not the package's.
+check = { cmd = "R CMD check --as-cran --no-manual dseams_2.14.0.tar.gz", env = { _R_CHECK_COMPILATION_FLAGS_KNOWN_ = "-march=nocona" } }
