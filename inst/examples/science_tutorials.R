@@ -1,18 +1,22 @@
 # Copyright (c) d-SEAMS developers
 # Science tutorials in R. Same numbers as science_tutorials.py in
-# seams-core, through the package's seams_* functions. DSEAMS_ROOT is a
-# seams-core checkout. DSEAMS_BRINE_T0 and DSEAMS_BRINE_TEND name the two
+# seams-core, through the package: chill_plus for the CHILL+ census and
+# seams_signature_cages for the cage census. DSEAMS_ROOT is a seams-core
+# checkout. DSEAMS_BRINE_T0 and DSEAMS_BRINE_TEND name the two
 # brine-front-230K frames, which are not in seams-core.
 
 root <- Sys.getenv("DSEAMS_ROOT", unset = "")
 stopifnot(nzchar(root))
 library(dseams)
 
+labels <- c("cubic", "hexagonal", "water", "interfacial", "clathrate",
+            "interClathrate", "unclassified", "reCubic", "reHex")
+
 frame_of <- function(path) {
-  sys <- seams_system_new()
-  n <- seams_system_read(sys, path, 1L, -1L)
-  if (n < 1) stop(path)
-  list(n = n, counts = as.integer(seams_chill(sys, cutoff = 3.5)))
+  ice <- chill_plus(read_frame(path, type = -1L), cutoff = 3.5, graph = "cutoff")
+  if (nrow(ice) < 1) stop(path)
+  list(n = nrow(ice),
+       counts = vapply(labels, function(k) sum(ice$name == k), integer(1)))
 }
 
 cages_of <- function(path, spec) {

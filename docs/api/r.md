@@ -114,7 +114,9 @@ the system itself, which the caller created and the finalizer releases.
 
 `inst/examples/r_capi.R` calls every `seams_*` function and compares the
 result with `binding_oracle`, the C++ reference a seams-core build makes;
-it runs when `SEAMS_CPP_ORACLE` names that executable.
+it runs when `SEAMS_CPP_ORACLE` names that executable, which is set when
+the package links the same build through `SEAMS_LIBDIR` or
+`DSEAMS_SYSTEM_ENGINE`.
 
 ```{literalinclude} ../../inst/examples/r_capi.R
 :language: r
