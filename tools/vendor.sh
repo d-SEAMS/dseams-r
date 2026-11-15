@@ -4,17 +4,23 @@
 # example dumps into inst/extdata, so that `R CMD build` makes a source
 # package which compiles with no seams-core checkout and no network.
 #
-#   sh tools/vendor.sh [SEAMS_CORE_ROOT]
+#   sh tools/vendor.sh [SEAMS_CORE_SRC]
 #
-# The root defaults to $DSEAMS_ROOT, then to the checkout this package sits
-# in (bindings/r/dseams). The list of engine objects is the seams/*.o block
-# of src/Makevars.in, so that file is the one place to add a source.
+# The seams-core source tree is the argument, else $SEAMS_CORE_SRC, else
+# $DSEAMS_ROOT. tools/seams-core.ref names the revision it should be; a
+# checkout at another revision is copied all the same, and src/seams/README
+# records which one it was. The list of engine objects is the seams/*.o
+# block of src/Makevars.in, so that file is the one place to add a source.
 set -e
 
 pkg=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-root=${1:-${DSEAMS_ROOT:-$pkg/../../..}}
+root=${1:-${SEAMS_CORE_SRC:-${DSEAMS_ROOT:-}}}
+if [ -z "$root" ]; then
+  echo "vendor.sh: name a seams-core source tree (argument, SEAMS_CORE_SRC or DSEAMS_ROOT)" >&2
+  exit 1
+fi
 if [ ! -f "$root/src/mol_sys.cpp" ] || [ ! -f "$root/bindings/cxx/seams_lang.cpp" ]; then
-  echo "vendor.sh: $root is not a seams-core checkout" >&2
+  echo "vendor.sh: $root is not a seams-core source tree" >&2
   exit 1
 fi
 root=$(CDPATH= cd -- "$root" && pwd)
@@ -112,8 +118,16 @@ patch=${rest#*.}
 sed -e "s/@MAJOR@/$major/" -e "s/@MINOR@/$minor/" -e "s/@PATCH@/$patch/" \
   -e "s/@STRING@/$version/" "$root/include/seams_version.h.in" > "$dest/include/seams_version.h"
 
-rev=unknown
-if command -v git >/dev/null 2>&1 && git -C "$root" rev-parse HEAD >/dev/null 2>&1; then
+# A tree unpacked by tools/fetch-engine.R is not a git checkout; configure
+# passes the pinned revision in SEAMS_CORE_REV.
+rev=${SEAMS_CORE_REV:-unknown}
+# Only the root of a checkout names its own revision; a tree unpacked
+# inside some other repository would report that repository's HEAD.
+top=
+if command -v git >/dev/null 2>&1; then
+  top=$(git -C "$root" rev-parse --show-toplevel 2>/dev/null || true)
+fi
+if [ -n "$top" ] && [ "$(CDPATH= cd -- "$top" && pwd)" = "$root" ]; then
   rev=$(git -C "$root" rev-parse HEAD)
   if ! git -C "$root" diff --quiet HEAD -- src include bindings/cxx; then
     rev="$rev-dirty"

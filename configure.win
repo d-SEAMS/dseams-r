@@ -1,11 +1,37 @@
 #!/bin/sh
-# src/Makevars.win is static. A source tarball carries src/seams; in a
-# seams-core checkout tools/vendor.sh copies it from the checkout.
-if [ ! -f src/seams/seams_lang.cpp ]; then
-  if [ -f tools/vendor.sh ] && sh tools/vendor.sh; then
-    :
-  else
-    echo "configure.win: src/seams is missing and this is not a seams-core checkout." >&2
-    exit 1
-  fi
+# src/Makevars.win is static. A source package carries src/seams. In a git
+# checkout tools/vendor.sh copies it from SEAMS_CORE_SRC (or DSEAMS_ROOT),
+# else from the revision in tools/seams-core.ref, which
+# tools/fetch-engine.R downloads unless DSEAMS_NO_DOWNLOAD is set. See
+# configure for the same steps.
+if [ -f src/seams/seams_lang.cpp ] && [ -f inst/extdata/ice1h.lammpstrj ]; then
+  exit 0
 fi
+if [ ! -f tools/vendor.sh ]; then
+  echo "configure.win: src/seams is missing and there is no tools/vendor.sh to make it" >&2
+  exit 1
+fi
+src=${SEAMS_CORE_SRC:-${DSEAMS_ROOT:-}}
+if [ -n "${src}" ]; then
+  sh tools/vendor.sh "${src}" || exit 1
+  exit 0
+fi
+case "${DSEAMS_NO_DOWNLOAD:-}" in
+  1|yes|true|TRUE)
+    echo "configure.win: src/seams is missing, DSEAMS_NO_DOWNLOAD is set, and SEAMS_CORE_SRC names no seams-core tree" >&2
+    exit 1
+    ;;
+esac
+pinned=$(sed -n 's/^SEAMS_CORE_REF=//p' tools/seams-core.ref)
+fetch="${TMPDIR:-${TEMP:-/tmp}}/dseams-engine-$$"
+mkdir -p "${fetch}"
+src=$("${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" --vanilla tools/fetch-engine.R "${fetch}" | tail -n 1 | tr -d '\r')
+if [ -z "${src}" ] || [ ! -d "${src}" ]; then
+  echo "configure.win: could not fetch seams-core ${pinned}; set SEAMS_CORE_SRC to a checkout" >&2
+  rm -rf "${fetch}"
+  exit 1
+fi
+SEAMS_CORE_REV=${pinned} sh tools/vendor.sh "${src}"
+status=$?
+rm -rf "${fetch}"
+exit ${status}

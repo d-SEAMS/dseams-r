@@ -1,0 +1,5 @@
+# The seams-core source that the bundled engine is copied from. configure,
+# tools/fetch-engine.R and the R-CMD-check workflow read these two lines.
+# Pin: switch to SEAMS_CORE_REPO=d-SEAMS/seams-core SEAMS_CORE_REF=v2.14.0 once that tag exists.
+SEAMS_CORE_REPO=HaoZeke/seams-core
+SEAMS_CORE_REF=2b5c3e00f60aeb7fda6e1e705d6cc61ec6d2c31c

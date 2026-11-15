@@ -1,13 +1,27 @@
 #!/bin/sh
 # Write src/Makevars from src/Makevars.in.
 #
-# The engine is compiled from src/seams. A source tarball already holds
-# those files. In a seams-core checkout tools/vendor.sh copies them from
-# the checkout, so nothing is fetched over the network.
+# By default the engine is compiled from the copy of the seams-core sources
+# in src/seams. A source package from R CMD build already holds that copy,
+# so installing it uses no network. In a git checkout src/seams is made by
+# tools/vendor.sh from, in order:
 #
-# To link an engine that is already built instead, set SEAMS_LIBDIR to the
-# directory of libseams_lang and SEAMS_INCLUDE to the directory of
-# seams_lang.h (DSEAMS_ROOT/bindings/cxx when DSEAMS_ROOT is set).
+#   SEAMS_CORE_SRC  a seams-core source tree (DSEAMS_ROOT is read too)
+#   tools/seams-core.ref  the pinned revision, downloaded from GitHub by
+#                   tools/fetch-engine.R; DSEAMS_NO_DOWNLOAD=1 forbids it
+#
+# To link an installed engine instead of compiling the copy, either
+#
+#   DSEAMS_SYSTEM_ENGINE=1  find libseams and libseams_lang with pkg-config
+#                           (the seams and seams-lang modules), or
+#   SEAMS_LIBDIR    the directory of libseams_lang, with SEAMS_INCLUDE the
+#                   directory of seams_lang.h, SEAMS_H_DIR that of seams.h
+#                   and SEAMS_SO_DIR that of libseams and seams_version.h.
+#                   With DSEAMS_ROOT set to a seams-core checkout, the
+#                   headers are found under it.
+#
+# The example data in inst/extdata come with the copy and are needed in
+# every mode.
 
 : "${R_HOME:=$(R RHOME)}"
 if [ ! -x "${R_HOME}/bin/R" ]; then
@@ -16,17 +30,66 @@ if [ ! -x "${R_HOME}/bin/R" ]; then
 fi
 
 version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+pinned=$(sed -n 's/^SEAMS_CORE_REF=//p' tools/seams-core.ref 2>/dev/null)
 
-# The example data in inst/extdata are copied together with the sources,
-# and are needed even when an external engine is linked.
-vendored=yes
 if [ ! -f src/seams/seams_lang.cpp ] || [ ! -f inst/extdata/ice1h.lammpstrj ]; then
-  if [ ! -f tools/vendor.sh ] || ! sh tools/vendor.sh; then
-    vendored=no
+  if [ ! -f tools/vendor.sh ]; then
+    echo "configure: src/seams is missing and there is no tools/vendor.sh to make it" >&2
+    exit 1
+  fi
+  src=${SEAMS_CORE_SRC:-${DSEAMS_ROOT:-}}
+  if [ -n "${src}" ]; then
+    echo "configure: copying the engine from ${src}"
+    sh tools/vendor.sh "${src}" || exit 1
+  else
+    case "${DSEAMS_NO_DOWNLOAD:-}" in
+      1|yes|true|TRUE)
+        echo "configure: src/seams is missing, DSEAMS_NO_DOWNLOAD is set, and SEAMS_CORE_SRC names no seams-core tree" >&2
+        exit 1
+        ;;
+    esac
+    fetch=$(mktemp -d 2>/dev/null || echo "${TMPDIR:-/tmp}/dseams-engine-$$")
+    mkdir -p "${fetch}"
+    src=$("${R_HOME}/bin/Rscript" --vanilla tools/fetch-engine.R "${fetch}" | tail -n 1)
+    if [ -z "${src}" ] || [ ! -d "${src}" ]; then
+      echo "configure: could not fetch seams-core ${pinned}; set SEAMS_CORE_SRC to a checkout" >&2
+      rm -rf "${fetch}"
+      exit 1
+    fi
+    SEAMS_CORE_REV=${pinned} sh tools/vendor.sh "${src}"
+    status=$?
+    rm -rf "${fetch}"
+    [ ${status} -eq 0 ] || exit 1
   fi
 fi
 
+link_mode=
+case "${DSEAMS_SYSTEM_ENGINE:-}" in
+  1|yes|true|TRUE) link_mode=pkg-config ;;
+esac
 if [ -n "${SEAMS_LIBDIR:-}" ]; then
+  link_mode=libdir
+fi
+
+if [ "${link_mode}" = pkg-config ]; then
+  PKG_CONFIG=${PKG_CONFIG:-pkg-config}
+  if ! ${PKG_CONFIG} --exists seams-lang seams; then
+    echo "configure: DSEAMS_SYSTEM_ENGINE is set, but ${PKG_CONFIG} finds no seams-lang and seams modules; set PKG_CONFIG_PATH" >&2
+    exit 1
+  fi
+  have=$(${PKG_CONFIG} --modversion seams)
+  if [ "${have}" != "${version}" ]; then
+    echo "configure: the installed engine is ${have}; dseams ${version} needs seams-core ${version}" >&2
+    exit 1
+  fi
+  libdir=$(${PKG_CONFIG} --variable=libdir seams)
+  lang_libdir=$(${PKG_CONFIG} --variable=libdir seams-lang)
+  echo "configure: linking the installed engine ${have} from ${libdir}"
+  SEAMS_CPPFLAGS=$(${PKG_CONFIG} --cflags seams-lang seams)
+  SEAMS_LIBS="$(${PKG_CONFIG} --libs seams-lang seams) -Wl,-rpath,${lang_libdir} -Wl,-rpath,${libdir}"
+  OPENMP_CXXFLAGS=""
+  ENGINE_OBJECTS=""
+elif [ "${link_mode}" = libdir ]; then
   if [ -z "${SEAMS_INCLUDE:-}" ] && [ -n "${DSEAMS_ROOT:-}" ]; then
     SEAMS_INCLUDE="${DSEAMS_ROOT}/bindings/cxx"
   fi
@@ -47,7 +110,7 @@ if [ -n "${SEAMS_LIBDIR:-}" ]; then
     "${SEAMS_SO_DIR}" \
     "$(dirname "${SEAMS_LIBDIR}")/src" \
     "${SEAMS_LIBDIR}" \
-    "${DSEAMS_ROOT:-.}/build/src"
+    "${DSEAMS_ROOT:+${DSEAMS_ROOT}/build/src}"
   do
     if [ -n "${dir}" ] && [ -f "${dir}/seams_version.h" ]; then
       SEAMS_SO_DIR=$dir
@@ -64,11 +127,6 @@ if [ -n "${SEAMS_LIBDIR:-}" ]; then
   OPENMP_CXXFLAGS=""
   ENGINE_OBJECTS=""
 else
-  if [ "${vendored}" != yes ]; then
-    echo "configure: src/seams is missing and this is not a seams-core checkout." >&2
-    echo "configure: build the source package with 'sh tools/vendor.sh' first." >&2
-    exit 1
-  fi
   SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='\"${version}\"'"
   SEAMS_LIBS=""
   ENGINE_OBJECTS='$(SEAMS_OBJECTS)'

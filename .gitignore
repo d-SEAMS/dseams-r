@@ -6,3 +6,7 @@ src/seams/
 inst/extdata/
 .Rhistory
 .RData
+.pixi/
+_site/
+*.Rcheck/
+dseams_*.tar.gz

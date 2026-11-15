@@ -19,3 +19,9 @@
 ^CODE_OF_CONDUCT\.md$
 ^CONTRIBUTING\.md$
 ^\.covrignore$
+^docs$
+^\.github$
+^_site$
+^pixi\.toml$
+^pixi\.lock$
+^\.pixi$
