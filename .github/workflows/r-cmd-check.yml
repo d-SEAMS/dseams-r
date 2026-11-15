@@ -85,6 +85,7 @@ jobs:
       DSEAMS_ROOT: ${{ github.workspace }}/seams-core
       SEAMS_LIBDIR: ${{ github.workspace }}/seams-core/build/bindings
       SEAMS_BIN: ${{ github.workspace }}/seams-core/build/seams
+      SEAMS_CPP_ORACLE: ${{ github.workspace }}/seams-core/build/bindings/binding_oracle
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -103,7 +104,7 @@ jobs:
         working-directory: seams-core
         run: |
           pixi run meson setup build -Dwith_python=false
-          pixi run ninja -C build seams src/libseams.so bindings/libseams_lang.so
+          pixi run ninja -C build seams src/libseams.so bindings/libseams_lang.so bindings/binding_oracle
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           manifest-path: dseams/pixi.toml
