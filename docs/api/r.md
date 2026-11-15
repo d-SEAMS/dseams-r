@@ -1,6 +1,6 @@
 # R
 
-d-SEAMS 2.14.0. The package is `bindings/r/dseams`. `libseams_lang`
+d-SEAMS 2.14.0. The package is <https://github.com/d-SEAMS/dseams-r>. `libseams_lang`
 serves the frame generics through cpp11. `libseams` serves
 `seams_system_new` and the analyses named `seams_*`. roxygen2 writes
 `man/` and `NAMESPACE`. pkgdown renders the package site from
@@ -13,29 +13,30 @@ The methods are `positions.dseams_frame`, `chill_plus.dseams_frame`,
 `signature_cages.dseams_frame`, `symmetry.dseams_frame`,
 `steinhardt.dseams_frame`, and `q4_q6.dseams_frame`.
 
-`docs/examples/core_counts.R` checks Ice Ih (128 hexagonal, 256
-six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
-`meson test docs_core_counts` runs it.
+[`docs/examples/core_counts.R`](https://github.com/d-SEAMS/seams-core/blob/v2.14.0/docs/examples/core_counts.R)
+in seams-core checks Ice Ih (128 hexagonal, 256 six-rings) and sII (136
+clathrate, 144 five-rings, 16 six-rings); `meson test docs_core_counts`
+runs it there.
 
-```{literalinclude} ../../../docs/examples/core_counts.R
-:language: r
-```
-
-`dseams` is not on CRAN yet and installs from this checkout. With only
-`DSEAMS_ROOT` set, `configure` runs `tools/vendor.sh` and the package
-compiles its own copy of the engine. To install the package against a
-built library instead, also name `libseams_lang` and `seams_lang.h`:
+`dseams` is not on CRAN yet and installs from a checkout of dseams-r.
+`configure` runs `tools/vendor.sh`, which copies the engine from the
+seams-core tree in `SEAMS_CORE_SRC` (or `DSEAMS_ROOT`), or downloads the
+revision pinned in `tools/seams-core.ref`, and the package compiles its own
+copy. To install the package against a built library instead, also name
+the directory of `libseams_lang`:
 
 ```bash
+# in a seams-core checkout at the pinned revision
 meson setup build -Dwith_tests=true
 meson compile -C build
-DSEAMS_ROOT=$PWD R CMD INSTALL bindings/r/dseams
-SEAMS_LIBDIR=$PWD/build/bindings SEAMS_INCLUDE=$PWD/bindings/cxx R CMD INSTALL --preclean bindings/r/dseams
+DSEAMS_ROOT=$PWD R CMD INSTALL /path/to/dseams-r
+DSEAMS_ROOT=$PWD SEAMS_LIBDIR=$PWD/build/bindings R CMD INSTALL --preclean /path/to/dseams-r
 ```
 
 `--preclean` clears the objects the first install left in `src`, which
-`R CMD INSTALL` would otherwise reuse. `R CMD build bindings/r/dseams` makes a source tarball that carries the
-engine and installs with no checkout; `R CMD check --as-cran` on it
+`R CMD INSTALL` would otherwise reuse. `R CMD build` on the dseams-r
+checkout makes a source tarball that carries the engine and installs with
+no seams-core tree; `R CMD check --as-cran` on it
 leaves the one NOTE for a new submission.
 
 CI runs the testthat file when `Rscript` is on `PATH` and
@@ -100,15 +101,13 @@ collected. System, neighbour, ring, cage, and fingerprint handles used
 inside one `seams_*` helper are freed before that helper returns, except
 the system itself, which the caller created and the finalizer releases.
 
-```{literalinclude} ../../../docs/examples/minimal_r.R
-:language: r
-```
+The seams-core examples
+[`docs/examples/minimal_r.R`](https://github.com/d-SEAMS/seams-core/blob/v2.14.0/docs/examples/minimal_r.R)
+and
+[`docs/examples/r_api.R`](https://github.com/d-SEAMS/seams-core/blob/v2.14.0/docs/examples/r_api.R)
+follow these rules. So does the ice test of this package:
 
-```{literalinclude} ../../../docs/examples/r_api.R
-:language: r
-```
-
-```{literalinclude} ../../../bindings/r/dseams/tests/testthat/test-ice.R
+```{literalinclude} ../../tests/testthat/test-ice.R
 :language: r
 :lines: 22-49,84-102
 ```

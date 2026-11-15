@@ -4,8 +4,8 @@ This is a new submission.
 
 The package compiles a copy of the d-SEAMS engine (C++20, in `src/seams`)
 together with the R glue. `tools/vendor.sh` makes that copy from the
-seams-core repository when the source package is built; installation does
-not use the network. In the copy, `[[nodiscard]]` is removed (the
+seams-core sources at a pinned revision when the source package is built;
+installing the source package does not use the network. In the copy, `[[nodiscard]]` is removed (the
 upstream build silences those warnings with `-Wno-unused-result`) and the
 engine's console output and `exit` go through `src/dseams_r_io.cpp` to
 `Rprintf`/`REprintf` and an R error.

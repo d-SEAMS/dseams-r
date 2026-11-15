@@ -2,11 +2,11 @@
 
 Draft for Rohit Goswami to review. This file is the issue body. It has not
 been opened on <https://github.com/ropensci/software-review>. Confirm the
-author attestations, the Generative AI paragraph, and the coauthor GitHub
-handles before pasting it into a new issue.
+author attestations and the coauthor GitHub handles before pasting it into
+a new issue.
 
-The package is `bindings/r/dseams` on branch `pkg/native-2.14`. The srr
-assessment is `bindings/r/dseams/srr-standards.md`.
+The package is the root of <https://github.com/d-SEAMS/dseams-r>. The srr
+assessment is `srr-standards.md`.
 
 After acceptance, rOpenSci can co-submit a short paper to the Journal of
 Open Source Software. `paper/` is that paper. Say so in the review thread
@@ -22,7 +22,7 @@ Below, please enter values for (1) submitting author GitHub handle (replacing "@
 Submitting Author Name: Rohit Goswami
 Submitting Author Github Handle: <!--author1-->@HaoZeke<!--end-author1-->
 Other Package Authors Github handles: (comma separated, delete if none) <!--author-others--><!--end-author-others-->
-Repository:  <!--repourl-->https://github.com/d-SEAMS/seams-core/tree/pkg/native-2.14<!--end-repourl-->
+Repository:  <!--repourl-->https://github.com/d-SEAMS/dseams-r<!--end-repourl-->
 Version submitted: 2.14.0
 Submission type: <!--submission-type-->Standard<!--end-submission-type-->
 Editor: <!--editor--> TBD <!--end-editor-->
@@ -62,8 +62,9 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
-URL: https://docs.dseams.info, https://github.com/d-SEAMS/seams-core
-BugReports: https://github.com/d-SEAMS/seams-core/issues
+URL: https://docs.dseams.info, https://github.com/d-SEAMS/dseams-r,
+    https://github.com/d-SEAMS/seams-core
+BugReports: https://github.com/d-SEAMS/dseams-r/issues
 Encoding: UTF-8
 Depends:
     R (>= 4.2.0)
@@ -82,7 +83,7 @@ Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.1.0
 ```
 
-The R package is the `bindings/r/dseams` directory of that branch. Amrita
+The R package is the root of that repository. Amrita
 Goswami and Ruhila S are authors on the DESCRIPTION. Their GitHub handles
 are not recorded in the repository; add them between the author markers
 above if they should be on the issue.
@@ -140,7 +141,7 @@ above if they should be on the issue.
 
   See the pkgcheck summary at the end of this file. Standards from the
   statistical-software track are assessed in
-  `bindings/r/dseams/srr-standards.md`. `dseams` is not statistical
+  `srr-standards.md`. `dseams` is not statistical
   software, so the category standards (Bayesian, regression, machine
   learning, distributions, exploratory data analysis, spatial, time
   series, unsupervised learning) do not apply, and the package does not
@@ -166,13 +167,6 @@ This package:
 ## Use of Generative AI
 
 - [x] Generative AI tools were used to produce some of the material in this submission.
-
-An assistant drafted this issue text, `bindings/r/dseams/README.md`,
-`NEWS.md`, `inst/CITATION`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
-`srr-standards.md`, and `codemeta.json` from the DESCRIPTION and the
-existing tests and vignette. The analysis code, the test suite, and the
-vignette were already in the repository. Rohit should edit this paragraph
-so it matches what he wants to disclose.
 
 ## Publication options
 
@@ -250,6 +244,6 @@ Other notes from the same run, not checklist failures:
   values. Five lines longer than 80 characters were wrapped after this
   run (`R/dseams.R` and the version test).
 
-`bindings/r/dseams/srr-standards.md` is the srr assessment. The package
+`srr-standards.md` is the srr assessment. The package
 is not statistical software, so it does not carry `@srrstats` tags, and
 pkgcheck did not fail an srr item.

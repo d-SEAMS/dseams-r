@@ -1,7 +1,7 @@
 R
 =
 
-roxygen2 comments in ``bindings/r/dseams/R/dseams.R`` are the source of
+roxygen2 comments in ``R/dseams.R`` of `dseams-r <https://github.com/d-SEAMS/dseams-r>`_ are the source of
 ``man/*.Rd``. Every ``NAMESPACE`` export has an ``\\alias``.
 ``R CMD check --as-cran`` must not report an undocumented object.
 
