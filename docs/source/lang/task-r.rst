@@ -7,8 +7,9 @@ example counts directed cutoff pairs of those positions under the
 minimum image of the dump's box. The ring table omits empty sizes; the
 printed histogram still has one integer per size from 0 through 6.
 
-.. literalinclude:: ../../examples/lang_tasks.R
+.. literalinclude:: ../../../inst/examples/lang_tasks.R
    :language: r
 
-``docs_lang_r`` runs this file. It exits 77 when R or the installed
-package is absent.
+``tests/testthat/test-doc-examples.R`` runs this file when
+``DSEAMS_ROOT`` names a seams-core checkout, and checks four directed
+pairs per water, 256 six-rings, and one CHILL+ label per atom.

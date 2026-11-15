@@ -13,10 +13,14 @@ The methods are `positions.dseams_frame`, `chill_plus.dseams_frame`,
 `signature_cages.dseams_frame`, `symmetry.dseams_frame`,
 `steinhardt.dseams_frame`, and `q4_q6.dseams_frame`.
 
-[`docs/examples/core_counts.R`](https://github.com/d-SEAMS/seams-core/blob/v2.14.0/docs/examples/core_counts.R)
-in seams-core checks Ice Ih (128 hexagonal, 256 six-rings) and sII (136
-clathrate, 144 five-rings, 16 six-rings); `meson test docs_core_counts`
-runs it there.
+`inst/examples/core_counts.R` checks Ice Ih (128 hexagonal, 256
+six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
+`tests/testthat/test-doc-examples.R` runs it, and the other scripts in
+`inst/examples`, when `DSEAMS_ROOT` names a seams-core checkout.
+
+```{literalinclude} ../../inst/examples/core_counts.R
+:language: r
+```
 
 `dseams` is not on CRAN yet and installs from a checkout of dseams-r.
 `configure` runs `tools/vendor.sh`, which copies the engine from the
@@ -39,12 +43,11 @@ checkout makes a source tarball that carries the engine and installs with
 no seams-core tree; `R CMD check --as-cran` on it
 leaves the one NOTE for a new submission.
 
-CI runs the testthat file when `Rscript` is on `PATH` and
-`DSEAMS_ROOT` points at this tree. The meson target is `language_fronts`
-(`tests/run_language_fronts.sh`). A missing R skips that front.
-`docs/examples/minimal_r.R` reads the GenIce sI
-cell and calls `steinhardt`, `chill_plus`, and `primitive_rings`.
-`meson test docs_examples` runs it.
+The R-CMD-check workflow of dseams-r runs the testthat suite with
+`DSEAMS_ROOT` pointing at a seams-core checkout at the pinned revision.
+`inst/examples/minimal_r.R` reads the GenIce sI
+cell and calls `steinhardt`, `chill_plus`, and `primitive_rings`;
+`tests/testthat/test-doc-examples.R` runs it.
 
 `R CMD check` is the cleanliness check. It expects no errors and no
 warnings. `pkgdown::build_site()` writes the native HTML from the
@@ -101,11 +104,21 @@ collected. System, neighbour, ring, cage, and fingerprint handles used
 inside one `seams_*` helper are freed before that helper returns, except
 the system itself, which the caller created and the finalizer releases.
 
-The seams-core examples
-[`docs/examples/minimal_r.R`](https://github.com/d-SEAMS/seams-core/blob/v2.14.0/docs/examples/minimal_r.R)
-and
-[`docs/examples/r_api.R`](https://github.com/d-SEAMS/seams-core/blob/v2.14.0/docs/examples/r_api.R)
-follow these rules. So does the ice test of this package:
+```{literalinclude} ../../inst/examples/minimal_r.R
+:language: r
+```
+
+```{literalinclude} ../../inst/examples/r_api.R
+:language: r
+```
+
+`inst/examples/r_capi.R` calls every `seams_*` function and compares the
+result with `binding_oracle`, the C++ reference a seams-core build makes;
+it runs when `SEAMS_CPP_ORACLE` names that executable.
+
+```{literalinclude} ../../inst/examples/r_capi.R
+:language: r
+```
 
 ```{literalinclude} ../../tests/testthat/test-ice.R
 :language: r
@@ -130,7 +143,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: cutoff in angstrom; frame index is dimensionless
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### cages.dseams_frame
 
@@ -146,7 +159,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: cutoff in angstrom; counts are dimensionless
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### chill_plus
 
@@ -162,7 +175,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: cutoff in angstrom
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### chill_plus.dseams_frame
 
@@ -178,7 +191,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: cutoff in angstrom; labels are dimensionless codes
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### dseams_example
 
@@ -194,7 +207,7 @@ Errors: The binding stops with "no example named" when name is not one of the sh
 
 Units: none; returns a file path or file names
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### dseams_threads
 
@@ -210,7 +223,7 @@ Errors: The binding stops when n is not one positive integer.
 
 Units: dimensionless thread count; 1 when the package was built without OpenMP
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### dseams_version
 
@@ -226,7 +239,7 @@ Errors: None.
 
 Units: none; returns a version string
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### jump_tau90
 
@@ -242,7 +255,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: dt and the result in the caller's time unit
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### nframes
 
@@ -258,7 +271,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: dimensionless count
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### positions
 
@@ -274,7 +287,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### positions.dseams_frame
 
@@ -290,7 +303,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### primitive_rings
 
@@ -306,7 +319,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: cutoff in angstrom
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### primitive_rings.dseams_frame
 
@@ -322,7 +335,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: cutoff in angstrom; counts are dimensionless
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### print.dseams_cages
 
@@ -338,7 +351,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### print.dseams_chill
 
@@ -354,7 +367,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### print.dseams_frame
 
@@ -370,7 +383,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: dimensionless count
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### print.dseams_ice
 
@@ -386,7 +399,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### print.dseams_q4_q6
 
@@ -402,7 +415,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### print.dseams_rings
 
@@ -418,7 +431,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### print.dseams_steinhardt
 
@@ -434,7 +447,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### print.dseams_system
 
@@ -450,7 +463,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### q4_q6
 
@@ -466,7 +479,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: cutoff in angstrom; q4 and q6 are dimensionless
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### q4_q6.dseams_frame
 
@@ -482,7 +495,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: cutoff in angstrom; q4 and q6 are dimensionless
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### read_frame
 
@@ -498,7 +511,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: frame index is dimensionless; coordinates are angstrom
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### seams_cages
 
@@ -514,7 +527,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_chill
 
@@ -530,7 +543,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_contact_pairs
 
@@ -546,7 +559,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_coordination
 
@@ -562,7 +575,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_density_axis
 
@@ -578,7 +591,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_domains
 
@@ -594,7 +607,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_fingerprint
 
@@ -610,7 +623,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_hbonds
 
@@ -626,7 +639,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_monolayer
 
@@ -642,7 +655,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_neighbours_knn
 
@@ -658,7 +671,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_prisms
 
@@ -674,7 +687,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_rdf
 
@@ -690,7 +703,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_rings_vertices
 
@@ -706,7 +719,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_running_cn
 
@@ -722,7 +735,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_set_num_threads
 
@@ -738,7 +751,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### seams_signature_cages
 
@@ -754,7 +767,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_site_table
 
@@ -770,7 +783,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_steinhardt
 
@@ -786,7 +799,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_system_count
 
@@ -802,7 +815,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_system_new
 
@@ -818,7 +831,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### seams_system_read
 
@@ -834,7 +847,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: angstrom where a length is involved; otherwise dimensionless
 
-Example: `docs/examples/r_api.R`
+Example: `inst/examples/r_api.R`
 
 ### signature_cages
 
@@ -850,7 +863,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: spec is text; cutoff used by the call is in angstrom
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### signature_cages.dseams_frame
 
@@ -866,7 +879,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: spec is text
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### steinhardt
 
@@ -882,7 +895,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: order parameter is dimensionless
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### steinhardt.dseams_frame
 
@@ -898,7 +911,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: order parameter is dimensionless
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### summary.dseams_cages
 
@@ -914,7 +927,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### summary.dseams_chill
 
@@ -930,7 +943,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### summary.dseams_frame
 
@@ -946,7 +959,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### summary.dseams_ice
 
@@ -962,7 +975,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### summary.dseams_q4_q6
 
@@ -978,7 +991,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### summary.dseams_rings
 
@@ -994,7 +1007,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### summary.dseams_steinhardt
 
@@ -1010,7 +1023,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### summary.dseams_system
 
@@ -1026,7 +1039,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: as named by the parameters
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### symmetry
 
@@ -1042,7 +1055,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: dimensionless label codes
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 
 ### symmetry.dseams_frame
 
@@ -1058,7 +1071,7 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 
 Units: dimensionless label codes
 
-Example: `docs/examples/minimal_r.R`
+Example: `inst/examples/minimal_r.R`
 <!-- API_SYMBOLS_END -->
 
 
