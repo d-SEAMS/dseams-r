@@ -7,17 +7,42 @@
 #   sh tools/vendor.sh [SEAMS_CORE_SRC]
 #
 # The seams-core source tree is the argument, else $SEAMS_CORE_SRC, else
-# $DSEAMS_ROOT. tools/seams-core.ref names the revision it should be; a
-# checkout at another revision is copied all the same, and src/seams/README
-# records which one it was. The list of engine objects is the seams/*.o
-# block of src/Makevars.in, so that file is the one place to add a source.
+# $DSEAMS_ROOT. With none of them, tools/fetch-engine.R downloads the
+# revision pinned in tools/seams-core.ref, unless DSEAMS_NO_DOWNLOAD is set.
+# A named tree at another revision is copied all the same, and
+# src/seams/README records which one it was. The list of engine objects is
+# the seams/*.o block of src/Makevars.in, so that file is the one place to
+# add a source.
 set -e
 
 pkg=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 root=${1:-${SEAMS_CORE_SRC:-${DSEAMS_ROOT:-}}}
+fetched=
+trap 'if [ -n "$fetched" ]; then rm -rf "$fetched"; fi' EXIT
 if [ -z "$root" ]; then
-  echo "vendor.sh: name a seams-core source tree (argument, SEAMS_CORE_SRC or DSEAMS_ROOT)" >&2
-  exit 1
+  case "${DSEAMS_NO_DOWNLOAD:-}" in
+    1|yes|true|TRUE)
+      echo "vendor.sh: DSEAMS_NO_DOWNLOAD is set; name a seams-core tree with SEAMS_CORE_SRC" >&2
+      exit 1
+      ;;
+  esac
+  rscript=Rscript
+  for cand in "${R_HOME:+$R_HOME/bin/Rscript}" \
+    "${R_HOME:+$R_HOME/bin${R_ARCH_BIN:-}/Rscript.exe}" \
+    "${R_HOME:+$R_HOME/bin/Rscript.exe}"; do
+    if [ -n "$cand" ] && [ -f "$cand" ]; then
+      rscript=$cand
+      break
+    fi
+  done
+  fetched="${TMPDIR:-${TEMP:-/tmp}}/dseams-engine-$$"
+  mkdir -p "$fetched"
+  root=$("$rscript" --vanilla "$pkg/tools/fetch-engine.R" "$pkg/tools/seams-core.ref" "$fetched" | tail -n 1 | tr -d '\r')
+  if [ -z "$root" ] || [ ! -d "$root" ]; then
+    echo "vendor.sh: could not fetch seams-core; set SEAMS_CORE_SRC to a checkout" >&2
+    exit 1
+  fi
+  SEAMS_CORE_REV=$(sed -n 's/^SEAMS_CORE_REF=//p' "$pkg/tools/seams-core.ref")
 fi
 if [ ! -f "$root/src/mol_sys.cpp" ] || [ ! -f "$root/bindings/cxx/seams_lang.cpp" ]; then
   echo "vendor.sh: $root is not a seams-core source tree" >&2
@@ -118,8 +143,8 @@ patch=${rest#*.}
 sed -e "s/@MAJOR@/$major/" -e "s/@MINOR@/$minor/" -e "s/@PATCH@/$patch/" \
   -e "s/@STRING@/$version/" "$root/include/seams_version.h.in" > "$dest/include/seams_version.h"
 
-# A tree unpacked by tools/fetch-engine.R is not a git checkout; configure
-# passes the pinned revision in SEAMS_CORE_REV.
+# A tree unpacked by tools/fetch-engine.R is not a git checkout; its
+# revision is the pin.
 rev=${SEAMS_CORE_REV:-unknown}
 # Only the root of a checkout names its own revision; a tree unpacked
 # inside some other repository would report that repository's HEAD.

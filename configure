@@ -3,8 +3,8 @@
 #
 # By default the engine is compiled from the copy of the seams-core sources
 # in src/seams. A source package from R CMD build already holds that copy,
-# so installing it uses no network. In a git checkout src/seams is made by
-# tools/vendor.sh from, in order:
+# so installing it uses no network. In a git checkout tools/vendor.sh makes
+# src/seams from, in order:
 #
 #   SEAMS_CORE_SRC  a seams-core source tree (DSEAMS_ROOT is read too)
 #   tools/seams-core.ref  the pinned revision, downloaded from GitHub by
@@ -30,37 +30,12 @@ if [ ! -x "${R_HOME}/bin/R" ]; then
 fi
 
 version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
-pinned=$(sed -n 's/^SEAMS_CORE_REF=//p' tools/seams-core.ref 2>/dev/null)
-
 if [ ! -f src/seams/seams_lang.cpp ] || [ ! -f inst/extdata/ice1h.lammpstrj ]; then
   if [ ! -f tools/vendor.sh ]; then
     echo "configure: src/seams is missing and there is no tools/vendor.sh to make it" >&2
     exit 1
   fi
-  src=${SEAMS_CORE_SRC:-${DSEAMS_ROOT:-}}
-  if [ -n "${src}" ]; then
-    echo "configure: copying the engine from ${src}"
-    sh tools/vendor.sh "${src}" || exit 1
-  else
-    case "${DSEAMS_NO_DOWNLOAD:-}" in
-      1|yes|true|TRUE)
-        echo "configure: src/seams is missing, DSEAMS_NO_DOWNLOAD is set, and SEAMS_CORE_SRC names no seams-core tree" >&2
-        exit 1
-        ;;
-    esac
-    fetch=$(mktemp -d 2>/dev/null || echo "${TMPDIR:-/tmp}/dseams-engine-$$")
-    mkdir -p "${fetch}"
-    src=$("${R_HOME}/bin/Rscript" --vanilla tools/fetch-engine.R "${fetch}" | tail -n 1)
-    if [ -z "${src}" ] || [ ! -d "${src}" ]; then
-      echo "configure: could not fetch seams-core ${pinned}; set SEAMS_CORE_SRC to a checkout" >&2
-      rm -rf "${fetch}"
-      exit 1
-    fi
-    SEAMS_CORE_REV=${pinned} sh tools/vendor.sh "${src}"
-    status=$?
-    rm -rf "${fetch}"
-    [ ${status} -eq 0 ] || exit 1
-  fi
+  R_HOME=${R_HOME} sh tools/vendor.sh || exit 1
 fi
 
 link_mode=

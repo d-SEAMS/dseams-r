@@ -1,19 +1,19 @@
 # Copyright (c) d-SEAMS developers
 # Download the pinned seams-core source and print the directory it unpacks
-# to. configure and configure.win call this only when src/seams is missing
-# and no seams-core checkout is named, which is the case for an install
-# from git. A source package from R CMD build already holds src/seams and
-# never reaches this script.
+# to. tools/vendor.sh calls this only when src/seams is missing and no
+# seams-core tree is named, which is the case for an install from git. A
+# source package from R CMD build already holds src/seams and never reaches
+# this script.
 #
-#   Rscript tools/fetch-engine.R DESTDIR
+#   Rscript tools/fetch-engine.R tools/seams-core.ref DESTDIR
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) != 1L) {
-  stop("usage: Rscript tools/fetch-engine.R DESTDIR", call. = FALSE)
+if (length(args) != 2L) {
+  stop("usage: Rscript tools/fetch-engine.R REFFILE DESTDIR", call. = FALSE)
 }
-dest <- args[[1L]]
+dest <- args[[2L]]
 
-pin <- readLines(file.path("tools", "seams-core.ref"), warn = FALSE)
+pin <- readLines(args[[1L]], warn = FALSE)
 pin <- pin[grepl("^SEAMS_CORE_[A-Z]+=", pin)]
 value <- function(key) {
   hit <- sub(paste0("^", key, "="), "", pin[startsWith(pin, paste0(key, "="))])
