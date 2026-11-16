@@ -64,20 +64,7 @@ jobs:
           COVR_INSTALL: ${{ runner.temp }}/covr
         run: |
           pixi run sh tools/vendor.sh "$DSEAMS_ROOT"
-          pixi run Rscript -e '
-            cov <- covr::package_coverage(quiet = FALSE, clean = FALSE,
-                                          install_path = Sys.getenv("COVR_INSTALL"))
-            print(cov)
-            saveRDS(cov, file.path(Sys.getenv("COVR_INSTALL"), "coverage.rds"))
-            df <- as.data.frame(cov)
-            per <- tapply(df$value > 0, df$filename, mean)
-            writeLines(c(
-              "## R coverage", "",
-              sprintf("%.2f%% of R lines", covr::percent_coverage(cov)), "",
-              "| file | percent |", "|---|---|",
-              sprintf("| %s | %.1f |", names(per), 100 * per)
-            ), Sys.getenv("GITHUB_STEP_SUMMARY"))
-          '
+          pixi run Rscript .github/coverage.R
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
