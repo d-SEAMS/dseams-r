@@ -41,5 +41,7 @@ VignetteBuilder: knitr
 SystemRequirements: C++20
 NeedsCompilation: yes
 Config/testthat/edition: 3
+X-schema.org-keywords: molecular-dynamics, trajectory-analysis, ice,
+    clathrate-hydrates, ring-statistics, d-seams
 Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.1.1
