@@ -110,7 +110,7 @@ jobs:
       - name: Build seams-core
         working-directory: seams-core
         run: |
-          pixi run meson setup build -Dwith_python=false
+          pixi run meson setup build
           pixi run ninja -C build seams src/libseams.so bindings/libseams_lang.so bindings/binding_oracle
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:

@@ -18,6 +18,7 @@ SEAMS_OBJECTS = \
   seams/cage_pack.o \
   seams/chemfiles_io.o \
   seams/chill_plus_scheme.o \
+  seams/chordless.o \
   seams/cluster.o \
   seams/cutoff_csr.o \
   seams/density.o \
@@ -39,12 +40,14 @@ SEAMS_OBJECTS = \
   seams/seams_input.o \
   seams/seams_output.o \
   seams/shapeMatch.o \
+  seams/shell2_count.o \
   seams/shell_classify.o \
   seams/shell_kernel.o \
   seams/site.o \
   seams/steinhardt_parallel.o \
   seams/topo_bulk.o \
   seams/topo_fingerprint.o \
+  seams/topo_neighbour_key.o \
   seams/topo_one_dim.o \
   seams/topo_two_dim.o \
   seams/tum_offload.o \
