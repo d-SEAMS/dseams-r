@@ -10,7 +10,8 @@ seams_set_num_threads(n)
 \item{n}{Thread count. Zero restores the library default.}
 }
 \value{
-\code{NULL}, invisibly.
+The width the next analysis requests, as an integer. A
+negative \code{n} stops with the library's error text.
 }
 \description{
 Set the OpenMP width used by the next analysis.

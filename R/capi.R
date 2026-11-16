@@ -48,7 +48,8 @@ seams_system_count <- function(sys) {
 #' Set the OpenMP width used by the next analysis.
 #'
 #' @param n Thread count. Zero restores the library default.
-#' @return `NULL`, invisibly.
+#' @return The width the next analysis requests, as an integer. A
+#'   negative `n` stops with the library's error text.
 #' @export
 seams_set_num_threads <- function(n) {
   .Call(`_dseams_seams_r_threads`, as.integer(n))
