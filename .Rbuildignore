@@ -4,7 +4,6 @@
 ^src/.*\.o$
 ^src/.*\.so$
 ^src/Makevars$
-^\.gitignore$
 ^src/.*\.dll$
 ^\.Rhistory$
 ^\.RData$
@@ -12,8 +11,6 @@
 ^\.Rproj\.user$
 ^cran-comments\.md$
 ^LICENSE\.md$
-^man/nframes\.Rd$
-^man/print\.dseams_frame\.Rd$
 ^srr-standards\.md$
 ^codemeta\.json$
 ^CODE_OF_CONDUCT\.md$
