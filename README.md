@@ -1,5 +1,7 @@
 # dseams
 
+[![R-CMD-check](https://github.com/d-SEAMS/dseams-r/actions/workflows/r-cmd-check.yml/badge.svg)](https://github.com/d-SEAMS/dseams-r/actions/workflows/r-cmd-check.yml)
+
 Ice classification and ring statistics for molecular simulations. `dseams`
 is the R interface to the [d-SEAMS](https://dseams.info) engine: CHILL+
 labels, primitive rings, hexagonal and double-diamond cages, and Steinhardt
