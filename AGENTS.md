@@ -122,7 +122,8 @@ The package version is the seams-core version it binds.
 2. Here: set `SEAMS_CORE_REPO=d-SEAMS/seams-core` and
    `SEAMS_CORE_REF=vX.Y.Z` in `tools/seams-core.ref`, `Version: X.Y.Z` in
    `DESCRIPTION`, `SEAMS_LANG_VERSION` in `src/Makevars.win`, rename the
-   `NEWS.md` heading, update `codemeta.json` and `cran-comments.md`, and
+   `NEWS.md` heading, update `version` in `CITATION.cff`, `codemeta.json`
+   and `cran-comments.md`, and
    wait for CI on that commit.
 3. `sh tools/vendor.sh`, `R CMD build .`, and submit that tarball.
 4. Tag `vX.Y.Z` here.
