@@ -1,6 +1,6 @@
 # srr standards assessment
 
-`dseams` is submitted to rOpenSci software peer review. It is not
+`dseams` is prepared for rOpenSci software peer review. It is not
 statistical software. The [srr standards](https://stats-devguide.ropensci.org/standards.html)
 (version 0.2.0) apply to packages in a statistical category. This note
 records which of those standards are relevant and why the package does not

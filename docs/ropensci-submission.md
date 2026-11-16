@@ -9,9 +9,9 @@ The package is the root of <https://github.com/d-SEAMS/dseams-r>. The srr
 assessment is `srr-standards.md`.
 
 After acceptance, rOpenSci can co-submit a short paper to the Journal of
-Open Source Software. `paper/` is that paper. Say so in the review thread
-if you want the co-submission. It is separate from the CRAN upload and from
-this issue.
+Open Source Software. No such paper is in the repository yet; write one
+before asking for the co-submission in the review thread. It is separate
+from the CRAN upload and from this issue.
 
 ---
 
@@ -78,15 +78,18 @@ LinkingTo:
     RcppEigen (>= 0.3.4.0.0)
 VignetteBuilder: knitr
 SystemRequirements: C++20
+NeedsCompilation: yes
 Config/testthat/edition: 3
+X-schema.org-keywords: molecular-dynamics, trajectory-analysis, ice,
+    clathrate-hydrates, ring-statistics, d-seams
 Roxygen: list(markdown = TRUE)
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1
 ```
 
-The R package is the root of that repository. Amrita
-Goswami and Ruhila S are authors on the DESCRIPTION. Their GitHub handles
-are not recorded in the repository; add them between the author markers
-above if they should be on the issue.
+The R package is the root of that repository. Amrita Goswami is an
+author (`aut`) and Ruhila S a contributor (`ctb`) in the DESCRIPTION.
+Their GitHub handles are not recorded in the repository; add Amrita
+Goswami's between the author markers above if she should be on the issue.
 
 ## Scope
 
@@ -187,9 +190,9 @@ This package:
 
 </details>
 
-A short paper already lives in `paper/`. After software review, rOpenSci
-can co-submit an accepted package to the Journal of Open Source Software.
-That option is open here. It is not requested by the checkboxes above.
+After software review, rOpenSci can co-submit an accepted package to the
+Journal of Open Source Software. That needs a paper, which the repository
+does not have yet. It is not requested by the checkboxes above.
 
 ## Code of conduct
 
@@ -197,43 +200,30 @@ That option is open here. It is not requested by the checkboxes above.
 
 ## pkgcheck
 
-`pkgcheck::pkgcheck()` 0.3.4, with the cache off, on this branch:
+The pkgcheck run recorded in earlier drafts (pkgcheck 0.3.4) predates the
+move of the package into d-SEAMS/dseams-r, and its CI and coverage lines
+described seams-core. Run `pkgcheck::pkgcheck()` again on the pushed
+default branch and paste its summary here before opening the issue.
 
-```
-✔ Package name is available
-✔ has a 'contributing' file.
-✔ uses 'roxygen2'.
-✔ 'DESCRIPTION' has a URL field.
-✔ 'DESCRIPTION' has a BugReports field.
-✔ Package has at least one HTML vignette
-✔ All functions have examples.
-✔ Repository has a website
-✖ Package has no continuous integration checks.
-✔ Package coverage is 100%.
-✔ R CMD check found no errors.
-✔ R CMD check found no warnings.
-ℹ Some goodpractice linters failed.
-ℹ Function names are duplicated in other packages
-ℹ Not all authors have ORCID IDs
-```
+What the repository gives pkgcheck now:
 
-`R CMD check --as-cran` on R 4.6.2 was 0 errors, 0 warnings, and 1 note,
-`New submission`.
+- CI: `.github/workflows/r-cmd-check.yml` (`name: R-CMD-check`) checks
+  the source package on Linux, macOS and Windows and links a seams-core
+  build at the pin. `.github/workflows/test-coverage.yml`
+  (`name: test-coverage`) runs covr. pkgcheck keeps runs whose name
+  matches `cmd` or `coverage`, so both count once they have run on the
+  default branch.
+- Coverage: covr on the R code is 100 percent (`R/capi.R`,
+  `R/dseams-package.R`, `R/dseams.R`, `R/s3.R`) with the package linked
+  against seams-core and `SEAMS_CPP_ORACLE` set, as the test-coverage
+  workflow runs it. `.covrignore` leaves out `src/`, the engine copy and
+  the C and C++ glue, which seams-core and the oracle test check, and
+  `.pixi/`, the local toolchain. The workflow writes the figure to the
+  job summary; nothing uploads it to a coverage service.
+- `R CMD check --as-cran` of the bundled tarball on R 4.5.3: 0 errors,
+  0 warnings, 1 note (`New submission`).
 
-The coverage figure is the R code. `.covrignore` leaves out `src/`, the
-bundled C++ engine. That engine is covered by the seams-core tests. covr
-on the R functions, including `.onLoad`, is 100%.
-
-The CI cross is pkgcheck reading GitHub Actions push runs on
-`d-SEAMS/seams-core`. The workflows on the default branch are named
-Bindings, Docs, CI, and Release. pkgcheck keeps a run only when its name
-matches `cmd` or `coverage`, so those four do not count. This branch adds
-`.github/workflows/r-cmd-check.yml` (`name: R-CMD-check`) and
-`.github/workflows/test-coverage.yml` (`name: test-coverage`). The branch
-has not been pushed, so those workflows have no successful run yet. That
-is the checklist item still open.
-
-Other notes from the same run, not checklist failures:
+Expected notes, not checklist failures:
 
 - Ruhila S has no ORCID in the repository, so none was added.
 - `positions` and `symmetry` are also exported by other CRAN packages.
@@ -241,9 +231,7 @@ Other notes from the same run, not checklist failures:
   shell label.
 - `expect_equal()` stays in the ice tests where the comparison is a count
   or a mean. `goodpractice` prefers `expect_identical()` for exact
-  values. Five lines longer than 80 characters were wrapped after this
-  run (`R/dseams.R` and the version test).
+  values.
 
 `srr-standards.md` is the srr assessment. The package
-is not statistical software, so it does not carry `@srrstats` tags, and
-pkgcheck did not fail an srr item.
+is not statistical software, so it does not carry `@srrstats` tags.
