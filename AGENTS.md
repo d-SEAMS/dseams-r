@@ -38,6 +38,7 @@ and the C++ reference `binding_oracle` live in
 | `docs/` | API, tutorial and language-task pages for the d-SEAMS site |
 | `pixi.toml`, `pixi.lock` | R, compilers and every Suggests package for local checks |
 | `.github/workflows/r-cmd-check.yml` | Bundled checks on Linux, macOS and Windows; a linked check against seams-core built at the pin |
+| `.github/workflows/test-coverage.yml` | covr on the R code, linked against seams-core built at the pin, reported in the job summary |
 
 ## How the package finds the engine
 
