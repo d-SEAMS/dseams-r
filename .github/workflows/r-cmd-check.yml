@@ -42,7 +42,11 @@ jobs:
       # The tests that read input/traj beyond the shipped examples.
       DSEAMS_ROOT: ${{ github.workspace }}/seams-core
     steps:
+      # The package and seams-core are checked out side by side, so that
+      # R CMD build does not pick up the seams-core tree as package content.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: dseams
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ needs.pin.outputs.repo }}
@@ -63,13 +67,16 @@ jobs:
         run: brew install checkbashisms
       - name: Copy the engine into the package
         shell: bash
+        working-directory: dseams
         run: sh tools/vendor.sh "$DSEAMS_ROOT"
       - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
+          working-directory: dseams
           extra-packages: any::rcmdcheck
           needs: check
       - uses: r-lib/actions/check-r-package@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
+          working-directory: dseams
           args: 'c("--no-manual", "--as-cran")'
           error-on: '"warning"'
           upload-snapshots: true
