@@ -1,0 +1,96 @@
+# Builds the pkgdown site, checks its links and the README links, and on
+# a push to main publishes the site to GitHub Pages
+# (https://d-seams.github.io/dseams-r/).
+name: pkgdown
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pkgdown-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # tools/seams-core.ref is the one place the engine revision is written.
+  pin:
+    runs-on: ubuntu-latest
+    outputs:
+      repo: ${{ steps.pin.outputs.SEAMS_CORE_REPO }}
+      ref: ${{ steps.pin.outputs.SEAMS_CORE_REF }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: pin
+        run: grep -E '^SEAMS_CORE_(REPO|REF)=' tools/seams-core.ref >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: pin
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      DSEAMS_ROOT: ${{ github.workspace }}/seams-core
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: dseams
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ needs.pin.outputs.repo }}
+          ref: ${{ needs.pin.outputs.ref }}
+          path: seams-core
+      - uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          use-public-rspm: true
+      - name: Copy the engine into the package
+        working-directory: dseams
+        run: sh tools/vendor.sh "$DSEAMS_ROOT"
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          working-directory: dseams
+          extra-packages: any::pkgdown, local::.
+          needs: website
+      - name: Build the site
+        working-directory: dseams
+        run: Rscript -e 'pkgdown::build_site(new_process = FALSE, install = FALSE)'
+      # The site URL is mapped to the build, so links to pages that are
+      # not deployed yet resolve against the files that will be.
+      - name: Link check
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          fail: true
+          workingDirectory: dseams
+          args: >-
+            --no-progress
+            --max-retries 3
+            --retry-wait-time 5
+            --timeout 30
+            --max-concurrency 4
+            --accept 200,206,429
+            --index-files index.html
+            --root-dir ${{ github.workspace }}/dseams/_site
+            --remap "https://d-seams.github.io/dseams-r file://${{ github.workspace }}/dseams/_site"
+            README.md _site
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: dseams/_site
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
