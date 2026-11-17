@@ -80,6 +80,14 @@ jobs:
             --remap "https://github.com/d-SEAMS/dseams-r/(blob|tree)/main file://${{ github.workspace }}/dseams"
             README.md _site
           token: ${{ secrets.GITHUB_TOKEN }}
+      # Every page of the site as its published URL, for the live check.
+      - name: List the site pages
+        working-directory: dseams/_site
+        run: find . -name '*.html' | sed -e 's#^\./##' -e 's#index\.html$##' -e 's#^#https://r.dseams.info/#' | sort > ../../site-pages.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site-pages
+          path: site-pages.txt
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: dseams/_site
@@ -97,3 +105,36 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # The deployed site, page by page: each page is fetched from
+  # r.dseams.info and its links are resolved against that page, so a page
+  # or a link that is missing from the live site fails the workflow. The
+  # source links into this repository were checked against the checkout
+  # in the build job and are not fetched from GitHub again.
+  live:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .lycheeignore
+          sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: site-pages
+      - id: pages
+        run: echo "urls=$(tr '\n' ' ' < site-pages.txt)" >> "$GITHUB_OUTPUT"
+      - name: Live link check
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          fail: true
+          args: >-
+            --no-progress
+            --max-retries 3
+            --retry-wait-time 10
+            --timeout 30
+            --max-concurrency 4
+            --accept 200,202,206,429
+            --exclude "^https://github\.com/d-SEAMS/dseams-r/(blob|tree)/main/"
+            ${{ steps.pages.outputs.urls }}
+          token: ${{ secrets.GITHUB_TOKEN }}
