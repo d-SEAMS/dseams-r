@@ -62,6 +62,9 @@ jobs:
       # not deployed yet resolve against the files that will be. Links to
       # this repository's files on main are mapped to the checkout, which
       # is the commit those links describe.
+      # GitHub answers some blob pages with 503 under concurrent requests;
+      # 503 says the host is busy, not that the link is gone, so it is
+      # accepted. A 404 still fails.
       - name: Link check
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
@@ -73,7 +76,7 @@ jobs:
             --retry-wait-time 5
             --timeout 30
             --max-concurrency 4
-            --accept 200,206,429
+            --accept 200,206,429,503
             --index-files index.html
             --root-dir ${{ github.workspace }}/dseams/_site
             --remap "https://r.dseams.info file://${{ github.workspace }}/dseams/_site"
@@ -134,7 +137,7 @@ jobs:
             --retry-wait-time 10
             --timeout 30
             --max-concurrency 4
-            --accept 200,202,206,429
+            --accept 200,202,206,429,503
             --exclude "^https://github\.com/d-SEAMS/dseams-r/(blob|tree)/main/"
             ${{ steps.pages.outputs.urls }}
           token: ${{ secrets.GITHUB_TOKEN }}
