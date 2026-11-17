@@ -47,7 +47,13 @@ def strip_existing_metadata(document: str) -> str:
         attrs = attributes(match.group(0))
         name = attrs.get("name", "").lower()
         prop = attrs.get("property", "").lower()
-        if name in {"description", "twitter:card", "twitter:title", "twitter:description"}:
+        if name in {
+            "description",
+            "twitter:card",
+            "twitter:title",
+            "twitter:description",
+            "twitter:image",
+        }:
             return ""
         if prop.startswith("og:"):
             return ""
@@ -63,9 +69,11 @@ def strip_existing_metadata(document: str) -> str:
 
 def page_title(document: str, page: Path, root: Path) -> str:
     match = re.search(r"<title\b[^>]*>(.*?)</title>", document, re.IGNORECASE | re.DOTALL)
-    if not match:
-        raise ValueError(f"{page.relative_to(root)} has no title element")
-    title = re.sub(r"<[^>]+>", "", html.unescape(match.group(1))).strip()
+    title = (
+        re.sub(r"<[^>]+>", "", html.unescape(match.group(1))).strip()
+        if match
+        else page.stem.replace(".", " ").replace("_", " ").replace("-", " ").title()
+    )
     suffix = f" | {SITE_TITLE}"
     if title.endswith(suffix):
         title = title[: -len(suffix)]
@@ -110,7 +118,23 @@ def enhance(root: Path) -> None:
     for page in pages:
         document = page.read_text(encoding="utf-8")
         title = page_title(document, page, root)
-        canonical = canonical_url(root, page)
+        noindex = bool(
+            re.search(
+                r'<meta\b(?=[^>]*\bname\s*=\s*["\']robots["\'])(?=[^>]*\bcontent\s*=\s*["\'][^"\']*noindex)',
+                document,
+                re.IGNORECASE,
+            )
+        )
+        existing_canonical = re.search(
+            r'<link\b(?=[^>]*\brel\s*=\s*["\']canonical["\'])[^>]*\bhref\s*=\s*(["\'])(.*?)\1',
+            document,
+            re.IGNORECASE,
+        )
+        canonical = (
+            html.unescape(existing_canonical.group(2))
+            if noindex and existing_canonical
+            else canonical_url(root, page)
+        )
         short_title = title.removesuffix(f" | {SITE_TITLE}")
         description = (
             SITE_DESCRIPTION
@@ -129,9 +153,11 @@ def enhance(root: Path) -> None:
 <meta property="og:title" content="{escaped_title}">
 <meta property="og:description" content="{escaped_description}">
 <meta property="og:url" content="{escaped_url}">
+<meta property="og:image" content="{IMAGE_URL}">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="{escaped_title}">
 <meta name="twitter:description" content="{escaped_description}">
+<meta name="twitter:image" content="{IMAGE_URL}">
 <script type="application/ld+json">{json.dumps(structured_data(canonical, title, description), separators=(",", ":"))}</script>
 """
         document, count = re.subn(
@@ -142,9 +168,18 @@ def enhance(root: Path) -> None:
             flags=re.IGNORECASE | re.DOTALL,
         )
         if count != 1:
-            raise ValueError(f"could not update title in {page.relative_to(root)}")
+            document, count = re.subn(
+                r"(<head\b[^>]*>)",
+                lambda match: f"{match.group(1)}\n<title>{escaped_title}</title>{metadata}",
+                document,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+        if count != 1:
+            raise ValueError(f"could not update head in {page.relative_to(root)}")
         page.write_text(document, encoding="utf-8")
-        urls.append(canonical)
+        if not noindex:
+            urls.append(canonical)
 
     sitemap = ET.Element(
         "urlset", xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -154,6 +189,10 @@ def enhance(root: Path) -> None:
         ET.SubElement(entry, "loc").text = url
     ET.ElementTree(sitemap).write(
         root / "sitemap.xml", encoding="utf-8", xml_declaration=True
+    )
+    (root / "robots.txt").write_text(
+        f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}sitemap.xml\n",
+        encoding="utf-8",
     )
 
 
@@ -201,7 +240,7 @@ def validate(root: Path) -> None:
     pages = sorted(root.rglob("*.html"))
     if not pages:
         raise ValueError(f"no HTML pages found under {root}")
-    expected_urls = {canonical_url(root, page) for page in pages}
+    expected_urls: set[str] = set()
     errors: list[str] = []
 
     for page in pages:
@@ -209,6 +248,11 @@ def validate(root: Path) -> None:
         parser = MetadataParser()
         parser.feed(page.read_text(encoding="utf-8"))
         expected = canonical_url(root, page)
+        noindex = any(
+            item.get("name", "").lower() == "robots"
+            and "noindex" in item.get("content", "").lower().split(",")
+            for item in parser.meta
+        )
         canonicals = [
             item.get("href", "")
             for item in parser.links
@@ -223,9 +267,16 @@ def validate(root: Path) -> None:
         ]
         if len(descriptions) != 1 or not descriptions[0]:
             errors.append(f"{relative}: must have exactly one meta description")
-        if canonicals != [expected]:
+        if noindex:
+            if len(canonicals) != 1 or not canonicals[0].startswith(BASE_URL):
+                errors.append(
+                    f"{relative}: noindex page must have exactly one custom-domain canonical"
+                )
+        elif canonicals != [expected]:
             errors.append(f"{relative}: must have exactly one canonical, {expected}")
-        for prop in ("og:type", "og:title", "og:description", "og:url"):
+        else:
+            expected_urls.add(expected)
+        for prop in ("og:type", "og:title", "og:description", "og:url", "og:image"):
             matching = [
                 item.get("content", "")
                 for item in parser.meta
@@ -233,7 +284,12 @@ def validate(root: Path) -> None:
             ]
             if len(matching) != 1 or not matching[0]:
                 errors.append(f"{relative}: must have exactly one {prop}")
-        for name in ("twitter:card", "twitter:title", "twitter:description"):
+        for name in (
+            "twitter:card",
+            "twitter:title",
+            "twitter:description",
+            "twitter:image",
+        ):
             matching = [
                 item.get("content", "")
                 for item in parser.meta
@@ -268,6 +324,16 @@ def validate(root: Path) -> None:
         }
         if actual_urls != expected_urls:
             errors.append("sitemap.xml does not contain exactly every generated HTML page")
+
+    robots_path = root / "robots.txt"
+    if not robots_path.exists():
+        errors.append("missing robots.txt")
+    else:
+        robots = robots_path.read_text(encoding="utf-8")
+        if "User-agent: *" not in robots or "Allow: /" not in robots:
+            errors.append("robots.txt must allow all crawlers")
+        if f"Sitemap: {BASE_URL}sitemap.xml" not in robots:
+            errors.append("robots.txt must name the custom-domain sitemap")
 
     if errors:
         raise ValueError("\n".join(errors))
