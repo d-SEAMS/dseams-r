@@ -10,7 +10,7 @@ order parameters.
 ## Documentation
 
 - Package site, with the function reference and the vignette:
-  <https://d-seams.github.io/dseams-r/>
+  <https://r.dseams.info/>
 - The R chapter of the d-SEAMS book:
   <https://docs.dseams.info/stable/r.html>
 - A video walk-through of the package:

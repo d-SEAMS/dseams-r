@@ -1,6 +1,6 @@
 # Builds the pkgdown site, checks its links and the README links, and on
 # a push to main publishes the site to GitHub Pages
-# (https://d-seams.github.io/dseams-r/).
+# (https://r.dseams.info/).
 name: pkgdown
 on:
   push:
@@ -76,7 +76,7 @@ jobs:
             --accept 200,206,429
             --index-files index.html
             --root-dir ${{ github.workspace }}/dseams/_site
-            --remap "https://d-seams.github.io/dseams-r file://${{ github.workspace }}/dseams/_site"
+            --remap "https://r.dseams.info file://${{ github.workspace }}/dseams/_site"
             --remap "https://github.com/d-SEAMS/dseams-r/(blob|tree)/main file://${{ github.workspace }}/dseams"
             README.md _site
           token: ${{ secrets.GITHUB_TOKEN }}
