@@ -9,6 +9,7 @@
   "issueTracker": "https://github.com/d-SEAMS/dseams-r/issues",
   "license": "https://spdx.org/licenses/MIT",
   "version": "2.14.0",
+  "datePublished": "2026-11-17",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -156,7 +157,7 @@
     },
     {
       "@type": "SoftwareSourceCode",
-      "datePublished": "2026",
+      "datePublished": "2026-11-17",
       "author": [
         {
           "@type": "Person",

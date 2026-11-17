@@ -41,6 +41,7 @@ Package: dseams
 Type: Package
 Title: Ice Classification and Ring Statistics for Molecular Simulations
 Version: 2.14.0
+Date: 2026-11-17
 Authors@R: c(
     person("Rohit", "Goswami", email = "rgoswami@ieee.org",
            role = c("aut", "cre"),
@@ -220,8 +221,10 @@ What the repository gives pkgcheck now:
   the C and C++ glue, which seams-core and the oracle test check, and
   `.pixi/`, the local toolchain. The workflow writes the figure to the
   job summary; nothing uploads it to a coverage service.
-- `R CMD check --as-cran` of the bundled tarball on R 4.5.3: 0 errors,
-  0 warnings, 1 note (`New submission`).
+- `R CMD check --as-cran` of the bundled tarball on R 4.5.3, including
+  the PDF manual: 0 errors, 0 warnings, 1 note (`New submission`).
+  `.github/workflows/release.yml` repeats `--as-cran --no-manual` on a
+  `v*` tag and publishes the source tarball only for d-SEAMS/dseams-r.
 
 Expected notes, not checklist failures:
 
