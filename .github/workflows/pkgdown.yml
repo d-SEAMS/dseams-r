@@ -60,8 +60,9 @@ jobs:
         run: Rscript -e 'pkgdown::build_site(new_process = FALSE, install = FALSE)'
       # The site URL is mapped to the build, so links to pages that are
       # not deployed yet resolve against the files that will be. Links to
-      # this repository's files on main are mapped to the checkout, which
-      # is the commit those links describe.
+      # this repository's files on main (blob URLs; a tree URL names a
+      # directory, which has no index file) are mapped to the checkout,
+      # which is the commit those links describe.
       # GitHub answers some blob pages with 503 under concurrent requests;
       # 503 says the host is busy, not that the link is gone, so it is
       # accepted. A 404 still fails.
@@ -80,7 +81,7 @@ jobs:
             --index-files index.html
             --root-dir ${{ github.workspace }}/dseams/_site
             --remap "https://r.dseams.info file://${{ github.workspace }}/dseams/_site"
-            --remap "https://github.com/d-SEAMS/dseams-r/(blob|tree)/main file://${{ github.workspace }}/dseams"
+            --remap "https://github.com/d-SEAMS/dseams-r/blob/main file://${{ github.workspace }}/dseams"
             README.md _site
           token: ${{ secrets.GITHUB_TOKEN }}
       # Every page of the site as its published URL, for the live check.
@@ -138,6 +139,6 @@ jobs:
             --timeout 30
             --max-concurrency 4
             --accept 200,202,206,429,503
-            --exclude "^https://github\.com/d-SEAMS/dseams-r/(blob|tree)/main/"
+            --exclude "^https://github\.com/d-SEAMS/dseams-r/blob/main/"
             ${{ steps.pages.outputs.urls }}
           token: ${{ secrets.GITHUB_TOKEN }}
