@@ -1,6 +1,6 @@
 # dseams 2.14.0 (2026-11-17)
 
-* First submission to CRAN.
+* Initial release prepared for submission to CRAN.
 * Classify ice with CHILL+ (`chill_plus`), count primitive rings
   (`primitive_rings`), find hexagonal and double-diamond cages (`cages`,
   `signature_cages`), and compute Steinhardt parameters (`steinhardt`,

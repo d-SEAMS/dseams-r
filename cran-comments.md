@@ -19,24 +19,24 @@ through `src/dseams_r_io.cpp` to `Rprintf`/`REprintf` and an R error.
 
   New submission
 
-Checked with `R CMD check --as-cran` on R 4.5.3 (2026-03-11),
-x86_64-conda-linux-gnu, conda-forge GCC 14.4.0, on Ubuntu 24.04.
-conda-forge's R adds `-march=nocona`; that flag is the toolchain's and
-was named with `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`. The PDF
-manual (pdflatex) and the HTML manual were built. Tests: 112 passed, 2
-skipped. The skips are the comparisons that need `SEAMS_BIN` and
-`SEAMS_CPP_ORACLE`, which a CRAN machine does not have.
+The exact `dseams_2.14.0.tar.gz` submitted here was checked on Ubuntu
+24.04 with:
 
-A second check on the same host linked `libseams` and `libseams_lang`
-from a seams-core 2.14.0 build (`R CMD check --no-manual`, `SEAMS_BIN`
-and `SEAMS_CPP_ORACLE` set). That run was Status: OK, with 118 passed and
-none skipped.
+* R 4.5.3 (2026-03-11), x86_64-conda-linux-gnu, conda-forge GCC 14.4.0;
+* R Under development (unstable) (2026-11-16 r90914),
+  x86_64-pc-linux-gnu.
 
-The R-CMD-check workflow also checks Ubuntu (R release and devel), macOS
-and Windows, with `--as-cran --no-manual`. A `v*` tag on
-d-SEAMS/dseams-r runs `.github/workflows/release.yml`, which repeats that
-check and, only when it reports no errors and no warnings, publishes the
-source tarball.
+Both checks used `R CMD check --as-cran`, built the PDF and HTML manuals,
+and reported the result above. They linked `libseams` and
+`libseams_lang` from the seams-core `v2.14.0` build and set
+`SEAMS_BIN` and `SEAMS_CPP_ORACLE` from that same build. The test result
+was 118 passed and none skipped in each check.
 
-The examples and tests run with at most two threads when
+The same tarball was also installed without the linked engine into an
+empty user library, exercising the bundled engine that CRAN will compile.
+The installed package read its shipped 128-water ice Ih frame, classified
+all 128 waters as hexagonal ice, and found 256 six-membered rings.
+
+There are no reverse dependencies because this is a new submission. The
+examples and tests run with at most two threads when
 `_R_CHECK_LIMIT_CORES_` is set.
