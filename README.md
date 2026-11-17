@@ -37,9 +37,8 @@ The copy is not stored in git. In a git checkout `configure` (and
    from GitHub by `tools/fetch-engine.R`. `DSEAMS_NO_DOWNLOAD=1` turns
    this step into an error.
 
-`install_github` takes the second path. The pin is the head of the
-seams-core `release/2.14.0` branch until the `v2.14.0` tag exists;
-`src/seams/README` records the revision a copy came from.
+`install_github` takes the second path. The pin is the seams-core tag
+`v2.14.0`; `src/seams/README` records the revision a copy came from.
 
 To link an engine that is already built instead of compiling the copy:
 

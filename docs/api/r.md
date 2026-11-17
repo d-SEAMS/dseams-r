@@ -25,9 +25,9 @@ six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
 `dseams` is not on CRAN yet and installs from a checkout of dseams-r.
 `configure` runs `tools/vendor.sh`, which copies the engine from the
 seams-core tree in `SEAMS_CORE_SRC` (or `DSEAMS_ROOT`), or downloads the
-revision pinned in `tools/seams-core.ref`, and the package compiles its own
-copy. To install the package against a built library instead, also name
-the directory of `libseams_lang`:
+revision pinned in `tools/seams-core.ref` (the tag `v2.14.0`), and the
+package compiles its own copy. To install the package against a built
+library instead, also name the directory of `libseams_lang`:
 
 ```bash
 # in a seams-core checkout at the pinned revision

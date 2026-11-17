@@ -11,7 +11,7 @@ Rscript -e 'library(dseams); print(packageVersion("dseams"))'
 `dseams` is not on CRAN yet. `R CMD INSTALL` compiles the package's own
 copy of the engine. In a git checkout `tools/vendor.sh` makes that copy
 from the seams-core tree `SEAMS_CORE_SRC` names, or downloads the
-seams-core revision pinned in `tools/seams-core.ref`. `SEAMS_LIBDIR`
+seams-core tag pinned in `tools/seams-core.ref` (`v2.14.0`). `SEAMS_LIBDIR`
 (with `DSEAMS_ROOT`) links a seams-core build tree instead, and
 `DSEAMS_SYSTEM_ENGINE=1` an installed one found by pkg-config.
 

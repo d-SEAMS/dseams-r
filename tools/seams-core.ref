@@ -1,6 +1,7 @@
 # The seams-core source that the bundled engine is copied from. configure,
 # tools/fetch-engine.R and the R-CMD-check workflow read these two lines.
-# Pin: the release/2.14.0 head (seams-core pull request 137). Switch to
-# SEAMS_CORE_REPO=d-SEAMS/seams-core SEAMS_CORE_REF=v2.14.0 once that tag exists.
-SEAMS_CORE_REPO=HaoZeke/seams-core
-SEAMS_CORE_REF=628b0af94b4d3bf52426708a0d08436027c8e4fa
+# Pin: the annotated tag v2.14.0 on d-SEAMS/seams-core
+# (commit acc8bbc803f55bac39493c85300f87a8ce302829). A release uses this
+# tag, not a branch and not a commit on a fork.
+SEAMS_CORE_REPO=d-SEAMS/seams-core
+SEAMS_CORE_REF=v2.14.0
