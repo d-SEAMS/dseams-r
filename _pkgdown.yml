@@ -1,6 +1,49 @@
 url: https://r.dseams.info/
 template:
   bootstrap: 5
+  light-switch: true
+  includes:
+    in_header: |
+      <link rel="stylesheet" href="/dseams/dseams-tokens.css">
+      <link rel="stylesheet" href="/dseams/dseams-family.css">
+      <link rel="stylesheet" href="/dseams/dseams-pkgdown.css">
+    before_body: |
+      <nav class="dseams-family" aria-label="d-SEAMS">
+        <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+        <ul class="dseams-family__nav">
+          <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+          <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+          <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+          <li class="dseams-family__docs">
+            <details>
+              <summary>Docs</summary>
+              <div class="dseams-family__menu">
+                <a href="https://docs.dseams.info/">Engine &amp; CLI</a>
+                <a href="https://python.dseams.info/">Python</a>
+                <a href="https://rust.dseams.info/">Rust</a>
+                <a href="https://julia.dseams.info/">Julia</a>
+                <a href="https://r.dseams.info/" aria-current="page">R</a>
+                <a href="https://lua.dseams.info/">Lua / Fennel</a>
+                <a href="https://fortran.dseams.info/">Fortran</a>
+                <a href="https://plumed.dseams.info/">PLUMED</a>
+                <a href="https://linkcell.dseams.info/">linkcell</a>
+              </div>
+            </details>
+          </li>
+          <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+          <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+          <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+        </ul>
+      </nav>
+  bslib:
+    primary: "#0e4da4"
+    link-color: "#0e4da4"
+    font-size-base: 1rem
+    border-radius: 10px
+    code-color: "#0b3a7a"
+    base_font: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
+    code_font: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace"
+    heading_font: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
 destination: _site
 repo:
   branch: main

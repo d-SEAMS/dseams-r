@@ -26,3 +26,4 @@
 ^AGENTS\.md$
 ^llms\.txt$
 ^\.lycheeignore$
+^pkgdown$
