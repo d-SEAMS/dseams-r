@@ -1,3 +1,10 @@
+# dseams 2.14.1 (2026-11-17)
+
+* Prepare the package's initial CRAN submission.
+* Keep the R package patch version separate from the pinned seams-core
+  version. This release binds seams-core `v2.14.0`.
+* Remove the unpublished package-site URL from package metadata.
+
 # dseams 2.14.0 (2026-11-17)
 
 * Initial release prepared for submission to CRAN.

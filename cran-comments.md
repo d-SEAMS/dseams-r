@@ -19,7 +19,7 @@ through `src/dseams_r_io.cpp` to `Rprintf`/`REprintf` and an R error.
 
   New submission
 
-The exact `dseams_2.14.0.tar.gz` submitted here was checked on Ubuntu
+The exact `dseams_2.14.1.tar.gz` submitted here was checked on Ubuntu
 24.04 with:
 
 * R 4.5.3 (2026-03-11), x86_64-conda-linux-gnu, conda-forge GCC 14.4.0;
@@ -31,6 +31,10 @@ and reported the result above. They linked `libseams` and
 `libseams_lang` from the seams-core `v2.14.0` build and set
 `SEAMS_BIN` and `SEAMS_CPP_ORACLE` from that same build. The test result
 was 118 passed and none skipped in each check.
+
+The R package patch version is 2.14.1 because the already-published
+`v2.14.0` package tag is immutable. The engine remains seams-core
+`v2.14.0`; this package-only patch does not change its API or results.
 
 The same tarball was also installed without the linked engine into an
 empty user library, exercising the bundled engine that CRAN will compile.

@@ -37,7 +37,7 @@ does that work:
 | --- | --- |
 | G1.0 Primary published reference | DESCRIPTION and the roxygen `@references` tags cite Goswami, Goswami and Singh (2020), Nguyen and Molinero (2015), Franzblau (1991), and Steinhardt, Nelson and Ronchetti (1983) |
 | G1.1 What the algorithm is | The functions implement those published deterministic classifiers. They are not a new statistical estimator |
-| G1.2 Life cycle | Version 2.14.0. `NEWS.md` records this as the first CRAN submission of a stable engine binding |
+| G1.2 Life cycle | Version 2.14.1. `NEWS.md` records preparation for the first CRAN submission of a stable engine binding |
 | G1.4 roxygen2 | Every exported function is documented with roxygen2, and each has an example |
 | G5.0, G5.1, G5.4 Known data | `inst/extdata` ships the ice Ih cell. Tests require 128 hexagonal waters and 256 primitive six-rings |
 | G5.2 Error behavior | Tests cover a missing file, a file that is not a dump, an unknown CHILL+ rule, an unknown example name, and a non-positive thread count |

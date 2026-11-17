@@ -1,6 +1,6 @@
 # R
 
-d-SEAMS 2.14.0. The package is <https://github.com/d-SEAMS/dseams-r>. `libseams_lang`
+d-SEAMS 2.14.1. The package is <https://github.com/d-SEAMS/dseams-r>. `libseams_lang`
 serves the frame generics through cpp11. `libseams` serves
 `seams_system_new` and the analyses named `seams_*`. roxygen2 writes
 `man/` and `NAMESPACE`. pkgdown renders the package site from

@@ -29,7 +29,15 @@ if [ ! -x "${R_HOME}/bin/R" ]; then
   exit 1
 fi
 
-version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+package_version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+engine_ref=$(sed -n 's/^SEAMS_CORE_REF=//p' tools/seams-core.ref)
+case "${engine_ref}" in
+  v*) engine_version=${engine_ref#v} ;;
+  *)
+    echo "configure: tools/seams-core.ref must pin a version tag" >&2
+    exit 1
+    ;;
+esac
 if [ ! -f src/seams/seams_lang.cpp ] || [ ! -f inst/extdata/ice1h.lammpstrj ]; then
   if [ ! -f tools/vendor.sh ]; then
     echo "configure: src/seams is missing and there is no tools/vendor.sh to make it" >&2
@@ -53,8 +61,8 @@ if [ "${link_mode}" = pkg-config ]; then
     exit 1
   fi
   have=$(${PKG_CONFIG} --modversion seams)
-  if [ "${have}" != "${version}" ]; then
-    echo "configure: the installed engine is ${have}; dseams ${version} needs seams-core ${version}" >&2
+  if [ "${have}" != "${engine_version}" ]; then
+    echo "configure: the installed engine is ${have}; dseams ${package_version} needs seams-core ${engine_version}" >&2
     exit 1
   fi
   libdir=$(${PKG_CONFIG} --variable=libdir seams)
@@ -102,7 +110,7 @@ elif [ "${link_mode}" = libdir ]; then
   OPENMP_CXXFLAGS=""
   ENGINE_OBJECTS=""
 else
-  SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='\"${version}\"'"
+  SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='\"${engine_version}\"'"
   SEAMS_LIBS=""
   ENGINE_OBJECTS='$(SEAMS_OBJECTS)'
   # An empty SHLIB_OPENMP_CXXFLAGS (Apple clang, for one) builds the

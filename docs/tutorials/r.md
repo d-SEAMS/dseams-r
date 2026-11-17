@@ -1,6 +1,6 @@
 # R tutorial
 
-d-SEAMS 2.14.0.
+d-SEAMS 2.14.1.
 
 ```bash
 git clone https://github.com/d-SEAMS/dseams-r
@@ -20,7 +20,7 @@ the package. With `DSEAMS_ROOT` set to a seams-core checkout, the
 testthat suite also checks the cubic dump in its `input/traj`:
 
 ```bash
-DSEAMS_ROOT=/path/to/seams-core R CMD check dseams_2.14.0.tar.gz
+DSEAMS_ROOT=/path/to/seams-core R CMD check dseams_2.14.1.tar.gz
 ```
 
 

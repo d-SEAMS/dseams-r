@@ -49,11 +49,8 @@ test_that("threads can be set and read back", {
   expect_error(dseams_threads(0L))
 })
 
-test_that("the engine version is the package version", {
-  expect_identical(
-    dseams_version(),
-    as.character(utils::packageVersion("dseams"))
-  )
+test_that("the engine version is the pinned seams-core version", {
+  expect_identical(dseams_version(), "2.14.0")
 })
 
 test_that(".onLoad honours the thread option and the core limit", {
