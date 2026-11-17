@@ -58,6 +58,12 @@ jobs:
       - name: Build the site
         working-directory: dseams
         run: Rscript -e 'pkgdown::build_site(new_process = FALSE, install = FALSE)'
+      - name: Add SEO metadata and sitemap
+        working-directory: dseams
+        run: python3 tools/seo.py _site
+      - name: Validate SEO metadata on every page
+        working-directory: dseams
+        run: python3 tools/seo.py --check _site
       # The site URL is mapped to the build, so links to pages that are
       # not deployed yet resolve against the files that will be. Links to
       # this repository's files on main (blob URLs; a tree URL names a
