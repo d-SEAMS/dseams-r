@@ -1,0 +1,141 @@
+name: Release
+
+# A v* tag that names the DESCRIPTION version, with tools/seams-core.ref
+# pointing at the seams-core tag of that same version, gets a GitHub
+# release. The asset is the R CMD build tarball (the engine copy is
+# already inside it) and SHA256SUMS. The notes are the NEWS.md section
+# for that version. GITHUB_TOKEN is the only credential.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source:
+    if: github.repository == 'd-SEAMS/dseams-r'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.pin.outputs.version }}
+    env:
+      _R_CHECK_FORCE_SUGGESTS_: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: dseams
+          persist-credentials: false
+      - id: pin
+        working-directory: dseams
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -eu
+          version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+          repo=$(sed -n 's/^SEAMS_CORE_REPO=//p' tools/seams-core.ref)
+          ref=$(sed -n 's/^SEAMS_CORE_REF=//p' tools/seams-core.ref)
+          if [ "$TAG_NAME" != "v${version}" ]; then
+            echo "tag ${TAG_NAME} does not name package version ${version}" >&2
+            exit 1
+          fi
+          if [ "$repo" != "d-SEAMS/seams-core" ] || [ "$ref" != "$TAG_NAME" ]; then
+            echo "tools/seams-core.ref is ${repo} at ${ref}; a release pins d-SEAMS/seams-core at ${TAG_NAME}" >&2
+            exit 1
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "repo=${repo}" >> "$GITHUB_OUTPUT"
+          echo "ref=${ref}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ steps.pin.outputs.repo }}
+          ref: ${{ steps.pin.outputs.ref }}
+          path: seams-core
+          persist-credentials: false
+      - uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          use-public-rspm: true
+      # R CMD check --as-cran runs checkbashisms on configure and cleanup,
+      # and qpdf on the built vignette PDFs.
+      - name: Install checkbashisms and qpdf
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends devscripts qpdf
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          working-directory: dseams
+          needs: check
+      - name: Copy the engine into the package
+        working-directory: dseams
+        env:
+          DSEAMS_ROOT: ${{ github.workspace }}/seams-core
+        run: sh tools/vendor.sh "$DSEAMS_ROOT"
+      - name: Build and check
+        working-directory: dseams
+        run: |
+          set -eu
+          R CMD build --no-manual .
+          R CMD check --as-cran --no-manual dseams_*.tar.gz
+          log=dseams.Rcheck/00check.log
+          if ! status=$(grep '^Status:' "$log"); then
+            echo "no Status line in $log"
+            exit 1
+          fi
+          echo "$status"
+          case "$status" in
+            *ERROR*|*WARNING*) exit 1 ;;
+          esac
+      - name: Checksums and notes
+        working-directory: dseams
+        env:
+          VERSION: ${{ steps.pin.outputs.version }}
+        run: |
+          set -eu
+          mkdir -p dist
+          mv "dseams_${VERSION}.tar.gz" dist/
+          (cd dist && sha256sum -- "dseams_${VERSION}.tar.gz" > SHA256SUMS)
+          python3 - << 'PY'
+          import os
+          import pathlib
+          version = os.environ["VERSION"]
+          text = pathlib.Path("NEWS.md").read_text()
+          heading = f"# dseams {version}"
+          start = text.find(heading)
+          if start < 0:
+              raise SystemExit(f"NEWS.md has no section {heading}")
+          nxt = text.find("\n# ", start + 1)
+          body = text[start:] if nxt < 0 else text[start:nxt]
+          pathlib.Path("dist/release-notes.md").write_text(body.strip() + "\n")
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: dseams/dist/
+          if-no-files-found: error
+
+  publish:
+    needs: source
+    if: github.repository == 'd-SEAMS/dseams-r'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: release
+          path: dist
+      - name: Create or update the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.ref_name }}
+          VERSION: ${{ needs.source.outputs.version }}
+        run: |
+          set -eu
+          assets=("dist/dseams_${VERSION}.tar.gz" dist/SHA256SUMS)
+          if gh release view "$TAG_NAME" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "$TAG_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$TAG_NAME" --notes-file dist/release-notes.md
+          fi
