@@ -24,7 +24,7 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
-URL: https://d-seams.github.io/dseams-r/, https://docs.dseams.info,
+URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core
 BugReports: https://github.com/d-SEAMS/dseams-r/issues
