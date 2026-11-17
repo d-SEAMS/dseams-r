@@ -65,8 +65,17 @@ test_that("a read system and its CHILL counts print", {
 })
 
 test_that("seams_set_num_threads returns the width in effect", {
-  # The width is process-global; put back the count .onLoad chose.
-  on.exit(seams_set_num_threads(dseams_threads()), add = TRUE)
+  # seams_set_num_threads also sets the OpenMP width dseams_threads()
+  # reads, so record that width now. An on.exit expression that called
+  # dseams_threads() would see the width this test had just set.
+  # Zero puts the C API back on its saved default; dseams_threads(old)
+  # then puts back the OpenMP width .onLoad chose, which may differ from
+  # the default the C API captured on its first use.
+  old <- dseams_threads()
+  on.exit({
+    seams_set_num_threads(0L)
+    dseams_threads(old)
+  }, add = TRUE)
   expect_identical(seams_set_num_threads(1L), 1L)
   expect_error(seams_set_num_threads(-1L), "negative")
 })
