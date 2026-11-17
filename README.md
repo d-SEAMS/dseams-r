@@ -7,6 +7,17 @@ is the R interface to the [d-SEAMS](https://dseams.info) engine: CHILL+
 labels, primitive rings, hexagonal and double-diamond cages, and Steinhardt
 order parameters.
 
+## Documentation
+
+- Package site, with the function reference and the vignette:
+  <https://d-seams.github.io/dseams-r/>
+- The R chapter of the d-SEAMS book:
+  <https://docs.dseams.info/stable/r.html>
+- A video walk-through of the package:
+  <https://odysee.com/dseams-r:e0c4871fe0399cf259531b5961c436abd79acadb>
+
+<iframe id="odysee-iframe" title="dseams R walk-through" width="560" height="315" src="https://odysee.com/$/embed/dseams-r:e0c4871fe0399cf259531b5961c436abd79acadb" allowfullscreen></iframe>
+
 ## Installation
 
 ```r

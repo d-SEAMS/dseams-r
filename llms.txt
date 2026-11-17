@@ -7,7 +7,9 @@ The R package is `dseams`; its version is the seams-core release it binds. R 4.2
 ## Package docs
 
 - [README](https://github.com/d-SEAMS/dseams-r/blob/main/README.md): Install, how the package gets the engine, use, development against a seams-core checkout, release order.
-- [Function reference](https://docs.dseams.info/r/): The pkgdown site: every exported function and S3 method.
+- [Package site](https://d-seams.github.io/dseams-r/): The pkgdown site: every exported function and S3 method, and the vignette.
+- [R chapter of the book](https://docs.dseams.info/stable/r.html): The R front in the d-SEAMS documentation.
+- [Video walk-through](https://odysee.com/dseams-r:e0c4871fe0399cf259531b5961c436abd79acadb): A video walk-through of the R package.
 - [Vignette: classifying ice](https://github.com/d-SEAMS/dseams-r/blob/main/vignettes/classifying-ice.Rmd): CHILL+, rings and cages on the shipped example dumps.
 - [API page](https://github.com/d-SEAMS/dseams-r/blob/main/docs/api/r.md): Frames, the `seams_*` C API wrappers, ownership, installing against a built engine.
 - [Tutorial](https://github.com/d-SEAMS/dseams-r/blob/main/docs/tutorials/r.md): Install from a checkout and run the tests against seams-core dumps.
