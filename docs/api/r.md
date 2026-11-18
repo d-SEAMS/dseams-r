@@ -1,6 +1,6 @@
 # R
 
-d-SEAMS 2.14.0. The package is <https://github.com/d-SEAMS/dseams-r>. `libseams_lang`
+d-SEAMS 2.14.1. The package is <https://github.com/d-SEAMS/dseams-r>. `libseams_lang`
 serves the frame generics through cpp11. `libseams` serves
 `seams_system_new` and the analyses named `seams_*`. roxygen2 writes
 `man/` and `NAMESPACE`. pkgdown renders the package site from
@@ -22,10 +22,9 @@ six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
 :language: r
 ```
 
-`dseams` is not on CRAN yet and installs from a checkout of dseams-r.
 `configure` runs `tools/vendor.sh`, which copies the engine from the
 seams-core tree in `SEAMS_CORE_SRC` (or `DSEAMS_ROOT`), or downloads the
-revision pinned in `tools/seams-core.ref` (the tag `v2.14.0`), and the
+revision pinned in `tools/seams-core.ref` (the tag `v2.14.1`), and the
 package compiles its own copy. To install the package against a built
 library instead, also name the directory of `libseams_lang`:
 

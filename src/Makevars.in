@@ -26,6 +26,7 @@ SEAMS_OBJECTS = \
   seams/franzblau.o \
   seams/generic.o \
   seams/ira_sofi.o \
+  seams/lc_threads.o \
   seams/local_symmetry.o \
   seams/mol_sys.o \
   seams/neighbours.o \
