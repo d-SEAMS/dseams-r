@@ -37,7 +37,8 @@ if [ -z "$root" ]; then
   done
   fetched="${TMPDIR:-${TEMP:-/tmp}}/dseams-engine-$$"
   mkdir -p "$fetched"
-  root=$("$rscript" --vanilla "$pkg/tools/fetch-engine.R" "$pkg/tools/seams-core.ref" "$fetched" | tail -n 1 | tr -d '\r')
+  fetched_out=$("$rscript" --vanilla "$pkg/tools/fetch-engine.R" "$pkg/tools/seams-core.ref" "$fetched")
+  root=$(printf '%s\n' "$fetched_out" | tail -n 1 | tr -d '\r')
   if [ -z "$root" ] || [ ! -d "$root" ]; then
     echo "vendor.sh: could not fetch seams-core; set SEAMS_CORE_SRC to a checkout" >&2
     exit 1
@@ -85,10 +86,19 @@ awk '{ print } /^#define SEAMS_LANG_H_$/ {
   print "#define seams_path_nframes seams_lang_path_nframes"
 }' "$root/bindings/cxx/seams_lang.h" > "$dest/seams_lang.h"
 defs() {
-  sed -n 's/^[A-Za-z_][A-Za-z0-9_ *]*[ *]\(seams_[A-Za-z0-9_]*\)(.*/\1/p' "$1" | sort -u
+  raw=$(sed -n 's/^[A-Za-z_][A-Za-z0-9_ *]*[ *]\(seams_[A-Za-z0-9_]*\)(.*/\1/p' "$1")
+  if [ -n "$raw" ]; then
+    printf '%s\n' "$raw" | sort -u
+  fi
 }
 renamed=$(sed -n 's/^#define \(seams_[A-Za-z0-9_]*\) seams_lang_.*/\1/p' "$dest/seams_lang.h")
-defs "$dest/seams_lang.cpp" | grep -vxF "$renamed" > "$dest/.lang_defs" || true
+defs "$dest/seams_lang.cpp" > "$dest/.lang_all_defs"
+rc=0
+grep -vxF "$renamed" "$dest/.lang_all_defs" > "$dest/.lang_defs" || rc=$?
+rm -f "$dest/.lang_all_defs"
+if [ "$rc" -gt 1 ]; then
+  exit "$rc"
+fi
 defs "$dest/seams_api.cpp" > "$dest/.api_defs"
 clash=$(comm -12 "$dest/.lang_defs" "$dest/.api_defs")
 rm -f "$dest/.lang_defs" "$dest/.api_defs"
@@ -124,8 +134,12 @@ for f in "$dest"/*.cpp "$dest"/include/*.h "$dest"/include/*.hpp; do
     mv "$f.tmp" "$f"
   fi
 done
+rc=0
 left=$(grep -En 'std::(cerr|cout|exit|abort|printf)\b|(^|[^a-z_:])(printf|puts)\(|\bstdout\b|fprintf\(stderr' \
-  "$dest"/*.cpp "$dest"/include/*.h "$dest"/include/*.hpp || true)
+  "$dest"/*.cpp "$dest"/include/*.h "$dest"/include/*.hpp) || rc=$?
+if [ "$rc" -gt 1 ]; then
+  exit "$rc"
+fi
 if [ -n "$left" ]; then
   echo "vendor.sh: console calls left in the engine copy:" >&2
   echo "$left" >&2
@@ -148,11 +162,7 @@ sed -e "s/@MAJOR@/$major/" -e "s/@MINOR@/$minor/" -e "s/@PATCH@/$patch/" \
 rev=${SEAMS_CORE_REV:-unknown}
 # Only the root of a checkout names its own revision; a tree unpacked
 # inside some other repository would report that repository's HEAD.
-top=
-if command -v git >/dev/null 2>&1; then
-  top=$(git -C "$root" rev-parse --show-toplevel 2>/dev/null || true)
-fi
-if [ -n "$top" ] && [ "$(CDPATH= cd -- "$top" && pwd)" = "$root" ]; then
+if [ -e "$root/.git" ] && command -v git >/dev/null 2>&1; then
   rev=$(git -C "$root" rev-parse HEAD)
   if ! git -C "$root" diff --quiet HEAD -- src include bindings/cxx; then
     rev="$rev-dirty"
