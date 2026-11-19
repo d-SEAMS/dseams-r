@@ -1,6 +1,6 @@
 # R
 
-d-SEAMS 2.14.0. The package is <https://github.com/d-SEAMS/dseams-r>. `libseams_lang`
+d-SEAMS 2.14.1. The package is <https://github.com/d-SEAMS/dseams-r>. `libseams_lang`
 serves the frame generics through cpp11. `libseams` serves
 `seams_system_new` and the analyses named `seams_*`. roxygen2 writes
 `man/` and `NAMESPACE`. pkgdown renders the package site from
@@ -22,10 +22,9 @@ six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
 :language: r
 ```
 
-`dseams` is not on CRAN yet and installs from a checkout of dseams-r.
 `configure` runs `tools/vendor.sh`, which copies the engine from the
 seams-core tree in `SEAMS_CORE_SRC` (or `DSEAMS_ROOT`), or downloads the
-revision pinned in `tools/seams-core.ref` (the tag `v2.14.0`), and the
+revision pinned in `tools/seams-core.ref` (the tag `v2.14.1`), and the
 package compiles its own copy. To install the package against a built
 library instead, also name the directory of `libseams_lang`:
 
@@ -51,12 +50,8 @@ cell and calls `steinhardt`, `chill_plus`, and `primitive_rings`;
 
 `R CMD check` is the cleanliness check. It expects no errors and no
 warnings. `pkgdown::build_site()` writes the native HTML from the
-roxygen topics. The built site is linked from this book:
-
-```{raw} html
-<p><a href="../r/index.html">dseams pkgdown reference</a>,
-generated from the roxygen topics in <code>man/</code>.</p>
-```
+roxygen topics. The built site is linked from this book as the
+[dseams pkgdown reference](https://r.dseams.info/reference/).
 
 ## Quickstart
 
@@ -1075,14 +1070,3 @@ Units: dimensionless label codes
 
 Example: `inst/examples/minimal_r.R`
 <!-- API_SYMBOLS_END -->
-
-
-## Structure still
-
-```{figure} ../tutorials/molecules/r/overlay-web.png
-:alt: Molecule still for this front
-:width: 480px
-
-Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug r` writes the 2400 by 1800 PNG.
-```
-

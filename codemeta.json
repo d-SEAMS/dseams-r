@@ -8,7 +8,7 @@
   "codeRepository": "https://github.com/d-SEAMS/dseams-r",
   "issueTracker": "https://github.com/d-SEAMS/dseams-r/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "2.14.0",
+  "version": "2.14.1",
   "datePublished": "2026-11-17",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
@@ -175,7 +175,7 @@
       ],
       "name": "dseams: Ice Classification and Ring Statistics for Molecular Simulations",
       "url": "https://github.com/d-SEAMS/dseams-r",
-      "description": "R package version 2.14.0"
+      "description": "R package version 2.14.1"
     }
   ],
   "releaseNotes": "https://github.com/d-SEAMS/dseams-r/blob/main/NEWS.md",

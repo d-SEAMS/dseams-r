@@ -1,6 +1,6 @@
 CXX_STD = CXX20
 
-PKG_CPPFLAGS = -I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='"2.14.0"' -DSEAMS_HAS_OPENMP=1
+PKG_CPPFLAGS = -I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='"2.14.1"' -DSEAMS_HAS_OPENMP=1
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
 
@@ -26,6 +26,7 @@ SEAMS_OBJECTS = \
   seams/franzblau.o \
   seams/generic.o \
   seams/ira_sofi.o \
+  seams/lc_threads.o \
   seams/local_symmetry.o \
   seams/mol_sys.o \
   seams/neighbours.o \

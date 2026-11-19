@@ -4,7 +4,7 @@ This is a new submission.
 
 The package compiles a copy of the d-SEAMS engine (C++20, in `src/seams`)
 together with the R glue. `tools/vendor.sh` makes that copy from the
-seams-core tag `v2.14.0` when the source package is built; installing the
+seams-core tag `v2.14.1` when the source package is built; installing the
 source package does not use the network. In the copy, `[[nodiscard]]` is
 removed (the upstream build silences those warnings with
 `-Wno-unused-result`) and the engine's console output and `exit` go
@@ -28,7 +28,7 @@ skipped. The skips are the comparisons that need `SEAMS_BIN` and
 `SEAMS_CPP_ORACLE`, which a CRAN machine does not have.
 
 A second check on the same host linked `libseams` and `libseams_lang`
-from a seams-core 2.14.0 build (`R CMD check --no-manual`, `SEAMS_BIN`
+from a seams-core 2.14.1 build (`R CMD check --no-manual`, `SEAMS_BIN`
 and `SEAMS_CPP_ORACLE` set). That run was Status: OK, with 118 passed and
 none skipped.
 

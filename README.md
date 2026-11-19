@@ -1,7 +1,5 @@
 # dseams
 
-[![R-CMD-check](https://github.com/d-SEAMS/dseams-r/actions/workflows/r-cmd-check.yml/badge.svg)](https://github.com/d-SEAMS/dseams-r/actions/workflows/r-cmd-check.yml)
-
 Ice classification and ring statistics for molecular simulations. `dseams`
 is the R interface to the [d-SEAMS](https://dseams.info) engine: CHILL+
 labels, primitive rings, hexagonal and double-diamond cages, and Steinhardt
@@ -48,8 +46,9 @@ The copy is not stored in git. In a git checkout `configure` (and
    from GitHub by `tools/fetch-engine.R`. `DSEAMS_NO_DOWNLOAD=1` turns
    this step into an error.
 
-`install_github` takes the second path. The pin is the seams-core tag
-`v2.14.0`; `src/seams/README` records the revision a copy came from.
+`install_github` takes the second path. The pinned engine version is the
+seams-core tag `v2.14.1`; `src/seams/README` records the exact source
+revision.
 
 To link an engine that is already built instead of compiling the copy:
 
@@ -117,12 +116,6 @@ package does not ship and runs the scripts in `inst/examples`;
 compares every `seams_*` function with the C++ reference. `pixi run
 vendor`, `pixi run build` and `pixi run check` provide R, the compilers
 and every Suggests package.
-
-The package version is the seams-core version it binds. A release follows
-the seams-core tag of the same version: seams-core tags `vX.Y.Z`, then
-`tools/seams-core.ref` moves to that tag, `DESCRIPTION` and
-`src/Makevars.win` move to `X.Y.Z`, CI passes on that commit, and this
-repository tags `vX.Y.Z` and submits the `R CMD build` tarball.
 
 The package is MIT licensed. Cite Goswami, Goswami and Singh (2020)
 <doi:10.1021/acs.jcim.0c00031>. `citation("dseams")` prints the record.
