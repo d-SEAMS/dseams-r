@@ -1,6 +1,7 @@
 /* Copyright (c) d-SEAMS developers */
 /* .Call shim over include/seams.h. No C++ and no engine headers. */
 
+#include <limits.h>
 #include <stdio.h>
 
 #include <R.h>
@@ -60,6 +61,33 @@ SEXP seams_r_read(SEXP ext, SEXP path, SEXP frame, SEXP type) {
 }
 
 SEXP seams_r_count(SEXP ext) { return ScalarInteger(seams_system_count(sys_of(ext))); }
+
+/* Frame count through the C API. The language counter does not report
+ * a readcon file. message receives the engine text and stays valid
+ * until the next C API call on this thread. */
+int seams_capi_nframes(const char *path, const char **message) {
+  size_t n = 0;
+  if (path == NULL) {
+    if (message != NULL) {
+      *message = "path is null";
+    }
+    return -1;
+  }
+  if (seams_path_nframes(path, &n) != SEAMS_OK) {
+    if (message != NULL) {
+      const char *text = seams_last_error_message();
+      *message = (text == NULL || text[0] == '\0') ? "unreadable trajectory" : text;
+    }
+    return -1;
+  }
+  if (n > (size_t)INT_MAX) {
+    if (message != NULL) {
+      *message = "frame count does not fit in an integer";
+    }
+    return -1;
+  }
+  return (int)n;
+}
 
 SEXP seams_r_threads(SEXP n) {
   int threads = Rf_asInteger(n);

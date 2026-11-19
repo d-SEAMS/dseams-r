@@ -1,5 +1,16 @@
 # dseams (development version)
 
+* Optional chemfiles and readcon-core readers. `read_frame()`,
+  `nframes()`, and `seams_system_read()` read LAMMPS dumps and XYZ files
+  on every build. When chemfiles (>= 0.10.4, < 0.11) is found they also
+  read the chemfiles formats (PDB, GRO, DCD, and the rest of that set).
+  When readcon-core (>= 0.16.2) is found they also read `.con` files,
+  and `.convel` files when the engine routes that extension.
+  `dseams_features()` reports which readers were compiled in. A build
+  with neither library still reads LAMMPS dumps and XYZ files.
+* Record ORCID 0000-0002-5443-9356 for Ruhila Goswami, and name the
+  exported analyses and the optional readers in DESCRIPTION.
+
 * Rewrite the README, the vignette, and the help pages around reading one
   frame and reading the data frames that come back. Every exported
   function has a runnable example.

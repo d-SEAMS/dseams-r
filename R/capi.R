@@ -33,10 +33,19 @@ seams_system_new <- function() {
 
 #' Read one frame into a system.
 #'
+#' The path is a LAMMPS dump or an XYZ file on every build. When
+#' [dseams_features()] reports `chemfiles`, it may be any format
+#' chemfiles 0.10 reads (PDB, GRO, DCD, and the rest of that set). When
+#' it reports `readcon`, a readcon `.con` file is read, and a `.convel`
+#' file is read when the engine routes that extension.
+#'
 #' @param sys A `dseams_system`.
-#' @param path Trajectory path.
+#' @param path Trajectory path. See the description for which formats
+#'   this build reads.
 #' @param frame 1-based frame index.
-#' @param type Species filter. Negative keeps every atom.
+#' @param type Species filter. Negative keeps every atom. A positive
+#'   value keeps that species number (a LAMMPS type, or an atomic number
+#'   on a chemfiles or readcon frame).
 #' @return The atom count. `sys` is updated in place. On failure the
 #'   previous frame is kept and the call stops with the engine's message.
 #' @examples

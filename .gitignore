@@ -3,7 +3,12 @@ src/*.so
 src/*.dll
 src/Makevars
 src/seams/
-inst/extdata/
+inst/extdata/*
+!inst/extdata/water3.xyz
+!inst/extdata/water3.lammpstrj
+!inst/extdata/water3.pdb
+!inst/extdata/water3.gro
+!inst/extdata/water3.con
 .Rhistory
 .RData
 .pixi/

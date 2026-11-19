@@ -119,6 +119,28 @@ else
   fi
 fi
 
+# Optional readers. Neither library is required. A CRAN machine has
+# neither, and the engine then reads LAMMPS dumps and XYZ only.
+if [ -z "$link_mode" ]; then
+  reader_mode=bundled
+else
+  reader_mode=linked
+fi
+reader_eval=$(R_HOME="$R_HOME" \
+  SEAMS_SO_DIR="${SEAMS_SO_DIR:-}" \
+  SEAMS_LIBDIR="${SEAMS_LIBDIR:-}" \
+  SEAMS_SCAN_DIR="${libdir:-}" \
+  SEAMS_CPPFLAGS="$SEAMS_CPPFLAGS" \
+  sh tools/find-readers.sh "$reader_mode") || exit 1
+eval "$reader_eval"
+if [ -n "$dseams_reader_cppflags" ]; then
+  SEAMS_CPPFLAGS="$SEAMS_CPPFLAGS $dseams_reader_cppflags"
+fi
+if [ -n "$dseams_reader_libs" ]; then
+  SEAMS_LIBS="$SEAMS_LIBS $dseams_reader_libs"
+fi
+echo "configure: $dseams_reader_message"
+
 sed -e "s|@SEAMS_CPPFLAGS@|${SEAMS_CPPFLAGS}|" \
   -e "s|@SEAMS_LIBS@|${SEAMS_LIBS}|" \
   -e "s|@OPENMP_CXXFLAGS@|${OPENMP_CXXFLAGS}|g" \

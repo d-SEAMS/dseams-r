@@ -27,20 +27,36 @@ dseams_example <- function(name = NULL) {
 #' Read one trajectory frame
 #'
 #' `type = 0` guesses oxygen (LAMMPS type 2, otherwise type 1). A positive
-#' type keeps that species. A negative type keeps every atom.
+#' type keeps that species. A negative type keeps every atom. On a
+#' chemfiles or readcon frame the species number is the atomic number
+#' when the file names an element.
+#'
+#' LAMMPS dumps (`.lammpstrj`, `.dump`) and XYZ files are read on every
+#' build. When [dseams_features()] reports `chemfiles`, the path may be
+#' any format chemfiles 0.10 reads: PDB, GRO, DCD, XTC, TRR, TNG, NetCDF,
+#' SDF, CML, CSSR, MOL2, CIF, mmCIF, LAMMPS data, Tinker ARC, and MMTF.
+#' When it reports `readcon`, a readcon `.con` file is read. readcon-core
+#' also defines `.convel`. `nframes()` asks the engine for both extensions.
+#' `read_frame()` and [seams_system_read()] pass a path to readcon when
+#' the extension is `.con`, which is the extension this engine routes.
 #'
 #' `print()` reports the frame index and the atom count. `summary()` also
 #' reports the file and the type filter. Both return the frame, invisibly.
 #'
-#' @param path Path to a LAMMPS dump, or an XYZ file.
+#' @param path Trajectory path. LAMMPS dumps and XYZ files on every build.
+#'   Chemfiles formats when chemfiles is compiled in. readcon `.con` and
+#'   `.convel` files when readcon-core is compiled in and the engine
+#'   accepts that extension. [dseams_features()] names the compiled readers.
 #' @param frame 1-based frame index.
-#' @param type LAMMPS type filter.
+#' @param type Species filter. See the description.
 #' @param x A `dseams_frame`, for `print()`.
 #' @param object A `dseams_frame`, for `summary()`.
 #' @param ... Ignored.
 #' @return `read_frame()` returns an object of class `dseams_frame`.
-#'   `nframes()` returns the number of LAMMPS timesteps; an XYZ file counts
-#'   as one. `print()` and `summary()` return the frame, invisibly.
+#'   `nframes()` returns the frame count: LAMMPS timesteps, XYZ frames,
+#'   chemfiles steps when that reader is compiled in, and readcon frames
+#'   for a `.con` or `.convel` file when that reader is compiled in.
+#'   `print()` and `summary()` return the frame, invisibly.
 #' @examples
 #' path <- dseams_example("ice1h.lammpstrj")
 #' nframes(path)
@@ -399,4 +415,22 @@ dseams_threads <- function(n = NULL) {
 #' @export
 dseams_version <- function() {
   lang_version_()
+}
+
+#' Readers compiled into this build
+#'
+#' LAMMPS dumps and XYZ files are always compiled in. `chemfiles` is
+#' `TRUE` when PDB, GRO, DCD, and the other chemfiles 0.10 formats are
+#' read. `readcon` is `TRUE` when readcon-core is compiled in, which
+#' reads `.con` files and `.convel` files the engine routes. A build
+#' with neither library has both flags `FALSE` and still reads LAMMPS
+#' dumps and XYZ files.
+#'
+#' @return A named logical vector with elements `lammps`, `xyz`,
+#'   `chemfiles`, and `readcon`.
+#' @examples
+#' dseams_features()
+#' @export
+dseams_features <- function() {
+  readers_()
 }

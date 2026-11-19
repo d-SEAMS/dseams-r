@@ -2,15 +2,23 @@
 
 #' @description
 #' Structural analysis of water and ice in one molecular-dynamics frame.
-#' Reads a LAMMPS dump or an XYZ file and returns data frames of CHILL+
-#' ice labels, primitive ring counts, hexagonal and double-diamond cages,
-#' and Steinhardt bond-orientational order parameters.
+#' LAMMPS dumps and XYZ files are always read. Chemfiles formats are
+#' read when chemfiles is compiled in, and readcon `.con` files are read
+#' when readcon-core is. readcon-core also defines `.convel`; this engine
+#' routes `.con` ([dseams_features()]). The analyses are CHILL+ ice labels,
+#' primitive rings, cages, Steinhardt q4 and q6, hydrogen bonds, radial
+#' distribution functions, prisms, domains, monolayers, topological
+#' fingerprints, coordination, density profiles, and jump_tau90.
 #'
 #' @details
 #' [dseams_example()] names the dumps shipped with the package.
-#' [read_frame()] loads one frame. [chill_plus()], [primitive_rings()],
+#' [read_frame()] loads one frame. [dseams_features()] reports which
+#' readers this build compiled. [chill_plus()], [primitive_rings()],
 #' [cages()], [signature_cages()], [symmetry()], [steinhardt()],
-#' [q4_q6()], and [jump_tau90()] analyse that frame.
+#' [q4_q6()], and [jump_tau90()] analyse that frame. The `seams_*`
+#' functions are the same analyses on a system handle, plus hydrogen
+#' bonds, radial distribution, coordination, density, prisms, domains,
+#' monolayers, and fingerprints.
 #'
 #' Cite Goswami, Goswami and Singh (2020), Journal of Chemical Information
 #' and Modeling. `citation("dseams")` prints the record.

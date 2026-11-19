@@ -1,7 +1,11 @@
 # Classify ice from R
 
-`dseams` reads one LAMMPS dump or XYZ frame and returns data frames of
-CHILL+ labels, primitive rings, cages, and Steinhardt order parameters.
+`dseams` reads one frame and returns data frames of CHILL+ labels,
+primitive rings, cages, and Steinhardt order parameters. LAMMPS dumps
+and XYZ files are read on every build. Chemfiles formats are read when
+chemfiles is compiled in, and readcon `.con` files are read when
+readcon-core is. readcon-core also defines `.convel`; this engine
+routes `.con`.
 
 Install needs a C++20 compiler. The package compiles the engine as it
 installs.
