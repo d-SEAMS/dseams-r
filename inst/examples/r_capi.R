@@ -20,7 +20,11 @@ close_to <- function(got, want) {
 mean_of <- function(values) if (length(values) == 0) 0 else mean(values)
 
 sys <- seams_system_new()
-stopifnot(seams_system_read(sys, file.path(root, "input/traj/ice1h.lammpstrj"), 1L, -1L) == rows[["ih n"]])
+stopifnot(
+  seams_system_read(
+    sys, file.path(root, "input/traj/ice1h.lammpstrj"), 1L, -1L
+  ) == rows[["ih n"]]
+)
 stopifnot(as.numeric(seams_chill(sys)) == rows[["ih chill0"]])
 q3 <- seams_steinhardt(sys, 3L)
 q4 <- seams_steinhardt(sys, 4L)
@@ -43,7 +47,9 @@ stopifnot(length(rdf[[1]]) == rows[["ih rdf"]][1])
 close_to(rdf[[3]], rows[["ih rdf"]][2])
 close_to(if (length(rdf[[2]]) == 0) 0 else rdf[[2]][[1]], rows[["ih rdf"]][3])
 running <- seams_running_cn(sys)
-close_to(if (length(running) == 0) 0 else running[[length(running)]], rows[["ih rcn"]])
+close_to(
+  if (length(running) == 0) 0 else running[[length(running)]], rows[["ih rcn"]]
+)
 close_to(seams_coordination(sys), rows[["ih cn"]])
 stopifnot(seams_hbonds(sys) == rows[["ih hbond"]])
 rho <- seams_density_axis(sys)
@@ -52,26 +58,46 @@ close_to(if (length(rho) == 0) 0 else rho[[1]], rows[["ih rho"]][2])
 fp <- seams_fingerprint(sys)
 stopifnot(fp[[1]] == rows[["ih fp"]][1], fp[[2]] == rows[["ih fp"]][2])
 stopifnot(seams_site_table(sys, "1=waterO")[[1]] == rows[["ih site"]])
-stopifnot(as.numeric(seams_contact_pairs(sys, "1=cationHead")) == rows[["ih pairs"]])
+stopifnot(
+  as.numeric(seams_contact_pairs(sys, "1=cationHead")) == rows[["ih pairs"]]
+)
 domain <- seams_domains(sys, "1=waterO")
-stopifnot(domain[[1]] == rows[["ih domain"]][1], domain[[2]] == rows[["ih domain"]][2])
+stopifnot(
+  domain[[1]] == rows[["ih domain"]][1], domain[[2]] == rows[["ih domain"]][2]
+)
 close_to(domain[[3]], rows[["ih domain"]][3])
 stopifnot(seams_prisms(sys)[[7]] == rows[["ih prism"]])
 stopifnot(seams_monolayer(sys)[[7]] == rows[["ih sheet"]])
 
 guest <- seams_system_new()
-stopifnot(seams_system_read(guest, file.path(root, "input/traj/genice_sI.lammpstrj"), 1L, 1L) == rows[["si n"]])
+stopifnot(
+  seams_system_read(
+    guest, file.path(root, "input/traj/genice_sI.lammpstrj"), 1L, 1L
+  ) == rows[["si n"]]
+)
 stopifnot(as.numeric(seams_signature_cages(guest, "512")) == rows[["si sig"]])
 
 xyz <- seams_system_new()
-stopifnot(seams_system_read(xyz, file.path(root, "input/xyz/configuration.xyz"), 1L, -1L) == rows[["xyz n"]])
+stopifnot(
+  seams_system_read(
+    xyz, file.path(root, "input/xyz/configuration.xyz"), 1L, -1L
+  ) == rows[["xyz n"]]
+)
 close_to(seams_coordination(xyz, rmax = 6), rows[["xyz cn"]])
 
 con <- seams_system_new()
-stopifnot(seams_system_read(con, file.path(root, "input/eon/tiny_multi_cuh2.con"), 1L, -1L) == rows[["con n"]])
+stopifnot(
+  seams_system_read(
+    con, file.path(root, "input/eon/tiny_multi_cuh2.con"), 1L, -1L
+  ) == rows[["con n"]]
+)
 stopifnot(seams_hbonds(con, oxygen_type = 0L) == rows[["con hbond"]])
 
 tri <- seams_system_new()
-stopifnot(seams_system_read(tri, file.path(root, "input/traj/genice_sH.lammpstrj"), 1L, 1L) == rows[["tri n"]])
+stopifnot(
+  seams_system_read(
+    tri, file.path(root, "input/traj/genice_sH.lammpstrj"), 1L, 1L
+  ) == rows[["tri n"]]
+)
 close_to(mean_of(seams_steinhardt(tri, 6L)[[1]]), rows[["tri q6"]])
 cat("r capi ok\n")

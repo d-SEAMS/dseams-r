@@ -25,8 +25,10 @@ test_that("summary methods print the frame", {
 })
 
 test_that("a ring census prints and summarises", {
-  rings <- primitive_rings(read_frame(dseams_example("ice1h.lammpstrj"), type = -1L),
-                           graph = "cutoff", max_depth = 6L)
+  rings <- primitive_rings(
+    read_frame(dseams_example("ice1h.lammpstrj"), type = -1L),
+    graph = "cutoff", max_depth = 6L
+  )
   expect_s3_class(rings, "dseams_rings")
   expect_output(print(rings), "size")
   expect_output(summary(rings), "size")
@@ -54,7 +56,9 @@ test_that("cages, steinhardt and q4_q6 results print their counts", {
 
 test_that("a read system and its CHILL counts print", {
   sys <- seams_system_new()
-  expect_identical(seams_system_read(sys, dseams_example("ice1h.lammpstrj")), 128L)
+  expect_identical(
+    seams_system_read(sys, dseams_example("ice1h.lammpstrj")), 128L
+  )
   expect_output(print(sys), "dseams system 128 atoms")
   expect_output(summary(sys), "one loaded frame.*dseams system 128 atoms")
   chill <- seams_chill(sys)

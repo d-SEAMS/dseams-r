@@ -13,7 +13,9 @@ labels <- c("cubic", "hexagonal", "water", "interfacial", "clathrate",
             "interClathrate", "unclassified", "reCubic", "reHex")
 
 frame_of <- function(path) {
-  ice <- chill_plus(read_frame(path, type = -1L), cutoff = 3.5, graph = "cutoff")
+  ice <- chill_plus(
+    read_frame(path, type = -1L), cutoff = 3.5, graph = "cutoff"
+  )
   if (nrow(ice) < 1) stop(path)
   list(n = nrow(ice),
        counts = vapply(labels, function(k) sum(ice$name == k), integer(1)))
@@ -53,7 +55,10 @@ cat("cages sH 51268 4\n")
 hexagonal_oxygens <- function(path) {
   rows <- readLines(path)
   oxygen <- grep("^O ", rows, value = TRUE)
-  sum(vapply(strsplit(oxygen, " "), function(parts) parts[[5]] == "hexagonal", logical(1)))
+  sum(vapply(
+    strsplit(oxygen, " "), function(parts) parts[[5]] == "hexagonal",
+    logical(1)
+  ))
 }
 
 brine <- c(Sys.getenv("DSEAMS_BRINE_T0"), Sys.getenv("DSEAMS_BRINE_TEND"))
@@ -62,5 +67,8 @@ if (all(nzchar(brine)) && all(file.exists(brine))) {
   stopifnot(hexagonal_oxygens(brine[[2]]) == 741L)
   cat("brine t0 hexagonal 733\nbrine tend hexagonal 741\n")
 } else {
-  cat("brine tutorial skipped: cannot fetch d-SEAMS/brine-front-230K at 4828e33ecf419c70643b2d466bfa4f283b4138dc\n")
+  cat(
+    "brine tutorial skipped: cannot fetch d-SEAMS/brine-front-230K at",
+    "4828e33ecf419c70643b2d466bfa4f283b4138dc\n"
+  )
 }

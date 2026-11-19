@@ -1,5 +1,6 @@
 # Copyright (c) d-SEAMS developers
-# .Call wrappers over include/seams.h. The libseams_lang frame API stays in dseams.R.
+# .Call wrappers over include/seams.h. The libseams_lang frame API stays
+# in dseams.R.
 
 .tag <- function(x, cls) {
   structure(x, class = c(cls, class(x)))
@@ -44,7 +45,10 @@ seams_system_new <- function() {
 #' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
 #' @export
 seams_system_read <- function(sys, path, frame = 1L, type = -1L) {
-  .Call(`_dseams_seams_r_read`, sys, normalizePath(path, mustWork = TRUE), as.integer(frame), as.integer(type))
+  .Call(
+    `_dseams_seams_r_read`, sys, normalizePath(path, mustWork = TRUE),
+    as.integer(frame), as.integer(type)
+  )
 }
 
 #' Atom count stored on a system.
@@ -96,7 +100,10 @@ seams_set_num_threads <- function(n) {
 #' seams_chill(sys)
 #' @export
 seams_chill <- function(sys, cutoff = 3.5, type = 0L, graph = 0L, rule = 0L) {
-  out <- .Call(`_dseams_seams_r_chill`, sys, cutoff, as.integer(type), as.integer(graph), as.integer(rule))
+  out <- .Call(
+    `_dseams_seams_r_chill`, sys, cutoff, as.integer(type),
+    as.integer(graph), as.integer(rule)
+  )
   names(out) <- .chill_names
   .tag(out, "dseams_chill")
 }
@@ -114,7 +121,10 @@ seams_chill <- function(sys, cutoff = 3.5, type = 0L, graph = 0L, rule = 0L) {
 #' seams_steinhardt(sys, order = 6L)
 #' @export
 seams_steinhardt <- function(sys, order, cutoff = 3.5, average = FALSE) {
-  out <- .Call(`_dseams_seams_r_steinhardt`, sys, cutoff, as.integer(order), as.integer(average))
+  out <- .Call(
+    `_dseams_seams_r_steinhardt`, sys, cutoff, as.integer(order),
+    as.integer(average)
+  )
   names(out) <- c("ql", "qlbar")
   .tag(out, "dseams_order")
 }
@@ -127,14 +137,19 @@ seams_steinhardt <- function(sys, order, cutoff = 3.5, average = FALSE) {
 #'   graphs as `"seeded"`, `"mutual"`, and `"cutoff"` in [cages()].
 #' @param k Neighbour count for the seeded graph.
 #' @param complete When true, run ring-adjacent completion.
-#' @return An integer vector `c(n_hex, n_cubic, n_water, n_both)`, class `dseams_cage_counts`.
+#' @return An integer vector `c(n_hex, n_cubic, n_water, n_both)`, class
+#'   `dseams_cage_counts`.
 #' @examples
 #' sys <- seams_system_new()
 #' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
 #' seams_cages(sys)
 #' @export
-seams_cages <- function(sys, cutoff = 3.5, graph = 2L, k = 4L, complete = FALSE) {
-  out <- .Call(`_dseams_seams_r_cages`, sys, cutoff, as.integer(graph), as.integer(k), as.integer(complete))
+seams_cages <- function(sys, cutoff = 3.5, graph = 2L, k = 4L,
+                        complete = FALSE) {
+  out <- .Call(
+    `_dseams_seams_r_cages`, sys, cutoff, as.integer(graph),
+    as.integer(k), as.integer(complete)
+  )
   names(out) <- c("n_hex", "n_cubic", "n_water", "n_both")
   .tag(out, "dseams_cage_counts")
 }
@@ -152,7 +167,9 @@ seams_cages <- function(sys, cutoff = 3.5, graph = 2L, k = 4L, complete = FALSE)
 #' seams_signature_cages(sys, "512")
 #' @export
 seams_signature_cages <- function(sys, spec, cutoff = 3.5, graph = 0L) {
-  out <- .Call(`_dseams_seams_r_signature`, sys, cutoff, as.integer(graph), spec)
+  out <- .Call(
+    `_dseams_seams_r_signature`, sys, cutoff, as.integer(graph), spec
+  )
   names(out) <- c("n_cages", "n_atoms")
   .tag(out, "dseams_signature")
 }
@@ -170,7 +187,12 @@ seams_signature_cages <- function(sys, spec, cutoff = 3.5, graph = 0L) {
 #' seams_neighbours_knn(sys)
 #' @export
 seams_neighbours_knn <- function(sys, k = 4L, cutoff = 3.5, mutual = TRUE) {
-  .tag(.Call(`_dseams_seams_r_knn`, sys, as.integer(k), cutoff, as.integer(mutual)), "dseams_nnz")
+  .tag(
+    .Call(
+      `_dseams_seams_r_knn`, sys, as.integer(k), cutoff, as.integer(mutual)
+    ),
+    "dseams_nnz"
+  )
 }
 
 #' Partial radial distribution.
@@ -202,7 +224,10 @@ seams_rdf <- function(sys, rmax = 6, bins = 8L) {
 #' seams_running_cn(sys)
 #' @export
 seams_running_cn <- function(sys, rmax = 6, bins = 8L) {
-  .tag(.Call(`_dseams_seams_r_running_cn`, sys, rmax, as.integer(bins)), "dseams_running_cn")
+  .tag(
+    .Call(`_dseams_seams_r_running_cn`, sys, rmax, as.integer(bins)),
+    "dseams_running_cn"
+  )
 }
 
 #' Coordination number integrated to `rmax`.
@@ -237,8 +262,8 @@ seams_coordination <- function(sys, rmax = 3.5, bins = 8L) {
 #' seams_system_read(sys, dseams_example("exampleTraj.lammpstrj"), type = -1L)
 #' seams_hbonds(sys, oxygen_type = 2L, hydrogen_type = 1L)
 #' @export
-seams_hbonds <- function(sys, cutoff = 3.5, oxygen_type = 1L, hydrogen_type = 2L,
-                         dist = 2.42, angle = 30) {
+seams_hbonds <- function(sys, cutoff = 3.5, oxygen_type = 1L,
+                         hydrogen_type = 2L, dist = 2.42, angle = 30) {
   .Call(`_dseams_seams_r_hbonds`, sys, cutoff, as.integer(oxygen_type),
         as.integer(hydrogen_type), dist, angle)
 }
@@ -256,7 +281,13 @@ seams_hbonds <- function(sys, cutoff = 3.5, oxygen_type = 1L, hydrogen_type = 2L
 #' seams_density_axis(sys)
 #' @export
 seams_density_axis <- function(sys, type = 0L, bins = 4L, axis = 2L) {
-  .tag(.Call(`_dseams_seams_r_density`, sys, as.integer(type), as.integer(bins), as.integer(axis)), "dseams_density")
+  .tag(
+    .Call(
+      `_dseams_seams_r_density`, sys, as.integer(type), as.integer(bins),
+      as.integer(axis)
+    ),
+    "dseams_density"
+  )
 }
 
 #' Topological fingerprint summary.
@@ -264,7 +295,8 @@ seams_density_axis <- function(sys, type = 0L, bins = 4L, axis = 2L) {
 #' @param sys A `dseams_system`.
 #' @param cutoff Neighbour cutoff in angstrom.
 #' @param hops Neighbourhood depth.
-#' @return An integer vector `c(key_length, ring_sum)`, class `dseams_fingerprint`.
+#' @return An integer vector `c(key_length, ring_sum)`, class
+#'   `dseams_fingerprint`.
 #' @examples
 #' sys <- seams_system_new()
 #' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
@@ -283,7 +315,8 @@ seams_fingerprint <- function(sys, cutoff = 3.5, hops = 2L) {
 #'
 #' @param sys A `dseams_system`.
 #' @param spec Site-table text such as `"1=cationHead"`.
-#' @return An integer vector `c(n_pairs, n_cation, n_anion)`, class `dseams_contacts`.
+#' @return An integer vector `c(n_pairs, n_cation, n_anion)`, class
+#'   `dseams_contacts`.
 #' @examples
 #' sys <- seams_system_new()
 #' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
@@ -304,7 +337,8 @@ seams_contact_pairs <- function(sys, spec) {
 #' @param spec Site-table text.
 #' @param cutoff Neighbour cutoff in angstrom.
 #' @param subset `0` apolar, `1` polar.
-#' @return A numeric vector `c(n_subset, largest, percolation)`, class `dseams_domains`.
+#' @return A numeric vector `c(n_subset, largest, percolation)`, class
+#'   `dseams_domains`.
 #' @examples
 #' sys <- seams_system_new()
 #' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
@@ -320,7 +354,8 @@ seams_domains <- function(sys, spec, cutoff = 3.5, subset = 0L) {
 #'
 #' @param sys A `dseams_system`.
 #' @param cutoff Neighbour cutoff in angstrom.
-#' @return An integer vector of length 7, class `dseams_prisms`. Index 7 is size 6.
+#' @return An integer vector of length 7, class `dseams_prisms`. Index 7
+#'   is size 6.
 #' @examples
 #' sys <- seams_system_new()
 #' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
@@ -336,14 +371,22 @@ seams_prisms <- function(sys, cutoff = 3.5) {
 #' @param cutoff Neighbour cutoff in angstrom.
 #' @param max_depth Largest ring size.
 #' @param sheet_area Sheet area in square angstrom.
-#' @return An integer vector, class `dseams_monolayer`. `counts[k + 1]` is size `k`.
+#' @return An integer vector, class `dseams_monolayer`. `counts[k + 1]` is
+#'   size `k`.
 #' @examples
 #' sys <- seams_system_new()
 #' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
 #' seams_monolayer(sys)
 #' @export
-seams_monolayer <- function(sys, cutoff = 3.5, max_depth = 6L, sheet_area = 100) {
-  .tag(.Call(`_dseams_seams_r_monolayer`, sys, cutoff, as.integer(max_depth), sheet_area), "dseams_monolayer")
+seams_monolayer <- function(sys, cutoff = 3.5, max_depth = 6L,
+                            sheet_area = 100) {
+  .tag(
+    .Call(
+      `_dseams_seams_r_monolayer`, sys, cutoff, as.integer(max_depth),
+      sheet_area
+    ),
+    "dseams_monolayer"
+  )
 }
 
 #' Atom indices of one primitive ring.
@@ -358,8 +401,15 @@ seams_monolayer <- function(sys, cutoff = 3.5, max_depth = 6L, sheet_area = 100)
 #' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
 #' seams_rings_vertices(sys)
 #' @export
-seams_rings_vertices <- function(sys, cutoff = 3.5, max_depth = 6L, index = 0L) {
-  .tag(.Call(`_dseams_seams_r_vertices`, sys, cutoff, as.integer(max_depth), as.integer(index)), "dseams_vertices")
+seams_rings_vertices <- function(sys, cutoff = 3.5, max_depth = 6L,
+                                 index = 0L) {
+  .tag(
+    .Call(
+      `_dseams_seams_r_vertices`, sys, cutoff, as.integer(max_depth),
+      as.integer(index)
+    ),
+    "dseams_vertices"
+  )
 }
 
 #' Per-atom site kind.

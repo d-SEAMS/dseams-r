@@ -312,8 +312,8 @@ symmetry.dseams_frame <- function(frame, shell_rmsd = 0.12) {
 #'   reports the mean of `ql` and of `qlbar`. Both return the data frame,
 #'   invisibly.
 #' @references Steinhardt, P. J., Nelson, D. R. and Ronchetti, M. (1983).
-#'   Bond-orientational order in liquids and glasses. *Physical Review B* 28, 784.
-#'   \doi{10.1103/PhysRevB.28.784}
+#'   Bond-orientational order in liquids and glasses. *Physical Review B*
+#'   28, 784. \doi{10.1103/PhysRevB.28.784}
 #' @examples
 #' frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
 #' summary(steinhardt(frame, order_l = 6L)$ql)
