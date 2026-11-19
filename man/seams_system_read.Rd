@@ -9,18 +9,25 @@ seams_system_read(sys, path, frame = 1L, type = -1L)
 \arguments{
 \item{sys}{A \code{dseams_system}.}
 
-\item{path}{Trajectory path.}
+\item{path}{Trajectory path. See the description for which formats
+this build reads.}
 
 \item{frame}{1-based frame index.}
 
-\item{type}{Species filter. Negative keeps every atom.}
+\item{type}{Species filter. Negative keeps every atom. A positive
+value keeps that species number (a LAMMPS type, or an atomic number
+on a chemfiles or readcon frame).}
 }
 \value{
 The atom count. \code{sys} is updated in place. On failure the
 previous frame is kept and the call stops with the engine's message.
 }
 \description{
-Read one frame into a system.
+The path is a LAMMPS dump or an XYZ file on every build. When
+\code{\link[=dseams_features]{dseams_features()}} reports \code{chemfiles}, it may be any format
+chemfiles 0.10 reads (PDB, GRO, DCD, and the rest of that set). When
+it reports \code{readcon}, a readcon \code{.con} file is read, and a \code{.convel}
+file is read when the engine routes that extension.
 }
 \examples{
 sys <- seams_system_new()

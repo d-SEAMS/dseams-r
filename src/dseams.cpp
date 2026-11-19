@@ -5,6 +5,7 @@
 #include <cpp11/data_frame.hpp>
 #include <cpp11/doubles.hpp>
 #include <cpp11/integers.hpp>
+#include <cpp11/logicals.hpp>
 #include <cpp11/strings.hpp>
 
 #include "seams_lang.h"
@@ -29,6 +30,14 @@ const char *ice_name(int label) {
   return names[label];
 }
 
+bool path_ext_is(const std::string &path, const char *ext) {
+  const auto dot = path.find_last_of('.');
+  if (dot == std::string::npos) {
+    return false;
+  }
+  return path.compare(dot + 1, std::string::npos, ext) == 0;
+}
+
 seams_frame *need(SEXP ptr) {
   frame_ptr xp(ptr);
   seams_frame *frame = xp.get();
@@ -49,13 +58,58 @@ cpp11::sexp read_frame_(std::string path, int frame, int type_filter) {
   return cpp11::sexp(static_cast<SEXP>(frame_ptr(held)));
 }
 
+// seams_call.c. The language counter does not ask readcon how many
+// frames a .con file holds; the C API does, when the engine was built
+// with it.
+extern "C" int seams_capi_nframes(const char *path, const char **message);
+
 [[cpp11::register]]
 int nframes_(std::string path) {
+  // .con is the extension seams-core hands to readcon-core. .convel is
+  // the same family's velocity file; the C API counts it only when that
+  // build's reader accepts the extension.
+  if (path_ext_is(path, "con") || path_ext_is(path, "convel")) {
+#ifdef SEAMS_HAS_READCON
+    const char *message = nullptr;
+    const int n = seams_capi_nframes(path.c_str(), &message);
+    if (n < 0) {
+      cpp11::stop("%s", message == nullptr ? "unreadable trajectory" : message);
+    }
+    return n;
+#else
+    cpp11::stop("readcon-core is not in this build; CON input needs it");
+    return -1;
+#endif
+  }
   const int n = seams_path_nframes(path.c_str());
   if (n < 0) {
     cpp11::stop("%s", seams_last_error());
   }
   return n;
+}
+
+[[cpp11::register]]
+cpp11::logicals readers_() {
+  cpp11::writable::logicals out(4);
+  out[0] = true;
+  out[1] = true;
+#ifdef SEAMS_HAS_CHEMFILES
+  out[2] = true;
+#else
+  out[2] = false;
+#endif
+#ifdef SEAMS_HAS_READCON
+  out[3] = true;
+#else
+  out[3] = false;
+#endif
+  cpp11::writable::strings names(4);
+  names[0] = "lammps";
+  names[1] = "xyz";
+  names[2] = "chemfiles";
+  names[3] = "readcon";
+  out.attr("names") = names;
+  return out;
 }
 
 [[cpp11::register]]

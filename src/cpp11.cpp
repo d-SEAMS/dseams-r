@@ -111,6 +111,13 @@ extern "C" SEXP _dseams_lang_version_() {
     return cpp11::as_sexp(lang_version_());
   END_CPP11
 }
+// dseams.cpp
+cpp11::logicals readers_();
+extern "C" SEXP _dseams_readers_() {
+  BEGIN_CPP11
+    return cpp11::as_sexp(readers_());
+  END_CPP11
+}
 
 extern "C" SEXP seams_r_system(void);
 extern "C" SEXP seams_r_read(SEXP, SEXP, SEXP, SEXP);
@@ -146,6 +153,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dseams_positions_",       (DL_FUNC) &_dseams_positions_,       1},
     {"_dseams_q4_q6_",           (DL_FUNC) &_dseams_q4_q6_,           3},
     {"_dseams_read_frame_",      (DL_FUNC) &_dseams_read_frame_,      3},
+    {"_dseams_readers_",         (DL_FUNC) &_dseams_readers_,         0},
     {"_dseams_rings_",           (DL_FUNC) &_dseams_rings_,           5},
     {"_dseams_set_threads_",     (DL_FUNC) &_dseams_set_threads_,     1},
     {"_dseams_signature_cages_", (DL_FUNC) &_dseams_signature_cages_, 5},

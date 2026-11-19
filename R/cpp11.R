@@ -59,3 +59,7 @@ get_threads_ <- function() {
 lang_version_ <- function() {
   .Call(`_dseams_lang_version_`)
 }
+
+readers_ <- function() {
+  .Call(`_dseams_readers_`)
+}
