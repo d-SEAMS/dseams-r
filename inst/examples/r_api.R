@@ -7,8 +7,10 @@ tip <- file.path(root, "input", "traj", "exampleTraj.lammpstrj")
 frame <- read_frame(tip, type = 2L)
 ice <- chill_plus(frame)
 tab <- table(ice$name)
-stopifnot(as.integer(tab[["interClathrate"]]) == 9L)
-stopifnot(as.integer(tab[["water"]]) == 241L)
+stopifnot(
+  as.integer(tab[["interClathrate"]]) == 9L,
+  as.integer(tab[["water"]]) == 241L
+)
 order <- q4_q6(frame)
 stopifnot(nrow(order) == 250L)
 cat("r api ok\n")

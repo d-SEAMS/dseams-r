@@ -52,8 +52,12 @@ cat("cages sH 51268 4\n")
 
 hexagonal_oxygens <- function(path) {
   rows <- readLines(path)
-  oxygen <- grep("^O ", rows, value = TRUE)
-  sum(vapply(strsplit(oxygen, " "), function(parts) parts[[5]] == "hexagonal", logical(1)))
+  oxygen <- rows[startsWith(rows, "O ")]
+  sum(vapply(
+    strsplit(oxygen, " ", fixed = TRUE),
+    function(parts) parts[[5]] == "hexagonal",
+    logical(1)
+  ))
 }
 
 brine <- c(Sys.getenv("DSEAMS_BRINE_T0"), Sys.getenv("DSEAMS_BRINE_TEND"))
