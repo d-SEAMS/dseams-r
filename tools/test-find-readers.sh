@@ -20,10 +20,23 @@
 # read the crate version back out of readcon-core.hpp and so accepted
 # whatever library it found.
 #
-# Both cases reuse a real, already-built readcon-core (from
+# Case D: an explicit READCON_LIBDIR with its own (empty) pkgconfig
+# directory must not fall through to a too-old readcon-core.pc that only
+# pkg-config's built-in default directories can see. scoped_pc_dirs()
+# points PKG_CONFIG_PATH at the explicit directory, but pkg-config still
+# consults its compiled-in defaults unless PKG_CONFIG_LIBDIR also names a
+# replacement; the fake .pc here lives where only PKG_CONFIG_LIBDIR
+# (simulating those defaults) can reach it, never PKG_CONFIG_PATH.
+#
+# Case E: is_windows() has two independent ways to see Windows: $OS, and
+# `uname -s` reporting MINGW/MSYS/CYGWIN (as a plain MSYS2 shell outside
+# Rtools would). Case C above exercises $OS; this exercises uname by
+# shimming it on PATH.
+#
+# All cases reuse a real, already-built readcon-core (from
 # tools/install-readcon.sh) for its headers and library, laid out under
-# two directories with their own, distinguishing fake .pc files. The
-# fake .pc Versions are deliberately wrong for their directory; only the
+# directories with their own, distinguishing fake .pc files. The fake
+# .pc Versions are deliberately wrong for their directory; only the
 # script's control flow is under test, not whether an old readcon-core
 # actually builds.
 #
@@ -117,7 +130,15 @@ EOF
 # case cannot be fooled by this shell's own ambient PKG_CONFIG_PATH or
 # CONDA_PREFIX (set by `pixi run`, among others).
 run_find_readers() {
-  env -i PATH="$PATH" R_HOME="$R_HOME" HOME="${HOME:-$work}" "$@" \
+  run_find_readers_path "$PATH" "$@"
+}
+
+# Same, but with an explicit PATH, so a case can prepend a directory of
+# shimmed commands (e.g. a fake uname) ahead of the real tools.
+run_find_readers_path() {
+  path=$1
+  shift
+  env -i PATH="$path" R_HOME="$R_HOME" HOME="${HOME:-$work}" "$@" \
     sh "$script" bundled
 }
 
@@ -187,6 +208,61 @@ else
   not_ok "READCON_ROOT pointing at a rejected 0.16.1 .pc was accepted anyway (dseams_readcon=$con)"
 fi
 
+# --- Case D: an explicit READCON_LIBDIR's own (empty) pkgconfig
+# directory must not fall through to a too-old readcon-core.pc that
+# only PKG_CONFIG_LIBDIR's default-directory replacement can see.
+# PKG_CONFIG_PATH is left unset throughout, so only PKG_CONFIG_LIBDIR
+# stands in for pkg-config's compiled-in default directories.
+#
+# This case pins PKG_CONFIG to a real pkgconf binary when one is on the
+# system outside any activated build environment. A pixi/conda-forge
+# environment's own "pkg-config" is a wrapper script that unconditionally
+# appends that environment's own default directories to whatever
+# PKG_CONFIG_LIBDIR the caller sets, which would make this case
+# non-deterministic (it would see that environment's own, correctly
+# versioned, readcon-core.pc instead of either fake one); see REPORT.md
+# for that caveat's effect on a pixi-environment build's own isolation. ---
+
+case_d_pc=${PKG_CONFIG:-pkg-config}
+if [ -x /usr/bin/pkg-config ]; then
+  case_d_pc=/usr/bin/pkg-config
+fi
+
+case_d_defaults=$work/case-d-defaults
+case_d_explicit=$work/case-d-explicit
+make_readcon_tree "$case_d_defaults" "0.16.1" 1
+make_readcon_tree "$case_d_explicit" "" 0
+# An empty pkgconfig directory, so scoped_pc_dirs() finds somewhere to
+# scope to, but the explicit directory's own pkg-config lookup finds
+# nothing there -- only a buggy fallback to the ambient default
+# directories would find the 0.16.1 .pc.
+mkdir -p "$case_d_explicit/lib/pkgconfig"
+
+out=$(run_find_readers \
+  PKG_CONFIG="$case_d_pc" \
+  PKG_CONFIG_LIBDIR="$case_d_defaults/lib/pkgconfig" \
+  READCON_LIBDIR="$case_d_explicit/lib" \
+  CHEMFILES_ROOT="$work/no-such-chemfiles-dir" \
+  2>"$work/case-d.stderr")
+con=$(get_var "$out" dseams_readcon)
+cppflags=$(get_var "$out" dseams_reader_cppflags)
+if grep -q '0\.16\.1' "$work/case-d.stderr"; then
+  not_ok "READCON_LIBDIR=$case_d_explicit/lib still reached the 0.16.1 .pc on the simulated PKG_CONFIG_LIBDIR default path"
+else
+  case "$cppflags" in
+    *"-I$case_d_explicit/include"*)
+      if [ "$con" = "1" ]; then
+        ok "READCON_LIBDIR's own (empty) pkgconfig excludes the simulated PKG_CONFIG_LIBDIR default path"
+      else
+        not_ok "READCON_LIBDIR's own headers were used but dseams_readcon=$con (expected 1)"
+      fi
+      ;;
+    *)
+      not_ok "READCON_LIBDIR=$case_d_explicit/lib did not end up using its own directory (dseams_readcon=$con, cppflags: $cppflags)"
+      ;;
+  esac
+fi
+
 # --- Sanity: a correctly-versioned explicit root is still accepted (the
 # fix must not just disable readcon-core outright). ---
 
@@ -223,6 +299,27 @@ libs=$(get_var "$out" dseams_reader_libs)
 case "$libs" in
   *"-Wl,-rpath,"*) not_ok "OS=Windows_NT still added -Wl,-rpath (libs: $libs)" ;;
   *) ok "OS=Windows_NT (as configure.win runs under) adds no -Wl,-rpath" ;;
+esac
+
+# --- Case E: is_windows()'s uname branch, for a plain MSYS2/Cygwin shell
+# that runs with no $OS=Windows_NT (unlike Rtools). Shims uname on PATH
+# ahead of the real one. ---
+
+winshim=$work/winshim
+mkdir -p "$winshim"
+cat >"$winshim/uname" <<'EOF'
+#!/bin/sh
+echo "MINGW64_NT-10.0-19045"
+EOF
+chmod +x "$winshim/uname"
+
+out=$(run_find_readers_path "$winshim:$PATH" \
+  READCON_ROOT="$good_dir" \
+  CHEMFILES_ROOT="$work/no-such-chemfiles-dir")
+libs=$(get_var "$out" dseams_reader_libs)
+case "$libs" in
+  *"-Wl,-rpath,"*) not_ok "a shimmed uname reporting MINGW64_NT still added -Wl,-rpath (libs: $libs)" ;;
+  *) ok "a shimmed uname reporting MINGW64_NT (is_windows()'s uname branch) adds no -Wl,-rpath" ;;
 esac
 
 if [ "$fail" -ne 0 ]; then
