@@ -26,5 +26,6 @@ the sparse ring table to one histogram entry for every size from 0 through
 .. literalinclude:: ../../../inst/examples/lang_tasks.R
    :language: r
 
-``tests/testthat/test-doc-examples.R`` runs this file and checks four
-directed pairs per water, 256 six-rings, and one CHILL+ label per atom.
+``tests/testthat/test-doc-examples.R`` runs this file when
+``DSEAMS_ROOT`` names a seams-core checkout, and checks four directed
+pairs per water, 256 six-rings, and one CHILL+ label per atom.
