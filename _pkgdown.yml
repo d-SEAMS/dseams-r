@@ -45,6 +45,14 @@ template:
     code_font: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace"
     heading_font: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
 destination: _site
+navbar:
+  structure:
+    left: [intro, reference, articles, tutorials, news, srr]
+    right: [search, github, lightswitch]
+  components:
+    srr:
+      text: rOpenSci standards
+      href: srr-standards.html
 repo:
   branch: main
   url:

@@ -6,7 +6,7 @@ author attestations and the coauthor GitHub handles before pasting it into
 a new issue.
 
 The package is the root of <https://github.com/d-SEAMS/dseams-r>. The srr
-assessment is `docs/srr-standards.md`.
+assessment is `srr-standards.md`.
 
 After acceptance, rOpenSci can co-submit a short paper to the Journal of
 Open Source Software. No such paper is in the repository yet; write one
@@ -145,7 +145,7 @@ Goswami's between the author markers above if she should be on the issue.
 
   See the pkgcheck summary at the end of this file. Standards from the
   statistical-software track are assessed in
-  `docs/srr-standards.md`. `dseams` is not statistical
+  `srr-standards.md`. `dseams` is not statistical
   software, so the category standards (Bayesian, regression, machine
   learning, distributions, exploratory data analysis, spatial, time
   series, unsupervised learning) do not apply, and the package does not
@@ -236,5 +236,5 @@ Expected notes, not checklist failures:
   or a mean. `goodpractice` prefers `expect_identical()` for exact
   values.
 
-`docs/srr-standards.md` is the srr assessment. The package
+`srr-standards.md` is the srr assessment. The package
 is not statistical software, so it does not carry `@srrstats` tags.

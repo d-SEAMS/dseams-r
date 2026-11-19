@@ -6,6 +6,8 @@
 * `print()` on a frame reports `atoms` instead of `nop`. `summary()` on
   a system handle reports the loaded frame.
 * Give the site favicon an SVG media type that browsers accept.
+* Publish the srr standards note and link it from the navbar as
+  rOpenSci standards.
 
 # dseams 2.14.1 (2026-11-17)
 
