@@ -21,6 +21,13 @@
   through to the version-blind manual directory scan, which could silently
   re-accept it; and the optional readers' `-Wl,-rpath` link flag is added
   only off Windows, so `configure.win` no longer emits it.
+* Fix `tools/find-readers.sh` further: an explicit `CHEMFILES_ROOT`/
+  `CHEMFILES_LIBDIR` or `READCON_ROOT`/`READCON_LIBDIR` now also scopes
+  `PKG_CONFIG_LIBDIR`, not just `PKG_CONFIG_PATH`, so a too-old module on
+  pkg-config's own compiled-in default directories can no longer answer in
+  its place; both variables are restored afterwards, unset again if they
+  were unset before. `tools/test-find-readers.sh` now runs as part of the
+  CI job that builds chemfiles and readcon-core.
 
 * Rewrite the README, the vignette, and the help pages around reading one
   frame and reading the data frames that come back. Every exported

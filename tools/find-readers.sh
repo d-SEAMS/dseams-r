@@ -12,15 +12,20 @@
 # Search order for a library, in bundled mode: an explicit CHEMFILES_ROOT
 # or CHEMFILES_LIBDIR (READCON_ROOT, READCON_LIBDIR), when either is set,
 # is used alone: the probe looks only at that location (first via its own
-# pkg-config file, then by scanning its directories by hand) and the
-# global pkg-config search path is never consulted. Only when neither is
-# set does the ambient pkg-config module (chemfiles, readcon-core) decide
-# it. This matches seams-core's own meson.build, which tries chemfiles_dir
-# "alone, when it is given" before pkg-config. An unusable or
-# out-of-range library is left off, and a version pkg-config rejects is
-# never retried by the version-blind manual scan, which exists only for
-# installs such as conda-forge's chemfiles that ship no .pc at all. The
-# CRAN build finds neither and still configures.
+# pkg-config file, then by scanning its directories by hand). Both
+# PKG_CONFIG_PATH (additional directories) and PKG_CONFIG_LIBDIR (which
+# replaces pkg-config's own compiled-in default directories; see
+# scoped_pc_dirs below) are pointed at that location for the pkg-config
+# attempt, and restored after -- PKG_CONFIG_PATH alone is not enough,
+# since clearing it still leaves pkg-config free to match something on
+# its built-in default search path. Only when neither CHEMFILES_ROOT nor
+# CHEMFILES_LIBDIR is set does the ambient pkg-config module (chemfiles,
+# readcon-core) decide it. This matches seams-core's own meson.build,
+# which tries chemfiles_dir "alone, when it is given" before pkg-config.
+# An unusable or out-of-range library is left off, and a version
+# pkg-config rejects is never retried by the version-blind manual scan,
+# which exists only for installs such as conda-forge's chemfiles that
+# ship no .pc at all. The CRAN build finds neither and still configures.
 #
 # stdout is assignments. The human line is dseams_reader_message.
 
@@ -81,15 +86,17 @@ is_windows() {
 }
 
 # Scope pkg-config to exactly an explicit root/libdir's own .pc files, so
-# it cannot silently answer from some other package on the ambient
-# PKG_CONFIG_PATH instead (see the file header: an explicit *_ROOT or
-# *_LIBDIR is used alone). The caller sets PKG_CONFIG_PATH to this
-# result rather than prepending it, since prepending still leaves the
-# original PKG_CONFIG_PATH as a fallback pkg-config can match against.
-# Prints the scoped directories and returns 0 when the root or libdir
-# has a pkgconfig directory to search, else returns 1 and prints
-# nothing, telling the caller to go straight to manual detection
-# instead of asking pkg-config at all.
+# it cannot silently answer from some other package instead (see the file
+# header: an explicit *_ROOT or *_LIBDIR is used alone). The caller sets
+# both PKG_CONFIG_PATH and PKG_CONFIG_LIBDIR to this result rather than
+# merely clearing or prepending to PKG_CONFIG_PATH: pkg-config always
+# falls back to its compiled-in default directories (e.g.
+# /usr/lib/pkgconfig) unless PKG_CONFIG_LIBDIR names a replacement, so
+# PKG_CONFIG_PATH alone cannot exclude them. Prints the scoped
+# directories and returns 0 when the root or libdir has a pkgconfig
+# directory to search, else returns 1 and prints nothing, telling the
+# caller to go straight to manual detection instead of asking pkg-config
+# at all.
 scoped_pc_dirs() {
   root=$1
   libdir=$2
@@ -455,18 +462,52 @@ scan_linked() {
   esac
 }
 
+# Point both PKG_CONFIG_PATH and PKG_CONFIG_LIBDIR at $1 (see
+# scoped_pc_dirs above for why both are needed).
+scope_pc_env() {
+  PKG_CONFIG_PATH=$1
+  PKG_CONFIG_LIBDIR=$1
+  export PKG_CONFIG_PATH PKG_CONFIG_LIBDIR
+}
+
+# Put PKG_CONFIG_PATH and PKG_CONFIG_LIBDIR back exactly as
+# save_pc_env() found them, unset if they were unset, rather than set to
+# an empty string: pkg-config can treat "unset" and "set to empty"
+# differently (an empty PKG_CONFIG_LIBDIR, for one, does not necessarily
+# disable the compiled-in default directories the way leaving it unset
+# and PKG_CONFIG_PATH alone does).
+save_pc_env() {
+  saved_pc=${PKG_CONFIG_PATH-}
+  have_pc=${PKG_CONFIG_PATH+x}
+  saved_pc_libdir=${PKG_CONFIG_LIBDIR-}
+  have_pc_libdir=${PKG_CONFIG_LIBDIR+x}
+}
+
+restore_pc_env() {
+  if [ "${have_pc:-}" = x ]; then
+    PKG_CONFIG_PATH=$saved_pc
+    export PKG_CONFIG_PATH
+  else
+    unset PKG_CONFIG_PATH
+  fi
+  if [ "${have_pc_libdir:-}" = x ]; then
+    PKG_CONFIG_LIBDIR=$saved_pc_libdir
+    export PKG_CONFIG_LIBDIR
+  else
+    unset PKG_CONFIG_LIBDIR
+  fi
+}
+
 if [ "$mode" = "linked" ]; then
   scan_linked
 else
-  saved_pc=${PKG_CONFIG_PATH:-}
+  save_pc_env
   if [ -n "${CHEMFILES_ROOT:-}" ] || [ -n "${CHEMFILES_LIBDIR:-}" ]; then
     chem_scoped=$(scoped_pc_dirs "${CHEMFILES_ROOT:-}" "${CHEMFILES_LIBDIR:-}") || chem_scoped=""
     if [ -n "$chem_scoped" ]; then
-      PKG_CONFIG_PATH=$chem_scoped
-      export PKG_CONFIG_PATH
+      scope_pc_env "$chem_scoped"
       try_chemfiles_pc || true
-      PKG_CONFIG_PATH=$saved_pc
-      export PKG_CONFIG_PATH
+      restore_pc_env
     fi
     if [ "$chem" -eq 0 ]; then
       manual_chemfiles "${CHEMFILES_ROOT:-}" "${CHEMFILES_LIBDIR:-}" || true
@@ -489,11 +530,9 @@ else
     con_version_rejected=0
     con_scoped=$(scoped_pc_dirs "${READCON_ROOT:-}" "${READCON_LIBDIR:-}") || con_scoped=""
     if [ -n "$con_scoped" ]; then
-      PKG_CONFIG_PATH=$con_scoped
-      export PKG_CONFIG_PATH
+      scope_pc_env "$con_scoped"
       try_readcon_pc || true
-      PKG_CONFIG_PATH=$saved_pc
-      export PKG_CONFIG_PATH
+      restore_pc_env
     fi
     if [ "$con" -eq 0 ] && [ "$con_version_rejected" -eq 0 ]; then
       manual_readcon "${READCON_ROOT:-}" "${READCON_LIBDIR:-}" || true
