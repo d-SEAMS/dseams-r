@@ -17,8 +17,12 @@ seams_system_read(sys, path, frame = 1L, type = -1L)
 }
 \value{
 The atom count. \code{sys} is updated in place. On failure the
-previous frame is kept and the call stops with the handle text.
+previous frame is kept and the call stops with the engine's message.
 }
 \description{
 Read one frame into a system.
+}
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
 }

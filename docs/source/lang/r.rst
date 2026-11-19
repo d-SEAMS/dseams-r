@@ -1,18 +1,20 @@
 R
 =
 
-roxygen2 comments in ``R/dseams.R`` of `dseams-r <https://github.com/d-SEAMS/dseams-r>`_ are the source of
-``man/*.Rd``. Every ``NAMESPACE`` export has an ``\\alias``.
-``R CMD check --as-cran`` must not report an undocumented object.
-
-The ``chill_plus`` example reads Ice Ih when ``DSEAMS_ROOT`` is set and
-asserts 128 hexagonal waters and 256 six-rings:
+``dseams`` reads one LAMMPS dump or XYZ frame and returns data frames
+of CHILL+ labels, primitive rings, cages, and Steinhardt parameters.
 
 .. code-block:: r
 
-   frame <- read_frame(file.path(root, "input", "traj", "ice1h.lammpstrj"),
-                       type = -1L)
-   ice <- chill_plus(frame, graph = "cutoff")
-   stopifnot(sum(ice$name == "hexagonal") == 128L)
-   rings <- primitive_rings(frame, graph = "cutoff", max_depth = 6L)
-   stopifnot(rings$n[rings$size == 6L] == 256L)
+   library(dseams)
+   frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
+   table(chill_plus(frame)$name)
+   primitive_rings(frame, graph = "cutoff", max_depth = 6L)
+   cages(frame)
+
+``ice1h.lammpstrj`` is a 2x2x2 ice Ih cell. All 128 oxygens are
+hexagonal, the cutoff graph holds 256 primitive six-rings, and every
+oxygen sits in a hexagonal cage.
+``vignette("classifying-ice", package = "dseams")`` repeats this frame
+and then a mixed TIP4P frame. The function reference is
+https://r.dseams.info/reference/.

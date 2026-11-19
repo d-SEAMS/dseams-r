@@ -21,3 +21,8 @@ A list of class \code{dseams_order} with elements \code{ql} and \code{qlbar}.
 \description{
 Local Steinhardt parameter on the cutoff shell.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_steinhardt(sys, order = 6L)
+}

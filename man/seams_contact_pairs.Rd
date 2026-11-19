@@ -15,5 +15,11 @@ seams_contact_pairs(sys, spec)
 An integer vector \code{c(n_pairs, n_cation, n_anion)}, class \code{dseams_contacts}.
 }
 \description{
-Mutual nearest unlike contacts.
+\code{spec} names each LAMMPS type. The ice Ih cell is one species, so the
+pair count is zero.
+}
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_contact_pairs(sys, "1=cationHead")
 }

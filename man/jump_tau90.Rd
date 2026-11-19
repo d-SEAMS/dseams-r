@@ -20,9 +20,12 @@ A number: \code{dt}, or \code{NaN}.
 }
 \description{
 Returns \code{dt} when any water's H-H vector rotates by at least 90 degrees
-between the two frames, and \code{NaN} otherwise.
+between the two frames, and \code{NaN} otherwise. Both frames must contain
+oxygen and hydrogen. In \code{exampleTraj.lammpstrj} those species are types
+2 and 1. \code{ice1h.lammpstrj} is oxygen only, so it has no H-H vector.
+Comparing a frame with itself returns \code{NaN}.
 }
 \examples{
-frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
-jump_tau90(frame, frame, dt = 1)
+frame <- read_frame(dseams_example("exampleTraj.lammpstrj"), type = -1L)
+jump_tau90(frame, frame, dt = 1, oxygen_type = 2L, hydrogen_type = 1L)
 }

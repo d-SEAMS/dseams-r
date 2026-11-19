@@ -11,7 +11,8 @@ seams_cages(sys, cutoff = 3.5, graph = 2L, k = 4L, complete = FALSE)
 
 \item{cutoff}{Neighbour cutoff in angstrom.}
 
-\item{graph}{\code{2} seeded, \code{1} mutual, \code{0} cutoff.}
+\item{graph}{\code{2} seeded, \code{1} mutual, \code{0} cutoff. These are the same
+graphs as \code{"seeded"}, \code{"mutual"}, and \code{"cutoff"} in \code{\link[=cages]{cages()}}.}
 
 \item{k}{Neighbour count for the seeded graph.}
 
@@ -22,4 +23,9 @@ An integer vector \code{c(n_hex, n_cubic, n_water, n_both)}, class \code{dseams_
 }
 \description{
 Disjoint cage population counts.
+}
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_cages(sys)
 }

@@ -56,7 +56,7 @@ In every mode `src/seams` and `inst/extdata` must exist. When they do not,
 `tools/vendor.sh` writes them from `SEAMS_CORE_SRC` or `DSEAMS_ROOT`, else
 from the revision in `tools/seams-core.ref`, which it downloads unless
 `DSEAMS_NO_DOWNLOAD=1`. A tarball from `R CMD build` carries the copy and
-installs with no network; that tarball is what CRAN and r-universe get.
+installs with no network.
 
 ## Build and test
 
@@ -66,10 +66,10 @@ seams-core checkout at the pin built in `build/` (meson targets
 `bindings/binding_oracle`):
 
 ```bash
-export DSEAMS_ROOT=/path/to/seams-core
-export SEAMS_BIN=$DSEAMS_ROOT/build/seams
+# DSEAMS_ROOT is a seams-core checkout at the pin, already built.
+export SEAMS_BIN="$DSEAMS_ROOT/build/seams"
 
-# bundled copy, as CRAN builds it
+# bundled copy
 pixi run sh tools/vendor.sh "$DSEAMS_ROOT"
 pixi run R CMD build --no-manual .
 pixi run R CMD check --as-cran --no-manual dseams_*.tar.gz
@@ -85,7 +85,7 @@ adds `-march=nocona`; `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`
 names it as a toolchain flag (the `pixi run check` task sets it).
 
 Every check must pass before a change is called done: no ERROR, no
-WARNING, and the one NOTE for a new submission. Fix the code under test; do
+WARNING. The check reports one NOTE, which is expected. Fix the code under test; do
 not skip, loosen or delete a test to get there. A test changes only when the
 behavior it pins changes on purpose, and the commit says so. Without
 `DSEAMS_ROOT`, `SEAMS_BIN` and `SEAMS_CPP_ORACLE` some tests report a skip;

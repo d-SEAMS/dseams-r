@@ -19,3 +19,8 @@ An integer vector \code{c(key_length, ring_sum)}, class \code{dseams_fingerprint
 \description{
 Topological fingerprint summary.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_fingerprint(sys)
+}

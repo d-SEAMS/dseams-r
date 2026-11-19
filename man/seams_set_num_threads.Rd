@@ -16,3 +16,6 @@ negative \code{n} stops with the library's error text.
 \description{
 Set the OpenMP width used by the next analysis.
 }
+\examples{
+seams_set_num_threads(1L)
+}

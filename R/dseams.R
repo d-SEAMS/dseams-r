@@ -29,12 +29,18 @@ dseams_example <- function(name = NULL) {
 #' `type = 0` guesses oxygen (LAMMPS type 2, otherwise type 1). A positive
 #' type keeps that species. A negative type keeps every atom.
 #'
+#' `print()` reports the frame index and the atom count. `summary()` also
+#' reports the file and the type filter. Both return the frame, invisibly.
+#'
 #' @param path Path to a LAMMPS dump, or an XYZ file.
 #' @param frame 1-based frame index.
 #' @param type LAMMPS type filter.
+#' @param x A `dseams_frame`, for `print()`.
+#' @param object A `dseams_frame`, for `summary()`.
+#' @param ... Ignored.
 #' @return `read_frame()` returns an object of class `dseams_frame`.
 #'   `nframes()` returns the number of LAMMPS timesteps; an XYZ file counts
-#'   as one.
+#'   as one. `print()` and `summary()` return the frame, invisibly.
 #' @examples
 #' path <- dseams_example("ice1h.lammpstrj")
 #' nframes(path)
@@ -64,11 +70,8 @@ nframes <- function(path) {
 #' Atom positions
 #'
 #' @param frame A `dseams_frame`.
-#' @param x A `dseams_frame`.
-#' @param ... Ignored.
 #' @return `positions()` returns a numeric matrix with one row per atom and
-#'   columns `x`, `y`, `z` in the units of the file. `print()` returns `x`
-#'   invisibly.
+#'   columns `x`, `y`, `z` in the units of the file.
 #' @examples
 #' frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
 #' head(positions(frame))
@@ -85,10 +88,10 @@ positions.dseams_frame <- function(frame) {
          dimnames = list(NULL, c("x", "y", "z")))
 }
 
-#' @rdname positions
+#' @rdname read_frame
 #' @export
 print.dseams_frame <- function(x, ...) {
-  cat("dseams frame", x$frame, "nop", nop_(x$ptr), "\n", sep = " ")
+  cat("dseams frame", x$frame, "atoms", nop_(x$ptr), "\n", sep = " ")
   invisible(x)
 }
 
@@ -104,6 +107,16 @@ print.dseams_frame <- function(x, ...) {
 #' Table 1 interfacial-neighbour test is on. `rule = "ovito-chill+"`
 #' averages q3 over the whole shell and skips that test.
 #'
+#' `name` is one of nine labels. `cubic` is cubic ice and `hexagonal` is
+#' hexagonal ice. `interfacial` is ice-like but not cubic or hexagonal.
+#' `clathrate` is clathrate and `interClathrate` is interfacial clathrate.
+#' `water` is liquid or amorphous. `unclassified` matched none of those.
+#' `reCubic` and `reHex` are cubic and hexagonal ice reclassified with the
+#' q6 order parameter.
+#'
+#' `print()` counts the names. It does not print the rows. `summary()`
+#' prints the same counts. Both return the data frame, invisibly.
+#'
 #' Ice Ih (`dseams_example("ice1h.lammpstrj")`, every atom) is 128
 #' hexagonal waters and 256 primitive six-rings.
 #'
@@ -115,15 +128,18 @@ print.dseams_frame <- function(x, ...) {
 #' @param rule `"chill+"` or `"ovito-chill+"`. A YAML or Lua snippet with
 #'   a `rule` field is accepted.
 #' @return A data.frame with columns `atom`, `type`, `label`, `name`.
-#'   The `counts` attribute is the nine-label histogram.
+#'   The `counts` attribute is the nine-label histogram. `print()` and
+#'   `summary()` return that data frame, invisibly.
 #' @references Nguyen, A. H. and Molinero, V. (2015). Identification of
 #'   clathrate hydrates, hexagonal ice, cubic ice, and liquid water in
-#'   simulations: the CHILL+ algorithm. *J. Phys. Chem. B* 119, 9369-9376.
+#'   simulations: the CHILL+ algorithm.
+#'   *The Journal of Physical Chemistry B* 119, 9369-9376.
 #'   \doi{10.1021/jp510289t}
 #' @examples
 #' frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
 #' ice <- chill_plus(frame)
 #' table(ice$name)
+#' ice
 #' @export
 chill_plus <- function(frame, cutoff = 3.5, type = 0L, graph = "cutoff",
                        rule = "chill+") {
@@ -147,6 +163,8 @@ chill_plus.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
 #' @param k Neighbours kept by the k-nearest graphs.
 #' @param graph `"seeded"`, `"mutual"`, `"cutoff"`, or `"knn-union"`.
 #' @return A data.frame with columns `atom`, `cage`, `name`.
+#'   `print()` reports `n_ih`, `n_ic`, `n_both`, and `n_water`.
+#'   `summary()` counts `name`. Both return the data frame, invisibly.
 #'   Attributes `n_ih`, `n_ic`, `n_both`, `n_water` are disjoint and match
 #'   `seams cages` (hexagonal only, cubic only, both, water). Per-atom
 #'   `cage` is 0 water, 1 hexagonal, 2 cubic, 3 both.
@@ -179,9 +197,10 @@ cages.dseams_frame <- function(frame, cutoff = 3.5, type = 0L, k = 4L,
 #' @param graph `"mutual"` or `"cutoff"`.
 #' @param max_depth Largest ring retained.
 #' @return A data.frame with columns `size` and `n`, one row per ring size
-#'   that occurs.
+#'   that occurs. `print()` and `summary()` print that table and return the
+#'   data frame, invisibly.
 #' @references Franzblau, D. S. (1991). Computation of ring statistics for
-#'   network models of solids. *Phys. Rev. B* 44, 4925.
+#'   network models of solids. *Physical Review B* 44, 4925.
 #'   \doi{10.1103/PhysRevB.44.4925}
 #' @examples
 #' frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
@@ -231,7 +250,10 @@ signature_cages.dseams_frame <- function(frame, spec = "512", cutoff = 3.5,
 #' Jump-rotor tau_90 between two frames
 #'
 #' Returns `dt` when any water's H-H vector rotates by at least 90 degrees
-#' between the two frames, and `NaN` otherwise.
+#' between the two frames, and `NaN` otherwise. Both frames must contain
+#' oxygen and hydrogen. In `exampleTraj.lammpstrj` those species are types
+#' 2 and 1. `ice1h.lammpstrj` is oxygen only, so it has no H-H vector.
+#' Comparing a frame with itself returns `NaN`.
 #'
 #' @param first,second `dseams_frame` objects read with every atom
 #'   (`type = -1`), so that both oxygens and hydrogens are present.
@@ -240,8 +262,8 @@ signature_cages.dseams_frame <- function(frame, spec = "512", cutoff = 3.5,
 #'   atoms.
 #' @return A number: `dt`, or `NaN`.
 #' @examples
-#' frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
-#' jump_tau90(frame, frame, dt = 1)
+#' frame <- read_frame(dseams_example("exampleTraj.lammpstrj"), type = -1L)
+#' jump_tau90(frame, frame, dt = 1, oxygen_type = 2L, hydrogen_type = 1L)
 #' @export
 jump_tau90 <- function(first, second, dt = 1, oxygen_type = 1L,
                        hydrogen_type = 2L) {
@@ -286,8 +308,11 @@ symmetry.dseams_frame <- function(frame, shell_rmsd = 0.12) {
 #'   the four nearest neighbours inside `cutoff + 1.5`. `"cutoff"` asks for
 #'   the cutoff shell by name.
 #' @return A data.frame with columns `atom`, `ql`, `qlbar`.
+#'   `print()` reports the atom count and the mean of `ql`. `summary()`
+#'   reports the mean of `ql` and of `qlbar`. Both return the data frame,
+#'   invisibly.
 #' @references Steinhardt, P. J., Nelson, D. R. and Ronchetti, M. (1983).
-#'   Bond-orientational order in liquids and glasses. *Phys. Rev. B* 28, 784.
+#'   Bond-orientational order in liquids and glasses. *Physical Review B* 28, 784.
 #'   \doi{10.1103/PhysRevB.28.784}
 #' @examples
 #' frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
@@ -319,6 +344,9 @@ steinhardt.dseams_frame <- function(
 #' @param cutoff Neighbour cutoff in angstrom.
 #' @param type LAMMPS type. 0 uses the first atom's type.
 #' @return A data.frame with columns `atom`, `q4`, `q6`, `q4bar`, `q6bar`.
+#'   `print()` reports the atom count and the mean of `q6`. `summary()`
+#'   reports the mean of `q4` and of `q6`. Both return the data frame,
+#'   invisibly.
 #' @examples
 #' frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
 #' head(q4_q6(frame))
@@ -342,9 +370,9 @@ q4_q6.dseams_frame <- function(frame, cutoff = 3.5, type = 0L) {
 #' `dseams_threads(n)` sets it for later calls from this R session. Frames
 #' below about 2000 atoms run on one thread regardless.
 #'
-#' When the environment variable `_R_CHECK_LIMIT_CORES_` is set (as
-#' `R CMD check --as-cran` does), the package starts with at most two
-#' threads. The option `dseams.threads` sets the starting count.
+#' The option `dseams.threads` sets the starting count, before the package
+#' is loaded. When R has been asked to limit the number of cores, the
+#' package starts with at most two threads.
 #'
 #' @param n Number of threads, or `NULL` to only query.
 #' @return The thread count in effect after the call. Without OpenMP this

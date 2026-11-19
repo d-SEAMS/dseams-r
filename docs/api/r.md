@@ -1,1072 +1,175 @@
 # R
 
-d-SEAMS 2.14.1. The package is <https://github.com/d-SEAMS/dseams-r>. `libseams_lang`
-serves the frame generics through cpp11. `libseams` serves
-`seams_system_new` and the analyses named `seams_*`. roxygen2 writes
-`man/` and `NAMESPACE`. pkgdown renders the package site from
-`_pkgdown.yml`. The exported frames are `read_frame`, `nframes`,
-`positions`, `chill_plus`, `cages`, `primitive_rings`,
-`signature_cages`, `symmetry`, `steinhardt`, `q4_q6`, and `jump_tau90`.
-`print` on a frame dispatches to `print.dseams_frame`.
-The methods are `positions.dseams_frame`, `chill_plus.dseams_frame`,
-`cages.dseams_frame`, `primitive_rings.dseams_frame`,
-`signature_cages.dseams_frame`, `symmetry.dseams_frame`,
-`steinhardt.dseams_frame`, and `q4_q6.dseams_frame`.
+`dseams` is the R package for one trajectory frame. It reads a LAMMPS
+dump or an XYZ file and returns data frames. The function reference,
+with a runnable example on every page, is
+<https://r.dseams.info/reference/>.
 
-`inst/examples/core_counts.R` checks Ice Ih (128 hexagonal, 256
-six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
-`tests/testthat/test-doc-examples.R` runs it, and the other scripts in
-`inst/examples`, when `DSEAMS_ROOT` names a seams-core checkout.
-
-```{literalinclude} ../../inst/examples/core_counts.R
-:language: r
+```r
+install.packages("remotes")
+remotes::install_github("d-SEAMS/dseams-r")
 ```
 
-`configure` runs `tools/vendor.sh`, which copies the engine from the
-seams-core tree in `SEAMS_CORE_SRC` (or `DSEAMS_ROOT`), or downloads the
-revision pinned in `tools/seams-core.ref` (the tag `v2.14.1`), and the
-package compiles its own copy. To install the package against a built
-library instead, also name the directory of `libseams_lang`:
+A C++20 compiler is required. The package compiles the engine as it
+installs.
 
-```bash
-# in a seams-core checkout at the pinned revision
-meson setup build -Dwith_tests=true
-meson compile -C build
-DSEAMS_ROOT=$PWD R CMD INSTALL /path/to/dseams-r
-DSEAMS_ROOT=$PWD SEAMS_LIBDIR=$PWD/build/bindings R CMD INSTALL --preclean /path/to/dseams-r
-```
-
-`--preclean` clears the objects the first install left in `src`, which
-`R CMD INSTALL` would otherwise reuse. `R CMD build` on the dseams-r
-checkout makes a source tarball that carries the engine and installs with
-no seams-core tree; `R CMD check --as-cran` on it
-leaves the one NOTE for a new submission.
-
-The R-CMD-check workflow of dseams-r runs the testthat suite with
-`DSEAMS_ROOT` pointing at a seams-core checkout at the pinned revision.
-`inst/examples/minimal_r.R` reads the GenIce sI
-cell and calls `steinhardt`, `chill_plus`, and `primitive_rings`;
-`tests/testthat/test-doc-examples.R` runs it.
-
-`R CMD check` is the cleanliness check. It expects no errors and no
-warnings. `pkgdown::build_site()` writes the native HTML from the
-roxygen topics. The built site is linked from this book as the
-[dseams pkgdown reference](https://r.dseams.info/reference/).
-
-## Quickstart
+## Read a frame
 
 ```r
 library(dseams)
-path <- system.file("extdata", "exampleTraj.lammpstrj", package = "dseams")
-frame <- read_frame(path, type = 2L)
-ice <- chill_plus(frame)
-print(ice)
-summary(frame)
+path <- dseams_example("ice1h.lammpstrj")
+nframes(path)
+frame <- read_frame(path, type = -1L)
+head(positions(frame))
 ```
 
-On `input/traj/exampleTraj.lammpstrj`, oxygen type 2, the cutoff shell
-has 9 interClathrate and 241 water. The mutual shell has 1 clathrate,
-7 interClathrate, and 242 water. Mean q3 is 0.374897. Six-rings at depth
-8 number 224.
+`read_frame()` returns a `dseams_frame`. `positions()` is a numeric
+matrix with columns `x`, `y`, and `z` in the units of the file.
+`nframes()` is the number of LAMMPS timesteps. An XYZ file counts as
+one frame.
 
-## S3 results
+`type = 0` guesses oxygen (LAMMPS type 2, otherwise type 1). A positive
+type keeps that species. A negative type keeps every atom.
+`ice1h.lammpstrj` is oxygen only, so `type = -1` and the guessed oxygen
+type both keep all 128 sites. In `exampleTraj.lammpstrj`, type 2 is
+oxygen and type 1 is hydrogen.
 
-`read_frame` returns class `dseams_frame`. `chill_plus` returns
-`dseams_ice`, `cages` returns `dseams_cages`, `primitive_rings` returns
-`dseams_rings`, `steinhardt` returns `dseams_steinhardt`, and `q4_q6`
-returns `dseams_q4_q6`. Each has `print` and `summary`. Cage counts are
-attributes `n_ih`, `n_ic`, `n_both`, and `n_water`, and they match
-`seams cages`.
+`print()` on a frame reports the frame index and the atom count.
+`summary()` adds the file and the type filter.
 
-`seams_system_new` returns an external pointer of class `dseams_system`.
-The finalizer calls `seams_system_destroy`. `print` reports the atom
-count. Analysis helpers return the same vectors the C oracle checks,
-with a class so `print` can name the columns. `as.numeric` and `[[`
-keep the positions those tests use.
+## CHILL+
+
+```r
+ice <- chill_plus(frame)
+table(ice$name)
+```
+
+The result is a data frame with columns `atom`, `type`, `label`, and
+`name`. `print()` counts the names. It does not print the rows. On this
+cell the count is 128 `hexagonal`.
+
+| `name` | Meaning |
+| --- | --- |
+| `cubic` | Cubic ice, Ic |
+| `hexagonal` | Hexagonal ice, Ih |
+| `interfacial` | Ice-like, and not cubic or hexagonal |
+| `clathrate` | Clathrate |
+| `interClathrate` | Interfacial clathrate |
+| `water` | Liquid or amorphous |
+| `unclassified` | None of the above |
+| `reCubic` | Reclassified as cubic ice by q6 |
+| `reHex` | Reclassified as hexagonal ice by q6 |
+
+`graph = "cutoff"` (the default) bonds every pair closer than `cutoff`
+angstrom. `graph = "mutual"` keeps the mutual four nearest neighbours
+inside `cutoff + 1.5`. `rule = "chill+"` is the published rule.
+`rule = "ovito-chill+"` averages q3 over the whole shell and skips the
+interfacial-neighbour test.
+
+On `exampleTraj.lammpstrj`, oxygen type 2, the cutoff list gives 9
+`interClathrate` and 241 `water`. The mutual list gives 1 `clathrate`,
+7 `interClathrate`, and 242 `water`.
+
+Nguyen, A. H. and Molinero, V. (2015). Identification of clathrate
+hydrates, hexagonal ice, cubic ice, and liquid water in simulations:
+the CHILL+ algorithm. The Journal of Physical Chemistry B 119,
+9369-9376. <https://doi.org/10.1021/jp510289t>
+
+## Rings
+
+```r
+primitive_rings(frame, graph = "cutoff", max_depth = 6L)
+```
+
+The result has columns `size` and `n`. Ice Ih on the cutoff graph has
+256 rings of size 6. The default graph is `"mutual"`, not `"cutoff"`.
+On the mixed frame the mutual list, kept out to depth 6, has 224
+six-rings.
+
+Franzblau, D. S. (1991). Computation of ring statistics for network
+models of solids. Physical Review B 44, 4925.
+<https://doi.org/10.1103/PhysRevB.44.4925>
+
+## Cages and shell symmetry
+
+```r
+cages(frame)
+table(symmetry(frame))
+signature_cages(frame, "512")
+```
+
+`cages()` returns one row per atom (`atom`, `cage`, `name`). The
+attributes `n_ih`, `n_ic`, `n_both`, and `n_water` are disjoint and sum
+to the number of atoms. On ice Ih they are 128 hexagonal, 0 cubic, 0
+both, and 0 water. `cage` is 0 water, 1 hexagonal, 2 cubic, 3 both.
+`graph = "seeded"` is the default. `"mutual"`, `"cutoff"`, and
+`"knn-union"` are the other graphs.
+
+`symmetry()` is an integer code per atom: 0 ice Ih, 1 ice Ic, 2
+stacking-disordered, -1 otherwise.
+
+`signature_cages()` counts closed cages of one ring census. `"512"` is
+twelve pentagons. The return value is `c(n_cages, n_atoms)`.
+
+## Steinhardt parameters
+
+```r
+tip <- read_frame(dseams_example("exampleTraj.lammpstrj"), type = 2L)
+summary(steinhardt(tip, order_l = 3L)$ql)
+head(q4_q6(frame))
+```
+
+`steinhardt()` returns `atom`, `ql`, and `qlbar` for one degree.
+Degrees 3, 4, 6, 8, and 12 are computed. `qlbar` is the Lechner-Dellago
+neighbour average. `q4_q6()` returns `q4`, `q6`, `q4bar`, and `q6bar`
+on the cutoff shell. On the mixed frame the mean local q3 is 0.3749.
+
+Steinhardt, P. J., Nelson, D. R. and Ronchetti, M. (1983).
+Bond-orientational order in liquids and glasses. Physical Review B 28,
+784. <https://doi.org/10.1103/PhysRevB.28.784>
+
+## Two frames
+
+```r
+both <- read_frame(dseams_example("exampleTraj.lammpstrj"), type = -1L)
+jump_tau90(both, both, dt = 1, oxygen_type = 2L, hydrogen_type = 1L)
+```
+
+`jump_tau90()` returns `dt` when any water's H-H vector rotates by at
+least 90 degrees, and `NaN` otherwise. Both frames need oxygen and
+hydrogen. Comparing a frame with itself returns `NaN`.
+
+## A system handle
+
+`seams_system_new()` returns an empty handle. `seams_system_read()`
+loads one frame into it and returns the atom count. Each later
+`seams_*` function analyses that frame. R frees the handle when the
+object is collected. A failed read stops with the engine's message and
+leaves the previous frame in place.
+
+```r
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_chill(sys)
+seams_cages(sys)
+```
+
+`seams_chill()` returns the nine population counts in the label order
+above. `graph = 0` is the cutoff list and `graph = 1` is the mutual
+list. `rule = 0` is the published CHILL+ rule and `rule = 1` is the
+OVITO variant. `seams_cages()` returns `n_hex`, `n_cubic`, `n_water`,
+and `n_both`. The other `seams_*` functions are the same analyses one
+handle at a time: neighbour lists, radial distribution, coordination,
+hydrogen bonds, density, rings, prisms, monolayers, fingerprints, and
+site tables. Each page in the reference shows the arguments and a
+runnable example.
+
+`dseams_threads()` reports the OpenMP thread count, and
+`dseams_threads(n)` sets it for later calls from this R session.
+`dseams_version()` is the engine version this package was built with.
 
 ## Errors
 
-A missing path stops in `normalizePath` before the library is called.
-An empty system stops with the text from `seams_handle_error`. The
-condition is an ordinary R error, so `tryCatch` and testthat
-`expect_error` see it.
-
-## Ownership
-
-The frame pointer inside `dseams_frame` is an external pointer freed by
-the C finalizer. Do not keep a copy of `frame$ptr` after the frame is
-collected. System, neighbour, ring, cage, and fingerprint handles used
-inside one `seams_*` helper are freed before that helper returns, except
-the system itself, which the caller created and the finalizer releases.
-
-```{literalinclude} ../../inst/examples/minimal_r.R
-:language: r
-```
-
-```{literalinclude} ../../inst/examples/r_api.R
-:language: r
-```
-
-`inst/examples/r_capi.R` calls every `seams_*` function and compares the
-result with `binding_oracle`, the C++ reference a seams-core build makes;
-it runs when `SEAMS_CPP_ORACLE` names that executable, which is set when
-the package links the same build through `SEAMS_LIBDIR` or
-`DSEAMS_SYSTEM_ENGINE`.
-
-```{literalinclude} ../../inst/examples/r_capi.R
-:language: r
-```
-
-```{literalinclude} ../../tests/testthat/test-ice.R
-:language: r
-:lines: 22-49,84-102
-```
-
-<!-- API_SYMBOLS_BEGIN -->
-
-## Symbol reference
-
-### cages
-
-Purpose: Cage counts for a dump path.
-
-Parameters: path; frame; cutoff
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: cutoff in angstrom; frame index is dimensionless
-
-Example: `inst/examples/minimal_r.R`
-
-### cages.dseams_frame
-
-Purpose: Cage counts for a frame object.
-
-Parameters: frame; cutoff
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: cutoff in angstrom; counts are dimensionless
-
-Example: `inst/examples/minimal_r.R`
-
-### chill_plus
-
-Purpose: CHILL+ labels for a dump path.
-
-Parameters: path; frame; cutoff
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: cutoff in angstrom
-
-Example: `inst/examples/minimal_r.R`
-
-### chill_plus.dseams_frame
-
-Purpose: CHILL+ labels for a frame object.
-
-Parameters: frame; cutoff
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: cutoff in angstrom; labels are dimensionless codes
-
-Example: `inst/examples/minimal_r.R`
-
-### dseams_example
-
-Purpose: Path of a trajectory shipped in the package's `inst/extdata`: `ice1h.lammpstrj`, `exampleTraj.lammpstrj` or `nucleation_f1.lammpstrj`. With no name it lists them.
-
-Parameters: name (file name, or `NULL` to list the files)
-
-Returns: A file path, or the file names when name is NULL.
-
-Ownership: R owns the returned character vector.
-
-Errors: The binding stops with "no example named" when name is not one of the shipped files.
-
-Units: none; returns a file path or file names
-
-Example: `inst/examples/minimal_r.R`
-
-### dseams_threads
-
-Purpose: Report the engine thread count, or set it for later calls from this R session. Under `_R_CHECK_LIMIT_CORES_` the package starts with at most two threads; the option `dseams.threads` sets the starting count.
-
-Parameters: n (number of threads, or `NULL` to only query)
-
-Returns: The thread count in effect after the call.
-
-Ownership: No allocation.
-
-Errors: The binding stops when n is not one positive integer.
-
-Units: dimensionless thread count; 1 when the package was built without OpenMP
-
-Example: `inst/examples/minimal_r.R`
-
-### dseams_version
-
-Purpose: Version string of the seams-core engine the package was built with or linked against.
-
-Parameters: none
-
-Returns: The engine version string.
-
-Ownership: R owns the returned character vector.
-
-Errors: None.
-
-Units: none; returns a version string
-
-Example: `inst/examples/minimal_r.R`
-
-### jump_tau90
-
-Purpose: Rotation time of H-H vectors between two frames.
-
-Parameters: first; second; dt
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: dt and the result in the caller's time unit
-
-Example: `inst/examples/minimal_r.R`
-
-### nframes
-
-Purpose: Number of frames in a trajectory path.
-
-Parameters: path
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: dimensionless count
-
-Example: `inst/examples/minimal_r.R`
-
-### positions
-
-Purpose: Coordinates of a dump frame.
-
-Parameters: path; frame
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom
-
-Example: `inst/examples/minimal_r.R`
-
-### positions.dseams_frame
-
-Purpose: Coordinates stored on a frame object.
-
-Parameters: frame
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom
-
-Example: `inst/examples/minimal_r.R`
-
-### primitive_rings
-
-Purpose: Ring histogram for a dump path.
-
-Parameters: path; frame; cutoff
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: cutoff in angstrom
-
-Example: `inst/examples/minimal_r.R`
-
-### primitive_rings.dseams_frame
-
-Purpose: Ring histogram for a frame object.
-
-Parameters: frame; cutoff
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: cutoff in angstrom; counts are dimensionless
-
-Example: `inst/examples/minimal_r.R`
-
-### print.dseams_cages
-
-Purpose: Print cage counts.
-
-Parameters: x; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### print.dseams_chill
-
-Purpose: Print CHILL population counts.
-
-Parameters: x; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### print.dseams_frame
-
-Purpose: Print the atom count of a frame.
-
-Parameters: frame
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: dimensionless count
-
-Example: `inst/examples/minimal_r.R`
-
-### print.dseams_ice
-
-Purpose: Print CHILL+ labels.
-
-Parameters: x; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### print.dseams_q4_q6
-
-Purpose: Print q4 and q6.
-
-Parameters: x; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### print.dseams_rings
-
-Purpose: Print a ring histogram.
-
-Parameters: x; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### print.dseams_steinhardt
-
-Purpose: Print Steinhardt parameters.
-
-Parameters: x; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### print.dseams_system
-
-Purpose: Print a system handle.
-
-Parameters: x; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### q4_q6
-
-Purpose: Local q4 and q6 for a dump path.
-
-Parameters: path; frame; cutoff
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: cutoff in angstrom; q4 and q6 are dimensionless
-
-Example: `inst/examples/minimal_r.R`
-
-### q4_q6.dseams_frame
-
-Purpose: Local q4 and q6 for a frame object.
-
-Parameters: frame; cutoff
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: cutoff in angstrom; q4 and q6 are dimensionless
-
-Example: `inst/examples/minimal_r.R`
-
-### read_frame
-
-Purpose: Read one frame from a dump.
-
-Parameters: path; frame; type
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: frame index is dimensionless; coordinates are angstrom
-
-Example: `inst/examples/minimal_r.R`
-
-### seams_cages
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_chill
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_contact_pairs
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_coordination
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_density_axis
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_domains
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_fingerprint
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_hbonds
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_monolayer
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_neighbours_knn
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_prisms
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_rdf
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_rings_vertices
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_running_cn
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_set_num_threads
-
-Purpose: Set the OpenMP width used by the next analysis.
-
-Parameters: n
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### seams_signature_cages
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_site_table
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_steinhardt
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_system_count
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_system_new
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### seams_system_read
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `inst/examples/r_api.R`
-
-### signature_cages
-
-Purpose: Closed cages for a dump path.
-
-Parameters: path; frame; spec
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: spec is text; cutoff used by the call is in angstrom
-
-Example: `inst/examples/minimal_r.R`
-
-### signature_cages.dseams_frame
-
-Purpose: Closed cages for a frame object.
-
-Parameters: frame; spec
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: spec is text
-
-Example: `inst/examples/minimal_r.R`
-
-### steinhardt
-
-Purpose: Mean local q_l for a dump path.
-
-Parameters: path; frame; order_l
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: order parameter is dimensionless
-
-Example: `inst/examples/minimal_r.R`
-
-### steinhardt.dseams_frame
-
-Purpose: Mean local q_l for a frame object.
-
-Parameters: frame; order_l
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: order parameter is dimensionless
-
-Example: `inst/examples/minimal_r.R`
-
-### summary.dseams_cages
-
-Purpose: Summary of cage names.
-
-Parameters: object; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### summary.dseams_chill
-
-Purpose: Summary of CHILL population counts.
-
-Parameters: object; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### summary.dseams_frame
-
-Purpose: Summary of one frame.
-
-Parameters: object; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### summary.dseams_ice
-
-Purpose: Summary of CHILL+ labels.
-
-Parameters: object; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### summary.dseams_q4_q6
-
-Purpose: Summary of q4 and q6.
-
-Parameters: object; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### summary.dseams_rings
-
-Purpose: Summary of a ring histogram.
-
-Parameters: object; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### summary.dseams_steinhardt
-
-Purpose: Summary of Steinhardt parameters.
-
-Parameters: object; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### summary.dseams_system
-
-Purpose: Summary of a system handle.
-
-Parameters: object; ...
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: as named by the parameters
-
-Example: `inst/examples/minimal_r.R`
-
-### symmetry
-
-Purpose: Shell labels for a dump path.
-
-Parameters: path; frame
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: dimensionless label codes
-
-Example: `inst/examples/minimal_r.R`
-
-### symmetry.dseams_frame
-
-Purpose: Shell labels for a frame object.
-
-Parameters: frame
-
-Returns: The data frame, vector, or count named in the purpose.
-
-Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
-
-Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
-
-Units: dimensionless label codes
-
-Example: `inst/examples/minimal_r.R`
-<!-- API_SYMBOLS_END -->
+A missing path stops in `normalizePath` before the engine is called.
+An empty handle stops with the engine's message. Either failure is an
+ordinary R error, so `tryCatch()` sees it.

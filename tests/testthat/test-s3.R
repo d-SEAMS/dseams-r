@@ -56,7 +56,7 @@ test_that("a read system and its CHILL counts print", {
   sys <- seams_system_new()
   expect_identical(seams_system_read(sys, dseams_example("ice1h.lammpstrj")), 128L)
   expect_output(print(sys), "dseams system 128 atoms")
-  expect_output(summary(sys), "external pointer.*dseams system 128 atoms")
+  expect_output(summary(sys), "one loaded frame.*dseams system 128 atoms")
   chill <- seams_chill(sys)
   expect_s3_class(chill, "dseams_chill")
   expect_identical(chill[["hexagonal"]], 128L)
