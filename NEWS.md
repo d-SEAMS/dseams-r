@@ -8,6 +8,7 @@
 * Give the site favicon an SVG media type that browsers accept.
 * Publish the srr standards note and link it from the navbar as
   rOpenSci standards.
+* Set the contributor name in package metadata to Ruhila Goswami.
 
 # dseams 2.14.1 (2026-11-17)
 
