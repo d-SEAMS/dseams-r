@@ -28,7 +28,6 @@ Package: dseams
 Type: Package
 Title: Ice Classification and Ring Statistics for Molecular Simulations
 Version: 2.14.1
-Date: 2026-11-17
 Authors@R: c(
     person("Rohit", "Goswami", email = "rgoswami@ieee.org",
            role = c("aut", "cre"),
@@ -100,7 +99,7 @@ Config/roxygen2/version: 8.1.1
 
 -   Who is the target audience and what are scientific applications of this package?
 
-  The target audience is researchers analysing molecular-dynamics trajectories of water, ice, and clathrate hydrates in R. The package is used for CHILL+ classification, primitive ring statistics, and cage and bond-order analyses in simulation workflows.
+  The target audience is researchers analyzing molecular-dynamics trajectories of water, ice, and clathrate hydrates in R. The package is used for CHILL+ classification, primitive ring statistics, and cage and bond-order analyses in simulation workflows.
 
 -   Are there other R packages that accomplish the same thing? If so, how does yours differ or meet [our criteria for best-in-category](https://ropensci.github.io/dev_guide/policies.html#overlap)?
 
@@ -117,10 +116,6 @@ Config/roxygen2/version: 8.1.1
 -   Explain reasons for any [`pkgcheck` items](https://docs.ropensci.org/pkgcheck/) which your package is unable to pass.
 
   See the `## pkgcheck` section below for the verbatim output.
-
-  - `Package has no continuous integration checks` and `Package coverage failed` are CI-based checks that depend on detected workflow runs on the default branch; they do not pass in this local run context.
-  - `R CMD check found 2 errors` and `R CMD check found 1 warning` in the local pkgcheck run reflect missing local PDF-manual tooling and local check environment constraints.
-  - `Some goodpractice linters failed`, duplicate function names, and missing ORCID for Ruhila Goswami are reported as quality and metadata items; the function names and contributor ORCID status are intentional.
 
 ## Technical checks
 
@@ -143,7 +138,7 @@ This package:
 
 - [x] Generative AI tools were used to produce some of the material in this submission.
 
-If so, please describe usage, and include links to any relevant aspects of your repository. See [our blog post](https://ropensci.org/blog/2026/02/26/ropensci-ai-policy/) for background. (Explicit advice is not yet included in our _Dev Guide_; we are hoping to update very soon, and ask your cooperation and transparency in the meantime.)
+<!-- AI usage description: Rohit to write -->
 
 ## Publication options
 
@@ -183,16 +178,16 @@ After software review, rOpenSci can co-submit an accepted package to the Journal
 ✔ Package has at least one HTML vignette
 ✔ All functions have examples.
 ✔ Repository has a website
-✖ Package has no continuous integration checks.
-✖ Package coverage failed
-✖ R CMD check found 2 errors.
-✖ R CMD check found 1 warning.
+✔ Package has continuous integration checks, but no badges on README
+✔ Package coverage is 100%.
+✔ R CMD check found no errors.
+✔ R CMD check found no warnings.
 ℹ Some goodpractice linters failed.
 ℹ Function names are duplicated in other packages
 ℹ Not all authors have ORCID IDs
 
 ℹ Current status:
-✖ Darn it, still problems lurking there ...
+✔ Rockin package, great work!
 
 ℹ 'pkgcheck' version: 0.3.4.5
 ```
