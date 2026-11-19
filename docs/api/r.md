@@ -50,12 +50,8 @@ cell and calls `steinhardt`, `chill_plus`, and `primitive_rings`;
 
 `R CMD check` is the cleanliness check. It expects no errors and no
 warnings. `pkgdown::build_site()` writes the native HTML from the
-roxygen topics. The built site is linked from this book:
-
-```{raw} html
-<p><a href="../r/index.html">dseams pkgdown reference</a>,
-generated from the roxygen topics in <code>man/</code>.</p>
-```
+roxygen topics. The built site is linked from this book as the
+[dseams pkgdown reference](https://r.dseams.info/reference/).
 
 ## Quickstart
 
@@ -1074,14 +1070,3 @@ Units: dimensionless label codes
 
 Example: `inst/examples/minimal_r.R`
 <!-- API_SYMBOLS_END -->
-
-
-## Structure still
-
-```{figure} ../tutorials/molecules/r/overlay-web.png
-:alt: Molecule still for this front
-:width: 480px
-
-Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug r` writes the 2400 by 1800 PNG.
-```
-
