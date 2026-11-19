@@ -21,3 +21,8 @@ An integer vector, class \code{dseams_monolayer}. \code{counts[k + 1]} is size \
 \description{
 Primitive-ring histogram of a monolayer.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_monolayer(sys)
+}

@@ -19,5 +19,11 @@ seams_domains(sys, spec, cutoff = 3.5, subset = 0L)
 A numeric vector \code{c(n_subset, largest, percolation)}, class \code{dseams_domains}.
 }
 \description{
-Largest polar or apolar domain.
+\code{subset = 0} is apolar and \code{subset = 1} is polar. On the ice Ih cell
+the three numbers are zero.
+}
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_domains(sys, "1=waterO")
 }

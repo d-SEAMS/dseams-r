@@ -19,3 +19,8 @@ A numeric scalar.
 \description{
 Coordination number integrated to \code{rmax}.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_coordination(sys)
+}

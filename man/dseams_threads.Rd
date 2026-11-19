@@ -20,9 +20,9 @@ it. \code{dseams_threads()} reports the thread count, and
 below about 2000 atoms run on one thread regardless.
 }
 \details{
-When the environment variable \verb{_R_CHECK_LIMIT_CORES_} is set (as
-\verb{R CMD check --as-cran} does), the package starts with at most two
-threads. The option \code{dseams.threads} sets the starting count.
+The option \code{dseams.threads} sets the starting count, before the package
+is loaded. When R has been asked to limit the number of cores, the
+package starts with at most two threads.
 }
 \examples{
 dseams_threads()

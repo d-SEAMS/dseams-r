@@ -17,3 +17,8 @@ An integer vector of length 7, class \code{dseams_prisms}. Index 7 is size 6.
 \description{
 Perfect prism counts by ring size.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_prisms(sys)
+}

@@ -15,3 +15,8 @@ An integer. Zero when the handle has no frame.
 \description{
 Atom count stored on a system.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_system_count(sys)
+}

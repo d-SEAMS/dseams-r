@@ -21,3 +21,8 @@ An integer vector \code{c(n_cages, n_atoms)}, class \code{dseams_signature}.
 \description{
 Closed cages of one ring census.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_signature_cages(sys, "512")
+}

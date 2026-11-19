@@ -19,3 +19,8 @@ A list of class \code{dseams_rdf} with \code{r}, \code{g}, and \code{volume}.
 \description{
 Partial radial distribution.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_rdf(sys)
+}

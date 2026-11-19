@@ -21,3 +21,8 @@ An integer, class \code{dseams_nnz}.
 \description{
 Column count of a k-nearest neighbour list.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_neighbours_knn(sys)
+}

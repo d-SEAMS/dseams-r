@@ -17,3 +17,8 @@ An integer vector, class \code{dseams_sites}.
 \description{
 Per-atom site kind.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_site_table(sys, "1=waterO")
+}

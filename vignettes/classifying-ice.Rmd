@@ -12,53 +12,125 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 dseams::dseams_threads(1L)
 ```
 
-dseams reads a trajectory frame into the d-SEAMS engine and returns the
-results as data frames. Three small dumps ship with the package:
+`dseams` reads one trajectory frame into the d-SEAMS engine and returns
+data frames. A frame is one configuration. The analyses below take that
+frame.
 
 ```{r}
 library(dseams)
 dseams_example()
 ```
 
+`ice1h.lammpstrj` is a 2x2x2 ice Ih cell (128 oxygen sites).
+`exampleTraj.lammpstrj` is one frame of a TIP4P mixture (250 waters;
+type 2 is oxygen and type 1 is hydrogen). `nucleation_f1.lammpstrj` is
+the first frame of an mW nucleation trajectory (4096 waters).
+
+`type = 0` guesses oxygen. A positive type keeps that LAMMPS species. A
+negative type keeps every atom.
+
 ## A perfect crystal
 
-`ice1h.lammpstrj` is a 2x2x2 ice Ih cell with 128 oxygen sites. Every
-water is hexagonal ice under CHILL+, and the hydrogen-bond network is
-made of six-membered rings only:
+Keep every atom. This dump is oxygen only, so the frame has 128 rows.
 
 ```{r}
 ice1h <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
 ice1h
-table(chill_plus(ice1h)$name)
-primitive_rings(ice1h, graph = "cutoff", max_depth = 6L)
+head(positions(ice1h))
 ```
+
+Coordinates are in the units of the file, here angstrom. CHILL+ labels
+every water hexagonal, and the hydrogen-bond network is six-membered
+rings only. `graph = "cutoff"` bonds every pair closer than the cutoff
+(3.5 angstrom). The default ring graph is the mutual four-neighbour
+list, so the crystal census names `"cutoff"` explicitly.
+
+```{r}
+ice <- chill_plus(ice1h)
+table(ice$name)
+primitive_rings(ice1h, graph = "cutoff", max_depth = 6L)
+cages(ice1h)
+```
+
+`name` is one of nine labels. `hexagonal` is ice Ih and `cubic` is ice
+Ic. `interfacial` is ice-like but not cubic or hexagonal. `clathrate`
+is clathrate and `interClathrate` is interfacial clathrate. `water` is
+liquid or amorphous. `unclassified` matched none of those. `reCubic`
+and `reHex` are cubic and hexagonal ice reclassified with the q6 order
+parameter.
+
+Cage membership is disjoint: hexagonal only, cubic only, both, or
+water. On this cell every oxygen is in a hexagonal cage.
+
+`symmetry()` compares each neighbour shell with ideal ice. The code is
+0 for ice Ih, 1 for ice Ic, 2 for stacking-disordered ice, and -1
+otherwise. On this cell every oxygen is code 0.
+
+```{r}
+table(symmetry(ice1h))
+summary(steinhardt(ice1h, order_l = 6L)$ql)
+```
+
+`ql` is the local Steinhardt parameter. `qlbar` is the Lechner-Dellago
+average of the same degree over the neighbour shell.
 
 ## A mixed frame
 
-`exampleTraj.lammpstrj` is one frame of a TIP4P system. Type 2 is oxygen.
+Type 2 is the oxygen in `exampleTraj.lammpstrj`.
 
 ```{r}
 frame <- read_frame(dseams_example("exampleTraj.lammpstrj"), type = 2L)
+frame
 ice <- chill_plus(frame)
 table(ice$name)
 table(chill_plus(frame, graph = "mutual")$name)
 ```
 
-`graph = "cutoff"`, the default, is the distance list. `graph = "mutual"`
-is the mutual four-neighbour list. On this dump the cutoff list gives 9
-interClathrate and 241 water, and the mutual list gives 1 clathrate, 7
-interClathrate, and 242 water.
+`graph = "cutoff"`, the default for `chill_plus()`, is the distance
+list: 9 interfacial clathrate and 241 water. `graph = "mutual"` keeps
+the mutual four nearest neighbours inside the cutoff plus 1.5 angstrom:
+1 clathrate, 7 interfacial clathrate, and 242 water.
 
-The ring census and the Steinhardt parameters come back the same way:
+`print()` on a CHILL+ result counts the labels. It does not print the
+rows. Select the columns into a plain data frame when you want the
+atoms:
+
+```{r}
+kept <- ice[ice$name != "water", ]
+data.frame(atom = kept$atom, label = kept$label, name = kept$name)
+```
+
+The ring census and the order parameters are data frames in the same
+way. The default ring graph is the mutual list. At depth 6 this frame
+has 224 six-membered rings.
 
 ```{r}
 primitive_rings(frame, max_depth = 6L)
 q3 <- steinhardt(frame, order_l = 3L)
 summary(q3$ql)
+head(q4_q6(frame))
 ```
 
-Each result is a data.frame, so the usual subsetting works:
+`q4_q6()` returns both degrees, and their neighbour averages `q4bar`
+and `q6bar`, on the cutoff shell. `signature_cages()` counts closed
+cages of one ring census. `"512"` is twelve pentagons, the small cage
+of structure I. The two numbers are the cage count and the number of
+atoms in those cages.
 
 ```{r}
-head(ice[ice$name != "water", ])
+signature_cages(frame, "512")
+cages(frame)
+```
+
+## Rotation between two frames
+
+`jump_tau90()` returns the time step `dt` when any water's H-H vector
+rotates by at least 90 degrees between two frames, and `NaN` when none
+does. Both frames must contain oxygen and hydrogen. In
+`exampleTraj.lammpstrj` those species are types 2 and 1. The same frame
+compared with itself has not rotated:
+
+```{r}
+both <- read_frame(dseams_example("exampleTraj.lammpstrj"), type = -1L)
+jump_tau90(both, both, dt = 1, oxygen_type = 2L, hydrogen_type = 1L)
 ```

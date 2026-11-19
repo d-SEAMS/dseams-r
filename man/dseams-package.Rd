@@ -6,11 +6,51 @@
 \alias{dseams-package}
 \title{dseams: Ice Classification and Ring Statistics for Molecular Simulations}
 \description{
-Structural analysis of water and ice in molecular dynamics trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh (2020) \doi{10.1021/acs.jcim.0c00031}). Reads 'LAMMPS' dumps and 'XYZ' files and returns data frames of 'CHILL+' ice labels (Nguyen and Molinero (2015) \doi{10.1021/jp510289t}), primitive ring counts (Franzblau (1991) \doi{10.1103/PhysRevB.44.4925}), hexagonal and double-diamond cages, and Steinhardt bond-orientational order parameters (Steinhardt, Nelson and Ronchetti (1983) \doi{10.1103/PhysRevB.28.784}). The engine is compiled from bundled C++ sources.
+Structural analysis of water and ice in one molecular-dynamics frame.
+Reads a LAMMPS dump or an XYZ file and returns data frames of CHILL+
+ice labels, primitive ring counts, hexagonal and double-diamond cages,
+and Steinhardt bond-orientational order parameters.
+}
+\details{
+\code{\link[=dseams_example]{dseams_example()}} names the dumps shipped with the package.
+\code{\link[=read_frame]{read_frame()}} loads one frame. \code{\link[=chill_plus]{chill_plus()}}, \code{\link[=primitive_rings]{primitive_rings()}},
+\code{\link[=cages]{cages()}}, \code{\link[=signature_cages]{signature_cages()}}, \code{\link[=symmetry]{symmetry()}}, \code{\link[=steinhardt]{steinhardt()}},
+\code{\link[=q4_q6]{q4_q6()}}, and \code{\link[=jump_tau90]{jump_tau90()}} analyse that frame.
+
+Cite Goswami, Goswami and Singh (2020), Journal of Chemical Information
+and Modeling. \code{citation("dseams")} prints the record.
+}
+\examples{
+frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
+table(chill_plus(frame)$name)
+
+}
+\references{
+Goswami, R., Goswami, A. and Singh, J. K. (2020).
+d-SEAMS: Deferred Structural Elucidation Analysis for Molecular
+Simulations.
+\emph{Journal of Chemical Information and Modeling} 60, 2169-2177.
+\doi{10.1021/acs.jcim.0c00031}
+
+Nguyen, A. H. and Molinero, V. (2015). Identification of clathrate
+hydrates, hexagonal ice, cubic ice, and liquid water in simulations:
+the CHILL+ algorithm.
+\emph{The Journal of Physical Chemistry B} 119, 9369-9376.
+\doi{10.1021/jp510289t}
+
+Franzblau, D. S. (1991). Computation of ring statistics for network
+models of solids. \emph{Physical Review B} 44, 4925.
+\doi{10.1103/PhysRevB.44.4925}
+
+Steinhardt, P. J., Nelson, D. R. and Ronchetti, M. (1983).
+Bond-orientational order in liquids and glasses.
+\emph{Physical Review B} 28, 784.
+\doi{10.1103/PhysRevB.28.784}
 }
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://r.dseams.info/}
   \item \url{https://docs.dseams.info}
   \item \url{https://github.com/d-SEAMS/dseams-r}
   \item \url{https://github.com/d-SEAMS/seams-core}
@@ -34,4 +74,3 @@ Other contributors:
 }
 
 }
-\keyword{internal}

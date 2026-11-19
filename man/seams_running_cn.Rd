@@ -19,3 +19,8 @@ A numeric vector, class \code{dseams_running_cn}.
 \description{
 Running coordination number.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_running_cn(sys)
+}

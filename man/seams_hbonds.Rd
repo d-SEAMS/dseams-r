@@ -28,5 +28,12 @@ seams_hbonds(
 An integer.
 }
 \description{
-Hydrogen-bond count.
+Counts bonds between \code{oxygen_type} and \code{hydrogen_type}. In
+\code{exampleTraj.lammpstrj} oxygen is type 2 and hydrogen is type 1.
+The ice Ih cell has no hydrogen.
+}
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("exampleTraj.lammpstrj"), type = -1L)
+seams_hbonds(sys, oxygen_type = 2L, hydrogen_type = 1L)
 }

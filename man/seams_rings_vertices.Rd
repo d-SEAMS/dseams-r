@@ -21,3 +21,8 @@ An integer vector, class \code{dseams_vertices}.
 \description{
 Atom indices of one primitive ring.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_rings_vertices(sys)
+}

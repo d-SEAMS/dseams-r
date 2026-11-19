@@ -17,7 +17,7 @@ test_that("bad input is an R error, not a crash", {
 
 test_that("print and positions agree on the atom count", {
   frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
-  expect_output(print(frame), "nop 128")
+  expect_output(print(frame), "atoms 128")
   expect_equal(nrow(positions(frame)), 128L)
   expect_identical(colnames(positions(frame)), c("x", "y", "z"))
 })

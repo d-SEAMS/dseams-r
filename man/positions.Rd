@@ -3,26 +3,18 @@
 \name{positions}
 \alias{positions}
 \alias{positions.dseams_frame}
-\alias{print.dseams_frame}
 \title{Atom positions}
 \usage{
 positions(frame)
 
 \method{positions}{dseams_frame}(frame)
-
-\method{print}{dseams_frame}(x, ...)
 }
 \arguments{
 \item{frame}{A \code{dseams_frame}.}
-
-\item{x}{A \code{dseams_frame}.}
-
-\item{...}{Ignored.}
 }
 \value{
 \code{positions()} returns a numeric matrix with one row per atom and
-columns \code{x}, \code{y}, \code{z} in the units of the file. \code{print()} returns \code{x}
-invisibly.
+columns \code{x}, \code{y}, \code{z} in the units of the file.
 }
 \description{
 Atom positions

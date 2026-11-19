@@ -1,3 +1,12 @@
+# dseams (development version)
+
+* Rewrite the README, the vignette, and the help pages around reading one
+  frame and reading the data frames that come back. Every exported
+  function has a runnable example.
+* `print()` on a frame reports `atoms` instead of `nop`. `summary()` on
+  a system handle reports the loaded frame.
+* Give the site favicon an SVG media type that browsers accept.
+
 # dseams 2.14.1 (2026-11-17)
 
 * Update the bundled d-SEAMS engine to seams-core 2.14.1.

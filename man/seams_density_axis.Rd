@@ -21,3 +21,8 @@ A numeric vector, class \code{dseams_density}.
 \description{
 Number density along one cell axis.
 }
+\examples{
+sys <- seams_system_new()
+seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+seams_density_axis(sys)
+}

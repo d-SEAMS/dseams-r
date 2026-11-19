@@ -15,9 +15,10 @@ seams-core source tree (`SEAMS_CORE_SRC`, or the revision in
 `configure` runs that script when they are missing.
 
 ```sh
-SEAMS_CORE_SRC=/path/to/seams-core sh tools/vendor.sh
+# SEAMS_CORE_SRC names a seams-core source tree.
+sh tools/vendor.sh "$SEAMS_CORE_SRC"
 R CMD build .
-DSEAMS_ROOT=/path/to/seams-core R CMD check --as-cran dseams_*.tar.gz
+DSEAMS_ROOT="$SEAMS_CORE_SRC" R CMD check --as-cran dseams_*.tar.gz
 ```
 
 `pixi run vendor`, `pixi run build` and `pixi run check` do the same in an
