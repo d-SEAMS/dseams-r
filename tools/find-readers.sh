@@ -9,10 +9,18 @@
 # -DSEAMS_HAS_READCON when that library was built with them, so the R
 # side can report the same set.
 #
-# Search order for a library, in bundled mode: CHEMFILES_ROOT or
-# CHEMFILES_LIBDIR (READCON_ROOT, READCON_LIBDIR), then pkg-config
-# (chemfiles, readcon-core). An unusable or out-of-range library is left
-# off. The CRAN build finds neither and still configures.
+# Search order for a library, in bundled mode: an explicit CHEMFILES_ROOT
+# or CHEMFILES_LIBDIR (READCON_ROOT, READCON_LIBDIR), when either is set,
+# is used alone: the probe looks only at that location (first via its own
+# pkg-config file, then by scanning its directories by hand) and the
+# global pkg-config search path is never consulted. Only when neither is
+# set does the ambient pkg-config module (chemfiles, readcon-core) decide
+# it. This matches seams-core's own meson.build, which tries chemfiles_dir
+# "alone, when it is given" before pkg-config. An unusable or
+# out-of-range library is left off, and a version pkg-config rejects is
+# never retried by the version-blind manual scan, which exists only for
+# installs such as conda-forge's chemfiles that ship no .pc at all. The
+# CRAN build finds neither and still configures.
 #
 # stdout is assignments. The human line is dseams_reader_message.
 
@@ -59,21 +67,49 @@ have_pc() {
   command -v "$PC" >/dev/null 2>&1 && "$PC" --exists "$1" >/dev/null 2>&1
 }
 
-add_pc_path() {
+# configure.win runs this same script under Rtools' MSYS2. -Wl,-rpath is
+# a Unix linker flag that mingw's ld does not need and does not always
+# accept; only configure (never configure.win) should receive it.
+is_windows() {
+  case "$(uname -s 2>/dev/null)" in
+    MINGW* | MSYS* | CYGWIN*) return 0 ;;
+  esac
+  case "${OS:-}" in
+    Windows_NT) return 0 ;;
+  esac
+  return 1
+}
+
+# Scope pkg-config to exactly an explicit root/libdir's own .pc files, so
+# it cannot silently answer from some other package on the ambient
+# PKG_CONFIG_PATH instead (see the file header: an explicit *_ROOT or
+# *_LIBDIR is used alone). The caller sets PKG_CONFIG_PATH to this
+# result rather than prepending it, since prepending still leaves the
+# original PKG_CONFIG_PATH as a fallback pkg-config can match against.
+# Prints the scoped directories and returns 0 when the root or libdir
+# has a pkgconfig directory to search, else returns 1 and prints
+# nothing, telling the caller to go straight to manual detection
+# instead of asking pkg-config at all.
+scoped_pc_dirs() {
   root=$1
-  if [ -z "$root" ]; then
-    return 0
-  fi
-  for d in "$root/lib/pkgconfig" "$root/lib64/pkgconfig" "$root/share/pkgconfig"; do
-    if [ -d "$d" ]; then
-      if [ -n "${PKG_CONFIG_PATH:-}" ]; then
-        PKG_CONFIG_PATH="$d:$PKG_CONFIG_PATH"
-      else
-        PKG_CONFIG_PATH="$d"
-      fi
-      export PKG_CONFIG_PATH
+  libdir=$2
+  dirs=""
+  for d in \
+    ${root:+"$root/lib/pkgconfig"} ${root:+"$root/lib64/pkgconfig"} \
+    ${root:+"$root/share/pkgconfig"} \
+    ${libdir:+"$libdir/pkgconfig"} ${libdir:+"$libdir/../pkgconfig"}
+  do
+    if [ -n "$d" ] && [ -d "$d" ]; then
+      case ":$dirs:" in
+        *":$d:"*) ;;
+        *) dirs="${dirs:+$dirs:}$d" ;;
+      esac
     fi
   done
+  if [ -z "$dirs" ]; then
+    return 1
+  fi
+  printf '%s' "$dirs"
 }
 
 # $1 directory, $2 library stem (chemfiles, seams-chemfiles, readcon_core)
@@ -137,6 +173,7 @@ trap cleanup EXIT
 
 chem=0
 con=0
+con_version_rejected=0
 chem_ver=""
 con_ver=""
 chem_note=""
@@ -222,6 +259,12 @@ adopt_readcon() {
   ver=$3
   if [ -n "$ver" ] && ! ver_ge "$ver" "0.16.2"; then
     printf '%s\n' "find-readers.sh: readcon-core $ver is older than 0.16.2" >&2
+    # The manual scan below has no way to read the crate version back out
+    # of readcon-core.hpp (unlike chemfiles, it carries no version macro
+    # a probe can print), so it cannot tell a 0.16.2+ library from the
+    # one just rejected here. Record the rejection so the caller skips
+    # that version-blind fallback instead of silently re-accepting it.
+    con_version_rejected=1
     return 1
   fi
   cat >"$probe_dir/readcon.cpp" <<'EOF'
@@ -266,7 +309,7 @@ pc_libdir() {
 with_rpath() {
   link=$1
   dir=$2
-  if [ -n "$dir" ]; then
+  if [ -n "$dir" ] && ! is_windows; then
     printf '%s -Wl,-rpath,%s' "$link" "$dir"
   else
     printf '%s' "$link"
@@ -417,13 +460,17 @@ if [ "$mode" = "linked" ]; then
 else
   saved_pc=${PKG_CONFIG_PATH:-}
   if [ -n "${CHEMFILES_ROOT:-}" ] || [ -n "${CHEMFILES_LIBDIR:-}" ]; then
-    PKG_CONFIG_PATH=$saved_pc
-    add_pc_path "${CHEMFILES_ROOT:-}"
-    if ! try_chemfiles_pc; then
+    chem_scoped=$(scoped_pc_dirs "${CHEMFILES_ROOT:-}" "${CHEMFILES_LIBDIR:-}") || chem_scoped=""
+    if [ -n "$chem_scoped" ]; then
+      PKG_CONFIG_PATH=$chem_scoped
+      export PKG_CONFIG_PATH
+      try_chemfiles_pc || true
+      PKG_CONFIG_PATH=$saved_pc
+      export PKG_CONFIG_PATH
+    fi
+    if [ "$chem" -eq 0 ]; then
       manual_chemfiles "${CHEMFILES_ROOT:-}" "${CHEMFILES_LIBDIR:-}" || true
     fi
-    PKG_CONFIG_PATH=$saved_pc
-    export PKG_CONFIG_PATH
   else
     try_chemfiles_pc || true
     # conda-forge chemfiles 0.10 ships headers and libchemfiles without
@@ -439,16 +486,22 @@ else
     fi
   fi
   if [ -n "${READCON_ROOT:-}" ] || [ -n "${READCON_LIBDIR:-}" ]; then
-    PKG_CONFIG_PATH=$saved_pc
-    add_pc_path "${READCON_ROOT:-}"
-    if ! try_readcon_pc; then
+    con_version_rejected=0
+    con_scoped=$(scoped_pc_dirs "${READCON_ROOT:-}" "${READCON_LIBDIR:-}") || con_scoped=""
+    if [ -n "$con_scoped" ]; then
+      PKG_CONFIG_PATH=$con_scoped
+      export PKG_CONFIG_PATH
+      try_readcon_pc || true
+      PKG_CONFIG_PATH=$saved_pc
+      export PKG_CONFIG_PATH
+    fi
+    if [ "$con" -eq 0 ] && [ "$con_version_rejected" -eq 0 ]; then
       manual_readcon "${READCON_ROOT:-}" "${READCON_LIBDIR:-}" || true
     fi
-    PKG_CONFIG_PATH=$saved_pc
-    export PKG_CONFIG_PATH
   else
+    con_version_rejected=0
     try_readcon_pc || true
-    if [ "$con" -eq 0 ]; then
+    if [ "$con" -eq 0 ] && [ "$con_version_rejected" -eq 0 ]; then
       for root in ${CONDA_PREFIX:-} ${PREFIX:-}; do
         if [ -n "$root" ] && [ -f "$root/include/readcon-core.hpp" ]; then
           if manual_readcon "$root" "$root/lib"; then

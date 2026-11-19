@@ -14,6 +14,13 @@
   with neither library still reads LAMMPS dumps and XYZ files.
 * Record ORCID 0000-0002-5443-9356 for Ruhila Goswami, and name the
   exported analyses and the optional readers in DESCRIPTION.
+* Fix `tools/find-readers.sh`: an explicit `CHEMFILES_ROOT`/`CHEMFILES_LIBDIR`
+  or `READCON_ROOT`/`READCON_LIBDIR` now wins over a pkg-config module on the
+  ambient `PKG_CONFIG_PATH` instead of sometimes losing to it; a
+  `readcon-core.pc` version pkg-config rejects as too old no longer falls
+  through to the version-blind manual directory scan, which could silently
+  re-accept it; and the optional readers' `-Wl,-rpath` link flag is added
+  only off Windows, so `configure.win` no longer emits it.
 
 * Rewrite the README, the vignette, and the help pages around reading one
   frame and reading the data frames that come back. Every exported
