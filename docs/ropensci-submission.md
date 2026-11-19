@@ -302,13 +302,13 @@ does not have yet. It is not requested by the checkboxes above.
 
 ## pkgcheck
 
-`pkgcheck::pkgcheck(".")` (pkgcheck 0.3.4.5, pkgstats 0.2.5.4) and
-`R CMD check --as-cran --no-manual` were run against commit `7d1ac794` of
-this branch, with R 4.5.3 and a vendored copy of the seams-core v2.14.1
-engine (`sh tools/vendor.sh`). Full logs are in the handoff bundle
-(`logs/pkgcheck.log` for both pkgcheck and the goodpractice checks it
-runs, `logs/r-cmd-check-as-cran.log`, `logs/testthat.log`,
-`logs/covr.log`, `logs/pkgdown-build-site.log`).
+`pkgcheck::pkgcheck(".", use_cache = FALSE)` (pkgcheck 0.3.4.5, pkgstats
+0.2.5.4) and `R CMD check --as-cran --no-manual` were run against commit
+`f5520b6` of this branch, with R 4.5.3 and a vendored copy of the
+seams-core v2.14.1 engine (`sh tools/vendor.sh`). Full logs are in the
+handoff bundle (`logs/pkgcheck.log` for both pkgcheck and the
+goodpractice checks it runs, `logs/r-cmd-check-as-cran.log`,
+`logs/testthat.log`, `logs/covr.log`, `logs/pkgdown-build-site.log`).
 
 What the repository gives pkgcheck:
 
