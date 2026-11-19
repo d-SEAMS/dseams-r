@@ -9,20 +9,27 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-2393-8056")),
     person("Amrita", "Goswami", role = "aut",
            comment = c(ORCID = "0000-0001-8706-2383")),
-    person("Ruhila", "S", role = "ctb"),
+    person("Ruhila", "Goswami", role = "ctb",
+           comment = c(ORCID = "0000-0002-5443-9356")),
     person("d-SEAMS core team", role = "cph",
            comment = "seams-core engine sources bundled in src/seams")
     )
 Description: Structural analysis of water and ice in molecular dynamics
     trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh
     (2020) <doi:10.1021/acs.jcim.0c00031>). Reads 'LAMMPS' dumps and
-    'XYZ' files and returns data frames of 'CHILL+' ice labels
-    (Nguyen and Molinero (2015) <doi:10.1021/jp510289t>), primitive
-    ring counts (Franzblau (1991) <doi:10.1103/PhysRevB.44.4925>),
-    hexagonal and double-diamond cages, and Steinhardt bond-orientational
-    order parameters (Steinhardt, Nelson and Ronchetti (1983)
-    <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
-    C++ sources.
+    'XYZ' files on every build. When 'chemfiles' is found at build time,
+    also reads the formats that library reads (PDB, GRO, DCD, and the
+    rest of the chemfiles 0.10 set). When 'readcon-core' is found, also
+    reads readcon '.con' files. readcon-core also defines '.convel';
+    this engine routes '.con'. Returns data frames for
+    'CHILL+' ice labels (Nguyen and Molinero (2015)
+    <doi:10.1021/jp510289t>), primitive rings (Franzblau (1991)
+    <doi:10.1103/PhysRevB.44.4925>), cages, Steinhardt q4 and q6
+    (Steinhardt, Nelson and Ronchetti (1983)
+    <doi:10.1103/PhysRevB.28.784>), hydrogen bonds, radial distribution
+    functions, prisms, domains, monolayers, topological fingerprints,
+    coordination, density profiles, and jump_tau90. The engine is
+    compiled from bundled C++ sources.
 License: MIT + file LICENSE
 URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
@@ -40,7 +47,11 @@ LinkingTo:
     cpp11 (>= 0.4.0),
     RcppEigen (>= 0.3.4.0.0)
 VignetteBuilder: knitr
-SystemRequirements: C++20
+SystemRequirements: C++20, optional chemfiles (>= 0.10.4, < 0.11)
+    for PDB, GRO, and the other chemfiles formats, and readcon-core
+    (>= 0.16.2) for .con and .convel files. pkg-config modules:
+    chemfiles, readcon-core. CHEMFILES_ROOT, CHEMFILES_LIBDIR,
+    READCON_ROOT, and READCON_LIBDIR select a prefix.
 NeedsCompilation: yes
 Config/testthat/edition: 3
 X-schema.org-keywords: molecular-dynamics, trajectory-analysis, ice,

@@ -20,6 +20,20 @@ r-rmarkdown = ">=2.25"
 r-covr = "*"
 qpdf = "*"
 ca-certificates = "*"
+r-roxygen2 = ">=7.3"
+
+[feature.readers.dependencies]
+# Optional trajectory readers. The default environment leaves them out,
+# which is the CRAN build. readcon-core is not on conda-forge; the
+# readers environment supplies Rust and cargo-c so tools/install-readcon.sh
+# can install the upstream v0.16.2 the engine links.
+chemfiles = ">=0.10.4,<0.11"
+rust = ">=1.88,<2"
+cargo-c = ">=0.10"
+
+[environments]
+default = { features = [] }
+readers = { features = ["readers"] }
 
 [tasks]
 # SEAMS_CORE_SRC, when set, is copied instead of downloading the pin.

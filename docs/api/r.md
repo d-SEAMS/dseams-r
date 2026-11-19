@@ -1,7 +1,13 @@
 # R
 
 `dseams` is the R package for one trajectory frame. It reads a LAMMPS
-dump or an XYZ file and returns data frames. The function reference,
+dump or an XYZ file on every build, the chemfiles formats when
+chemfiles is compiled in, and readcon `.con` files when readcon-core
+is. readcon-core also defines `.convel`; this engine routes `.con`.
+It returns data frames for CHILL+, rings, cages, Steinhardt q4 and q6,
+hydrogen bonds, radial distribution functions, prisms, domains,
+monolayers, fingerprints, coordination, density profiles, and
+jump_tau90. The function reference,
 with a runnable example on every page, is
 <https://r.dseams.info/reference/>.
 
@@ -25,8 +31,14 @@ head(positions(frame))
 
 `read_frame()` returns a `dseams_frame`. `positions()` is a numeric
 matrix with columns `x`, `y`, and `z` in the units of the file.
-`nframes()` is the number of LAMMPS timesteps. An XYZ file counts as
-one frame.
+`nframes()` is the frame count. A LAMMPS dump counts timesteps. An XYZ
+file is counted from its header. With chemfiles compiled in, PDB, GRO,
+DCD, and the other chemfiles 0.10 formats use the chemfiles step count.
+With readcon-core compiled in, a `.con` file, and a `.convel` file the
+engine routes, is counted through readcon.
+
+`dseams_features()` is a named logical vector, `lammps`, `xyz`,
+`chemfiles`, and `readcon`. The first two are always `TRUE`.
 
 `type = 0` guesses oxygen (LAMMPS type 2, otherwise type 1). A positive
 type keeps that species. A negative type keeps every atom.
@@ -142,7 +154,11 @@ hydrogen. Comparing a frame with itself returns `NaN`.
 ## A system handle
 
 `seams_system_new()` returns an empty handle. `seams_system_read()`
-loads one frame into it and returns the atom count. Each later
+loads one frame into it and returns the atom count. The path follows
+the same rules as `read_frame()`: LAMMPS and XYZ on every build,
+chemfiles formats when `dseams_features()` reports `chemfiles`, and
+readcon `.con` files when it reports `readcon`. readcon-core also
+defines `.convel`; this engine routes `.con`. Each later
 `seams_*` function analyses that frame. R frees the handle when the
 object is collected. A failed read stops with the engine's message and
 leaves the previous frame in place.
@@ -167,6 +183,7 @@ runnable example.
 `dseams_threads()` reports the OpenMP thread count, and
 `dseams_threads(n)` sets it for later calls from this R session.
 `dseams_version()` is the engine version this package was built with.
+`dseams_features()` reports the readers compiled into that build.
 
 ## Errors
 
