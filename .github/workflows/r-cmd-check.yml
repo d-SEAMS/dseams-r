@@ -163,6 +163,9 @@ jobs:
       - name: Install readcon-core
         working-directory: dseams
         run: pixi run -e readers sh tools/install-readcon.sh
+      - name: Check find-readers.sh precedence and version handling
+        working-directory: dseams
+        run: pixi run -e readers sh tools/test-find-readers.sh
       - name: R CMD check
         working-directory: dseams
         run: |
