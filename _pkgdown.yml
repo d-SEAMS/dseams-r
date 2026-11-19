@@ -61,6 +61,23 @@ repo:
     issue: https://github.com/d-SEAMS/dseams-r/issues/
     user: https://github.com/
 
+redirects:
+  - ["reference/print.dseams_ice.html", "reference/chill_plus.html"]
+  - ["reference/summary.dseams_ice.html", "reference/chill_plus.html"]
+  - ["reference/print.dseams_cages.html", "reference/cages.html"]
+  - ["reference/summary.dseams_cages.html", "reference/cages.html"]
+  - ["reference/print.dseams_rings.html", "reference/primitive_rings.html"]
+  - ["reference/summary.dseams_rings.html", "reference/primitive_rings.html"]
+  - ["reference/print.dseams_steinhardt.html", "reference/steinhardt.html"]
+  - ["reference/summary.dseams_steinhardt.html", "reference/steinhardt.html"]
+  - ["reference/print.dseams_q4_q6.html", "reference/q4_q6.html"]
+  - ["reference/summary.dseams_q4_q6.html", "reference/q4_q6.html"]
+  - ["reference/print.dseams_system.html", "reference/seams_system_new.html"]
+  - ["reference/summary.dseams_system.html", "reference/seams_system_new.html"]
+  - ["reference/print.dseams_chill.html", "reference/seams_chill.html"]
+  - ["reference/summary.dseams_chill.html", "reference/seams_chill.html"]
+  - ["reference/summary.dseams_frame.html", "reference/read_frame.html"]
+
 reference:
   - title: Read a frame
     desc: One configuration from a LAMMPS dump or an XYZ file.

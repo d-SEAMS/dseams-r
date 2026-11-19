@@ -6,6 +6,12 @@ CHILL+ labels, primitive rings, hexagonal and double-diamond cages, and
 Steinhardt order parameters. The calculations are the
 [d-SEAMS](https://dseams.info) engine.
 
+## Documentation
+
+- [Function reference and vignette](https://r.dseams.info/)
+- [R chapter of the d-SEAMS book](https://docs.dseams.info/stable/r.html)
+- [Video walk-through](https://odysee.com/dseams-r:e0c4871fe0399cf259531b5961c436abd79acadb)
+
 ## Installation
 
 A C++20 compiler is required. The package compiles the engine as it
@@ -15,6 +21,13 @@ installs.
 install.packages("remotes")
 remotes::install_github("d-SEAMS/dseams-r")
 ```
+
+An `R CMD build` source tarball carries the engine and installs without a
+separate seams-core checkout or a network connection. A git checkout instead
+copies the engine from `SEAMS_CORE_SRC` or downloads the revision in
+`tools/seams-core.ref`; set `DSEAMS_NO_DOWNLOAD=1` to require a local source
+tree. The [R API guide](docs/api/r.md#installing-from-source) also shows how
+to link an existing seams-core installation or build tree.
 
 ## Classify one frame
 
@@ -42,6 +55,3 @@ Modeling. <https://doi.org/10.1021/acs.jcim.0c00031>. `citation("dseams")`
 prints the record.
 
 Report bugs at <https://github.com/d-SEAMS/dseams-r/issues>.
-
-A video walk-through of the same dumps:
-<https://odysee.com/dseams-r:e0c4871fe0399cf259531b5961c436abd79acadb>.
