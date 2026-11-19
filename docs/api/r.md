@@ -13,6 +13,33 @@ remotes::install_github("d-SEAMS/dseams-r")
 A C++20 compiler is required. The package compiles the engine as it
 installs.
 
+## Installing from source
+
+A source tarball made by `R CMD build` carries the engine sources and installs
+without a seams-core checkout or a network connection. In a git checkout,
+`configure` copies them from `SEAMS_CORE_SRC` (or `DSEAMS_ROOT`), or downloads
+the revision in `tools/seams-core.ref`. Set `DSEAMS_NO_DOWNLOAD=1` when the
+build must use a local source tree.
+
+To link an existing engine of the same version instead of compiling the
+bundled copy:
+
+```bash
+# seams and seams-lang are installed as pkg-config modules
+DSEAMS_SYSTEM_ENGINE=1 R CMD INSTALL .
+
+# libseams and libseams_lang are in a seams-core build tree
+DSEAMS_ROOT=/path/to/seams-core \
+  SEAMS_LIBDIR=/path/to/seams-core/build/bindings \
+  R CMD INSTALL --preclean .
+```
+
+`SEAMS_LIBDIR` names the directory containing `libseams_lang`.
+`DSEAMS_ROOT` supplies both headers and the default location of `libseams`.
+`SEAMS_INCLUDE`, `SEAMS_H_DIR`, and `SEAMS_SO_DIR` override those locations.
+Use `--preclean` when changing between bundled and linked builds so R does not
+reuse objects compiled for the other mode.
+
 ## Read a frame
 
 ```r
@@ -154,6 +181,13 @@ seams_chill(sys)
 seams_cages(sys)
 ```
 
+The complete low-level example
+[`inst/examples/r_capi.R`](../../inst/examples/r_capi.R) calls every
+`seams_*` wrapper and compares its result with the C++ reference executable.
+`DSEAMS_ROOT` names the seams-core checkout and `SEAMS_CPP_ORACLE` names its
+`build/bindings/binding_oracle`; the package and oracle must use the same
+engine build.
+
 `seams_chill()` returns the nine population counts in the label order
 above. `graph = 0` is the cutoff list and `graph = 1` is the mutual
 list. `rule = 0` is the published CHILL+ rule and `rule = 1` is the
@@ -167,6 +201,18 @@ runnable example.
 `dseams_threads()` reports the OpenMP thread count, and
 `dseams_threads(n)` sets it for later calls from this R session.
 `dseams_version()` is the engine version this package was built with.
+
+## Ownership
+
+`dseams_frame` and `dseams_system` objects contain external pointers. R
+releases their native memory when the owning object is collected. Keep the
+frame or system object alive while calling its methods; do not extract and
+retain `frame$ptr` on its own.
+
+Neighbour, ring, cage, and fingerprint handles created inside a `seams_*`
+call are released before that call returns. A `dseams_system` is different:
+the caller creates it with `seams_system_new()`, may reuse it for several
+analyses, and lets its finalizer release it.
 
 ## Errors
 

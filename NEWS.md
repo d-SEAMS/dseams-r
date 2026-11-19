@@ -1,5 +1,7 @@
 # dseams (development version)
 
+* Restore reader guidance for source and linked-engine installs, native
+  object ownership, and the complete R language-task example.
 * Rewrite the README, the vignette, and the help pages around reading one
   frame and reading the data frames that come back. Every exported
   function has a runnable example.
