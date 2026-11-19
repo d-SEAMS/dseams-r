@@ -157,13 +157,21 @@ Goswami's between the author markers above if she should be on the issue.
 
   Checked the live CRAN package index
   (<https://CRAN.R-project.org/web/packages/available_packages_by_name.html>,
-  fetched during this review) for "chill", "clathrate", "hydrate",
+  fetched during this review; the exact search and full result list
+  are in `logs/cran-search.log`) for "chill", "clathrate", "hydrate",
   "molecular dynamics" and "franzblau": no CRAN package performs CHILL+
   ice classification, Franzblau primitive rings, or a clathrate/cage
-  census; the only "chill" hits are agricultural chill-hour models
-  (`ChillModels`, `chillR`), an unrelated domain, and the only
-  "molecular dynamics" hit (`SOMMD`) does self-organising-map analysis of
-  simulation output, not structure classification. Outside CRAN,
+  census. The only genuine "chill" hits are agricultural chill-hour
+  models (`ChillModels`, `chillR`), an unrelated domain (a plain
+  substring search on "chill" also matches `Achilles`, a clinical
+  data-source package, which is neither agricultural nor related to
+  ice). "molecular dynamics" matches two packages, not one: `SOMMD`
+  does self-organising-map analysis of simulation output, not
+  structure classification, and `xvm` reads and plots 'GROMACS' own
+  scalar time series ('XVG'/'XPM' files: RMSD, energy, temperature),
+  not 'LAMMPS' dumps or 'XYZ' trajectories, and computes none of
+  CHILL+ labels, primitive rings, or cage/point-group classification.
+  Neither package does what `dseams` does. Outside CRAN,
   [OVITO](https://www.ovito.org/) is, by its own description, "scientific
   data visualization and analysis software for particle-based simulation
   models" and can identify some of the same structures, but is not an R
@@ -303,10 +311,16 @@ does not have yet. It is not requested by the checkboxes above.
 ## pkgcheck
 
 `pkgcheck::pkgcheck(".", use_cache = FALSE)` (pkgcheck 0.3.4.5, pkgstats
-0.2.5.4) and `R CMD check --as-cran --no-manual` were run against commit
-`f5520b6` of this branch, with R 4.5.3 and a vendored copy of the
-seams-core v2.14.1 engine (`sh tools/vendor.sh`). Full logs are in the
-handoff bundle (`logs/pkgcheck.log` for both pkgcheck and the
+0.2.5.4) and `R CMD check --as-cran --no-manual` were run on the
+submission branch, at package version 2.14.1 (the `Version` field in
+the DESCRIPTION pasted above), with R 4.5.3 and a vendored copy of the
+seams-core v2.14.1 engine (`sh tools/vendor.sh`). This cites the
+version rather than a commit, because each review round rewrites this
+submission as a fresh set of commits on top of the last accepted
+round, applied with `git format-patch`/`git am`; a local commit hash
+from the sandbox that produced these checks would not exist in that
+upstream history and so could never be looked up there. Full logs are
+in the handoff bundle (`logs/pkgcheck.log` for both pkgcheck and the
 goodpractice checks it runs, `logs/r-cmd-check-as-cran.log`,
 `logs/testthat.log`, `logs/covr.log`, `logs/pkgdown-build-site.log`).
 
@@ -372,7 +386,7 @@ What the repository gives pkgcheck:
   `_R_CHECK_SYSTEM_CLOCK_` governs a separate, nested block inside the
   future-file-timestamp check. Verified directly against R 4.5.3's
   `tools:::check.R` (the version `pixi.toml` pins, and this review's
-  local run used): that block spans lines 521-568 -- when the variable
+  local run used): that block spans lines 521-568. When the variable
   is the default `TRUE` (nothing in `pixi.toml` or this review's local
   setup changes it), the check queries `worldtimeapi.org` (https, then
   http) and, failing both, `worldclockapi.com`, and NOTEs "unable to
