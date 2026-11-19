@@ -69,7 +69,8 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
-URL: https://docs.dseams.info, https://github.com/d-SEAMS/dseams-r,
+URL: https://r.dseams.info/, https://docs.dseams.info,
+    https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core
 BugReports: https://github.com/d-SEAMS/dseams-r/issues
 Encoding: UTF-8
@@ -130,14 +131,20 @@ Goswami's between the author markers above if she should be on the issue.
   guide](https://devguide.ropensci.org/softwarereview_policies.html#package-categories)
   describes that category as tools "for handling data in specific
   scientific formats generated from scientific workflows". `read_frame()`
-  parses LAMMPS dump and XYZ trajectories (the output format of a
-  molecular-dynamics workflow) into an R-native `dseams_frame`; `chill_plus()`,
-  `cages()`, `primitive_rings()`, `steinhardt()` and `q4_q6()` turn that
-  frame into documented, S3-classed data frames (`dseams_ice`,
-  `dseams_cages`, `dseams_rings`, `dseams_steinhardt`, `dseams_q4_q6`).
-  That said, several of those functions classify or count structures
-  rather than only reformat them, so the fit is not as clean as the
-  guide's own `data munging` examples (`plateR`, `phonfieldwork`); see the
+  (`R/dseams.R:50-62`) parses LAMMPS dump and XYZ trajectories (the output
+  format of a molecular-dynamics workflow) into an R-native
+  `dseams_frame`. That said, it is not a clean "reformat the file into a
+  data frame" fit: `chill_plus()` (`R/dseams.R:144-156`) assigns each atom
+  one of nine CHILL+ labels from a computed q3 order parameter and the
+  published Nguyen-and-Molinero decision rule; `cages()`
+  (`R/dseams.R:176-187`) and `primitive_rings()` (`R/dseams.R:209-222`)
+  build a neighbour graph from the coordinates and classify or count ring
+  and cage membership in it, values that are not present in the input
+  file at all; and `symmetry()` (`R/dseams.R:286-294`) assigns a
+  point-group code from an RMSD to a reference ice template.
+  `steinhardt()` (`R/dseams.R:321-335`) and `q4_q6()` (`R/dseams.R:354-363`)
+  are the closest to a plain reformat, computing bond-orientational order
+  parameters per atom and returning them as data frames. See the
   presubmission-inquiry note below.
 
 -   Who is the target audience and what are scientific applications of this package?
@@ -148,12 +155,33 @@ Goswami's between the author markers above if she should be on the issue.
 
 -   Are there other R packages that accomplish the same thing? If so, how does yours differ or meet [our criteria for best-in-category](https://ropensci.github.io/dev_guide/policies.html#overlap)?
 
-  No CRAN package performs CHILL+ ice classification, Franzblau primitive
-  rings, and the d-SEAMS cage census. Neighbouring tools are outside R
-  (the d-SEAMS engine itself, and Python and visualisation codes such as
-  OVITO). `dseams` is the R binding of that engine, with the same ice Ih
-  reference counts the other bindings use (128 hexagonal waters and 256
-  six-membered rings on `ice1h.lammpstrj`).
+  Checked the live CRAN package index
+  (<https://CRAN.R-project.org/web/packages/available_packages_by_name.html>,
+  fetched during this review) for "chill", "clathrate", "hydrate",
+  "molecular dynamics" and "franzblau": no CRAN package performs CHILL+
+  ice classification, Franzblau primitive rings, or a clathrate/cage
+  census; the only "chill" hits are agricultural chill-hour models
+  (`ChillModels`, `chillR`), an unrelated domain, and the only
+  "molecular dynamics" hit (`SOMMD`) does self-organising-map analysis of
+  simulation output, not structure classification. Outside CRAN,
+  [OVITO](https://www.ovito.org/) is, by its own description, "scientific
+  data visualization and analysis software for particle-based simulation
+  models" and can identify some of the same structures, but is not an R
+  package and is not itself the d-SEAMS engine. `dseams` is the R
+  binding of the d-SEAMS C++ engine; on `ice1h.lammpstrj` (every atom),
+  the published CHILL+ reference count of 128 hexagonal waters that
+  `R/dseams.R:120-121` documents and
+  `tests/testthat/test-ice.R:10-11` asserts is the same count the engine's own
+  Python and Julia binding docs record for the identical input
+  ([`docs/api/python.md`](https://github.com/d-SEAMS/seams-core/blob/main/docs/api/python.md):
+  "the same call returns 128 at index 1"; 
+  [`docs/api/julia.md`](https://github.com/d-SEAMS/seams-core/blob/main/docs/api/julia.md):
+  "published CHILL+ at 3.5 angstrom is 128 hexagonal"), in both
+  `d-SEAMS/seams-core`.   The 256 primitive-ring count on the same file is
+  this package's own tested value (`R/dseams.R:121`,
+  `tests/testthat/test-ice.R:14`); this review did not find the same
+  figure documented for the Python or Julia bindings specifically, so it
+  is not claimed as cross-binding-verified.
 
 -   (If applicable) Does your package comply with our [guidance around _Ethics, Data Privacy and Human Subjects Research_](https://devguide.ropensci.org/policies.html#ethics-data-privacy-and-human-subjects-research)?
 
@@ -175,16 +203,10 @@ Goswami's between the author markers above if she should be on the issue.
   series, unsupervised learning) do not apply, and the package does not
   carry `@srrstats` tags.
 
-  Three further pkgcheck/goodpractice items need explaining rather than
+  Two further pkgcheck/goodpractice items need explaining rather than
   fixing (see the pkgcheck summary below for the full output they come
   from):
 
-  - Long-line linter hits (36, mostly in `R/capi.R` and
-    `inst/examples/`): these are single-expression `.Call()` wrappers and
-    `@return` lines that run 81-117 characters, a few past the 80-column
-    guideline. Wrapping a one-argument-per-line `.Call()` in a file of
-    near-identical thin wrappers would add noise, not readability, so
-    they stay as single lines.
   - Function names duplicated in other packages: `positions()` is also
     exported by `mixvlmc`, `splus2R` and `splusTimeSeries`, and
     `symmetry()` by `DecomposeR` and `xnet`. Both names are kept because
@@ -200,14 +222,15 @@ Goswami's between the author markers above if she should be on the issue.
 ### Presubmission inquiry
 
 None of the listed categories is an exact match: `data munging` is the
-closest honest fit (see above), but the guide's own examples for that
-category (`plateR`, `phonfieldwork`) only reformat data, while several
-`dseams` functions classify structures (CHILL+ ice labels, ring and cage
-membership) rather than just reshape them. Given that, a pre-submission
-inquiry to confirm scope before opening the full review issue is the
-right next step, rather than asserting a category that may not survive
-editor triage. The following is a draft of that inquiry, for Rohit to
-review, edit and post himself; it has not been sent.
+closest honest fit (see above), but `chill_plus()`, `cages()`,
+`primitive_rings()` and `symmetry()` classify structures (CHILL+ ice
+labels, ring and cage membership, point-group symmetry) computed from a
+neighbour graph, rather than only reshaping values already present in
+the input file (see the function-by-function detail above). Given that,
+a pre-submission inquiry to confirm scope before opening the full review
+issue is the right next step, rather than asserting a category that may
+not survive editor triage. The following is a draft of that inquiry, for
+Rohit to review, edit and post himself; it has not been sent.
 
 > **Draft presubmission inquiry (not yet posted)**
 >
@@ -298,15 +321,23 @@ What the repository gives pkgcheck:
   `d-SEAMS/dseams-r` run IDs 44552815028 and 44552815409) are green.
 - Coverage: covr on the R code is 100 percent (`R/capi.R`,
   `R/dseams-package.R`, `R/dseams.R`, `R/s3.R`) with the package linked
-  against seams-core and `SEAMS_CPP_ORACLE` set, as the test-coverage
-  workflow runs it (confirmed from that run's own log: "dseams Coverage:
-  100.00%"). `.covrignore` leaves out `src/`, the engine copy and the C
-  and C++ glue, which seams-core and the oracle test check, and
-  `.pixi/`, the local toolchain. The workflow writes the figure to the
-  job summary; nothing uploads it to a coverage service. A local,
+  against a seams-core build at the pin (`DSEAMS_ROOT`, `SEAMS_LIBDIR`,
+  `SEAMS_BIN` and `SEAMS_CPP_ORACLE` all set), as the test-coverage
+  workflow runs it; this review re-checked run 44552815409 directly
+  (`gh run view --job=135686626700 --log`), whose own log reads "dseams
+  Coverage: 100.00%". `.covrignore` leaves out `src/`, the engine copy
+  and the C and C++ glue, which seams-core and the oracle test check,
+  and `.pixi/`, the local toolchain. The workflow writes the figure to
+  the job summary; nothing uploads it to a coverage service. A bundled,
   unlinked run of `covr::package_coverage()` in this review (no
-  `DSEAMS_ROOT`/`SEAMS_CPP_ORACLE`, so the oracle-comparison code paths
-  are skipped rather than exercised) measured 75 percent; that gap is
+  `DSEAMS_ROOT`, `SEAMS_LIBDIR` or `SEAMS_CPP_ORACLE`) measured 62.8
+  percent overall, with `R/capi.R` at 19.75 percent: most of that file's
+  coverage comes from `tests/testthat/test-doc-examples.R`'s comparison
+  against `binding_oracle`, which needs the package itself linked
+  against a seams-core build (`SEAMS_LIBDIR`), not only `DSEAMS_ROOT` and
+  `SEAMS_CPP_ORACLE` (see the comment at
+  `tests/testthat/test-doc-examples.R:63-66`: the bundled copy omits the
+  optional CON reader the oracle test's fixtures need). That gap is
   expected from AGENTS.md's own note that those tests skip without a
   linked seams-core build, not a regression from the CI figure above.
 - `R CMD check --as-cran --no-manual` of the bundled tarball on R 4.5.3
@@ -315,39 +346,50 @@ What the repository gives pkgcheck:
   current time` under "checking for future file timestamps"). The CI job
   linked above reports a clean `Status: OK` for the same
   `--as-cran --no-manual` invocation, on R 4.6.2 (its own log says so).
-  Neither this repository's workflows nor the pinned `check-r-package`
-  action set `NOT_CRAN` or `_R_CHECK_SYSTEM_CLOCK_` anywhere
-  (`.github/workflows/r-cmd-check.yml` sets only
-  `_R_CHECK_FORCE_SUGGESTS_`, at lines 44 and 94); those two settings
-  play no part here. What the pinned action does set, when otherwise
-  unset, is `_R_CHECK_CRAN_INCOMING_=false`
-  (`check-r-package/action.yaml:47` at the commit
-  `.github/workflows/r-cmd-check.yml:80` pins, `f9a764fe`). R's own
-  `tools:::check.R` reads that variable to decide whether to run
-  `check_CRAN_incoming()` at all (gated at lines 7729-7737 in R 4.5.3,
-  7958-7966 in R 4.6.2): when it is false the whole "checking CRAN
-  incoming feasibility" step is skipped outright, not just its message,
-  which is why CI's log has no such step and no `New submission` NOTE.
+  This repository's own workflow files set only
+  `_R_CHECK_FORCE_SUGGESTS_` directly (`.github/workflows/r-cmd-check.yml`
+  lines 44 and 94); both notes are instead explained by what the two
+  pinned actions the "bundled" job runs set on its behalf.
 
-  The second note is not suppressed by any variable, and this review
-  cannot fully verify why CI's run avoids it. `--as-cran` always forces
-  the future-file-timestamp check on (`_R_CHECK_FUTURE_FILE_TIMESTAMPS_
-  = "TRUE"` at `check.R:7404` in R 4.5.3, `check.R:7612` in R 4.6.2),
-  and `_R_CHECK_SYSTEM_CLOCK_` defaults to `TRUE` in both versions
-  (`check.R:521` / `check.R:527`) when nothing sets it, as is the case
-  here. R 4.5.3 (this review's run) then queries `worldtimeapi.org`
-  (https, then http) and, failing both, `worldclockapi.com`, noting
-  "unable to verify current time" only if all three fail
-  (`check.R:515-553`); repeating that exact lookup in this review's own
-  sandbox, right now, fails on all three. R 4.6.2 (CI's run) instead
-  tries an HTTP date header from `https://CRAN.R-project.org` first,
-  then `timeapi.io`, then `worldtimeapi.org` (the same check, lines
-  515-553 in 4.6.2's `check.R`) -- a different, CRAN-anchored set of
-  endpoints, and CRAN itself is reachable from this sandbox. Whether
-  CI's run actually succeeded via `CRAN.R-project.org` or one of the
-  other two is unverified from here: the CI log only records
-  `checking for future file timestamps ... OK`, and `check.R` does not
-  log which attempt succeeded.
+  `r-lib/actions/setup-r` (`.github/workflows/r-cmd-check.yml:59`,
+  pinned to commit `f9a764fe`) unconditionally exports
+  `_R_CHECK_SYSTEM_CLOCK_=FALSE` for the rest of the job, and
+  `NOT_CRAN=true` if nothing has already set it
+  (`setREnvironmentVariables()` in its compiled source,
+  `setup-r/src/installer.ts:826-829`, called at line 94 of that same
+  file). `r-lib/actions/check-r-package`
+  (`.github/workflows/r-cmd-check.yml:80`), which runs later in the same
+  job, separately sets `_R_CHECK_CRAN_INCOMING_=false` when that is
+  otherwise unset (`check-r-package/action.yaml:47`).
+
+  R's own `tools:::check.R` reads `_R_CHECK_CRAN_INCOMING_` to decide
+  whether to run `check_CRAN_incoming()` at all (gated at lines
+  7729-7737 in R 4.5.3, 7958-7966 in R 4.6.2): when it is `false`, the
+  whole "checking CRAN incoming feasibility" step, and with it the
+  `New submission` NOTE, is skipped outright rather than just silenced.
+  That is why CI's log has no such step at all.
+
+  `_R_CHECK_SYSTEM_CLOCK_` governs a separate, nested block inside the
+  future-file-timestamp check. Verified directly against R 4.5.3's
+  `tools:::check.R` (the version `pixi.toml` pins, and this review's
+  local run used): that block spans lines 521-568 -- when the variable
+  is the default `TRUE` (nothing in `pixi.toml` or this review's local
+  setup changes it), the check queries `worldtimeapi.org` (https, then
+  http) and, failing both, `worldclockapi.com`, and NOTEs "unable to
+  verify current time" only if all three fail; when it is `FALSE`, that
+  whole online-lookup block is skipped, and only a separate, unrelated
+  check of the built tarball's own file modification times runs
+  afterwards. This review repeated R 4.5.3's exact three-endpoint lookup
+  live in its own sandbox and all three fail there, reproducing the
+  NOTE locally. On CI, `setup-r` has already set
+  `_R_CHECK_SYSTEM_CLOCK_=FALSE` by the time `check-r-package` runs
+  `R CMD check`, so the online lookup never runs on CI at all;
+  `checking for future file timestamps ... OK` in that job's log is the
+  separate, unrelated file-timestamp check passing (nothing in the
+  tarball has a future modification time), not a successful time query.
+  `NOT_CRAN=true` plays no part in either NOTE: the string `NOT_CRAN`
+  does not appear anywhere in `tools:::check.R`, and `dseams`'s own
+  tests do not call `skip_on_cran()` or otherwise read that variable.
   `.github/workflows/release.yml` repeats `--as-cran --no-manual` on a
   `v*` tag and publishes the source tarball only for d-SEAMS/dseams-r.
 
@@ -361,14 +403,6 @@ Expected notes, not checklist failures:
   they are the plain names for the frame coordinate matrix and the
   reclassified point-group label, `dseams` does not depend on those
   packages, and the names are unambiguous inside this package.
-- 36 lines over 80 columns (`lintr_line_length_linter`): 21 in
-  `R/capi.R`, 11 across `inst/examples/r_capi.R` (8) and
-  `inst/examples/science_tutorials.R` (3), 2 in
-  `tests/testthat/test-s3.R`, and 1 each in `R/dseams.R` and
-  `tests/testthat/test-doc-examples.R`. Most are single-expression
-  `.Call()` wrappers or `@return`/example lines; they stay as single
-  lines rather than being wrapped mid-call, which would scatter a short,
-  mechanical wrapper file across more lines without adding information.
 - `expect_equal()` stays in the ice tests where the comparison is a count
   or a mean. `goodpractice` prefers `expect_identical()` for exact
   values.
