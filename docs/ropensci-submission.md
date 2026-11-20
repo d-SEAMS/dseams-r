@@ -410,12 +410,18 @@ compiles that pin, passes the test.
 
 `testthat::test_local()` and `testthat::test_check()` both load and
 pass on the bundled build, and `cpp11::cpp_register()` leaves
-`R/cpp11.R` and `src/cpp11.cpp` unchanged. Nine tests skip when
-`DSEAMS_ROOT` and `SEAMS_BIN` are unset, and the submission-file test
-skips on an installed tree because it has no `tools/check-submission.R`.
-`R CMD check` of the source tarball runs that submission test from
-`00_pkg_src` and reports `checking tests ... OK`. On the linked
-install, `test_check()` reports the version failure above.
+`R/cpp11.R` and `src/cpp11.cpp` unchanged. With `DSEAMS_ROOT` and
+`SEAMS_BIN` unset, `test_local()` skips 8 tests. Six are the example
+scripts in `tests/testthat/test-doc-examples.R`, and one is the
+cubic-ice test in `tests/testthat/test-ice.R`: each stops because
+`DSEAMS_ROOT` is unset. The eighth is the seeded-cage comparison in
+`test-ice.R`, which stops because `SEAMS_BIN` is unset. That
+`test_local()` run does not skip the submission-file test. That test
+skips only on an installed tree, where `tools/check-submission.R` is
+not beside the test, and that is the ninth skip in `test_check()` of
+an install. `R CMD check` of the source tarball runs the submission
+test from `00_pkg_src` and reports `checking tests ... OK`. On the
+linked install, `test_check()` reports the version failure above.
 
 Names shared with other packages stay. `positions()` is the frame
 coordinate matrix and `symmetry()` is the reclassified point-group
