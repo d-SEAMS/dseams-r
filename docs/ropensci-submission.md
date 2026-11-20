@@ -1,9 +1,15 @@
 # rOpenSci software-review submission (draft)
 
-Draft for Rohit Goswami to review. This file is the issue body. It has not
-been opened on <https://github.com/ropensci/software-review>. Confirm the
-author attestations and the coauthor GitHub handles before pasting it into
-a new issue.
+Draft for Rohit Goswami to review. This file is the issue body, shaped
+by the current "Submit software for review" issue form at
+<https://github.com/ropensci/software-review/blob/main/.github/ISSUE_TEMPLATE/A-submit-software-for-review.md>
+(the 16 HTML-comment markers below, such as `author1` and `repourl`,
+match that form field for field; an older single-file
+`.github/ISSUE_TEMPLATE.md` link some drafts of this kind cite no longer
+resolves). It has not been opened on
+<https://github.com/ropensci/software-review>. Confirm the author
+attestations and the coauthor GitHub handles before pasting it into a new
+issue.
 
 The package is the root of <https://github.com/d-SEAMS/dseams-r>. The srr
 assessment is `srr-standards.md`.
@@ -21,7 +27,7 @@ Below, please enter values for (1) submitting author GitHub handle (replacing "@
 
 Submitting Author Name: Rohit Goswami
 Submitting Author Github Handle: <!--author1-->@HaoZeke<!--end-author1-->
-Other Package Authors Github handles: (comma separated, delete if none) <!--author-others--><!--end-author-others-->
+Other Package Authors Github handles: (comma separated, delete if none) <!--author-others-->@amritagos, @RuhiRG<!--end-author-others-->
 Repository:  <!--repourl-->https://github.com/d-SEAMS/dseams-r<!--end-repourl-->
 Version submitted: 2.14.1
 Submission type: <!--submission-type-->Standard<!--end-submission-type-->
@@ -48,7 +54,8 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-2393-8056")),
     person("Amrita", "Goswami", role = "aut",
            comment = c(ORCID = "0000-0001-8706-2383")),
-    person("Ruhila", "S", role = "ctb"),
+    person("Ruhila", "Goswami", role = "ctb",
+           comment = c(ORCID = "0000-0002-5443-9356")),
     person("d-SEAMS core team", role = "cph",
            comment = "seams-core engine sources bundled in src/seams")
     )
@@ -63,7 +70,8 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
-URL: https://docs.dseams.info, https://github.com/d-SEAMS/dseams-r,
+URL: https://r.dseams.info/, https://docs.dseams.info,
+    https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core
 BugReports: https://github.com/d-SEAMS/dseams-r/issues
 Encoding: UTF-8
@@ -88,9 +96,7 @@ Config/roxygen2/version: 8.1.1
 ```
 
 The R package is the root of that repository. Amrita Goswami is an
-author (`aut`) and Ruhila S a contributor (`ctb`) in the DESCRIPTION.
-Their GitHub handles are not recorded in the repository; add Amrita
-Goswami's between the author markers above if she should be on the issue.
+author (`aut`) and Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION.
 
 ## Scope
 
@@ -98,13 +104,13 @@ Goswami's between the author markers above if she should be on the issue.
 
 	- [ ] data retrieval
 	- [ ] data extraction
-	- [ ] data munging
+	- [x] data munging
 	- [ ] data deposition
     - [ ] data validation and testing
 	- [ ] workflow automation
 	- [ ] version control
 	- [ ] citation management and bibliometrics
-	- [x] scientific software wrappers
+	- [ ] scientific software wrappers
 	- [ ] field and lab reproducibility tools
 	- [ ] database software bindings
 	- [ ] geospatial data
@@ -113,9 +119,32 @@ Goswami's between the author markers above if she should be on the issue.
 
 - Explain how and why the package falls under these categories (briefly, 1-2 sentences):
 
-  `dseams` is a wrapper around the d-SEAMS C++ engine. It reads a LAMMPS
-  dump or an XYZ file and returns data frames of ice labels, ring counts,
-  cages, and order parameters. The numerical work is the bundled engine.
+  `dseams` is not a wrapper in the rOpenSci sense: the [package fit
+  policies](https://devguide.ropensci.org/softwarereview_policies.html#package-categories)
+  define "scientific software wrappers" as packages that wrap "non-R
+  utility programs", and say this "does not include wrappers of other R
+  packages or C/C++ libraries that can be included in R packages"; the
+  d-SEAMS engine is C++ compiled into `dseams` itself (`LinkingTo: cpp11,
+  RcppEigen`), not an external program invoked at run time. `data munging`
+  fits what the package actually does: [the
+  guide](https://devguide.ropensci.org/softwarereview_policies.html#package-categories)
+  describes that category as tools "for handling data in specific
+  scientific formats generated from scientific workflows". `read_frame()`
+  (`R/dseams.R:50-62`) parses LAMMPS dump and XYZ trajectories (the output
+  format of a molecular-dynamics workflow) into an R-native
+  `dseams_frame`. That said, it is not a clean "reformat the file into a
+  data frame" fit: `chill_plus()` (`R/dseams.R:144-156`) assigns each atom
+  one of nine CHILL+ labels from a computed q3 order parameter and the
+  published Nguyen-and-Molinero decision rule; `cages()`
+  (`R/dseams.R:176-187`) and `primitive_rings()` (`R/dseams.R:209-222`)
+  build a neighbour graph from the coordinates and classify or count ring
+  and cage membership in it, values that are not present in the input
+  file at all; and `symmetry()` (`R/dseams.R:286-294`) assigns a
+  shell-symmetry code from an RMSD to a reference ice template.
+  `steinhardt()` (`R/dseams.R:321-336`) and `q4_q6()` (`R/dseams.R:354-364`)
+  are the closest to a plain reformat, computing bond-orientational order
+  parameters per atom and returning them as data frames. See the
+  presubmission-inquiry note below.
 
 -   Who is the target audience and what are scientific applications of this package?
 
@@ -125,12 +154,41 @@ Goswami's between the author markers above if she should be on the issue.
 
 -   Are there other R packages that accomplish the same thing? If so, how does yours differ or meet [our criteria for best-in-category](https://ropensci.github.io/dev_guide/policies.html#overlap)?
 
-  No CRAN package performs CHILL+ ice classification, Franzblau primitive
-  rings, and the d-SEAMS cage census. Neighbouring tools are outside R
-  (the d-SEAMS engine itself, and Python and visualisation codes such as
-  OVITO). `dseams` is the R binding of that engine, with the same ice Ih
-  reference counts the other bindings use (128 hexagonal waters and 256
-  six-membered rings on `ice1h.lammpstrj`).
+  Checked the live CRAN package index
+  (<https://CRAN.R-project.org/web/packages/available_packages_by_name.html>;
+  the command, the date, and every title hit are in
+  `docs/cran-search.log`) for "chill", "clathrate", "hydrate",
+  "molecular dynamics" and "franzblau": no CRAN package performs CHILL+
+  ice classification, Franzblau primitive rings, or a clathrate/cage
+  census. The only genuine "chill" hits are agricultural chill-hour
+  models (`ChillModels`, `chillR`), an unrelated domain (a plain
+  substring search on "chill" also matches `Achilles`, a clinical
+  data-source package, which is neither agricultural nor related to
+  ice). "molecular dynamics" matches two packages, not one: `SOMMD`
+  does self-organising-map analysis of simulation output, not
+  structure classification, and `xvm` reads and plots 'GROMACS' own
+  scalar time series ('XVG'/'XPM' files: RMSD, energy, temperature),
+  not 'LAMMPS' dumps or 'XYZ' trajectories, and computes none of
+  CHILL+ labels, primitive rings, or cage or shell-symmetry classification.
+  Neither package does what `dseams` does. Outside CRAN,
+  [OVITO](https://www.ovito.org/) is, by its own description, "scientific
+  data visualization and analysis software for particle-based simulation
+  models" and can identify some of the same structures, but is not an R
+  package and is not itself the d-SEAMS engine. `dseams` is the R
+  binding of the d-SEAMS C++ engine; on `ice1h.lammpstrj` (every atom),
+  the published CHILL+ reference count of 128 hexagonal waters that
+  `R/dseams.R:120-121` documents and
+  `tests/testthat/test-ice.R:10-11` asserts is the same count the engine's own
+  Python and Julia binding docs record for the identical input
+  ([`docs/api/python.md`](https://github.com/d-SEAMS/seams-core/blob/main/docs/api/python.md):
+  "the same call returns 128 at index 1"; 
+  [`docs/api/julia.md`](https://github.com/d-SEAMS/seams-core/blob/main/docs/api/julia.md):
+  "published CHILL+ at 3.5 angstrom is 128 hexagonal"), in both
+  `d-SEAMS/seams-core`.   The 256 primitive-ring count on the same file is
+  this package's own tested value (`R/dseams.R:121`,
+  `tests/testthat/test-ice.R:14`); this review did not find the same
+  figure documented for the Python or Julia bindings specifically, so it
+  is not claimed as cross-binding-verified.
 
 -   (If applicable) Does your package comply with our [guidance around _Ethics, Data Privacy and Human Subjects Research_](https://devguide.ropensci.org/policies.html#ethics-data-privacy-and-human-subjects-research)?
 
@@ -139,17 +197,62 @@ Goswami's between the author markers above if she should be on the issue.
 
 -   If you made a pre-submission inquiry, please paste the link to the corresponding issue, forum post, or other discussion, or `@tag` the editor you contacted.
 
-  No pre-submission inquiry.
+  No pre-submission inquiry yet; see the recommendation and draft text
+  below.
 
 -   Explain reasons for any [`pkgcheck` items](https://docs.ropensci.org/pkgcheck/) which your package is unable to pass.
 
-  See the pkgcheck summary at the end of this file. Standards from the
+  The pkgcheck section quotes the run and says why each remaining
+  item stays. Standards from the
   statistical-software track are assessed in
   `srr-standards.md`. `dseams` is not statistical
   software, so the category standards (Bayesian, regression, machine
   learning, distributions, exploratory data analysis, spatial, time
   series, unsupervised learning) do not apply, and the package does not
   carry `@srrstats` tags.
+
+  Two exported names that other packages also use are kept:
+
+  - Function names duplicated in other packages: `positions()` is also
+    exported by `mixvlmc`, `splus2R` and `splusTimeSeries`, and
+    `symmetry()` by `DecomposeR` and `xnet`. Both names are kept because
+    they are the plain English names for what they return here (the atom
+    coordinate matrix of a frame, and its shell-symmetry code),
+    `dseams` does not depend on or re-export those packages, and
+    neither name collides inside this package's own namespace.
+
+### Presubmission inquiry
+
+None of the listed categories is an exact match: `data munging` is the
+closest honest fit (see above), but `chill_plus()`, `cages()`,
+`primitive_rings()` and `symmetry()` classify structures (CHILL+ ice
+labels, ring and cage membership, shell symmetry) computed from a
+neighbour graph, rather than only reshaping values already present in
+the input file (see the function-by-function detail above). Given that,
+a pre-submission inquiry to confirm scope before opening the full review
+issue is the right next step, rather than asserting a category that may
+not survive editor triage. The following is a draft of that inquiry, for
+Rohit to review, edit and post himself; it has not been sent.
+
+> **Draft presubmission inquiry (not yet posted)**
+>
+> Title: Presubmission inquiry: dseams, an R interface to the d-SEAMS
+> ice/water structural-analysis engine
+>
+> `dseams` (<https://github.com/d-SEAMS/dseams-r>) reads LAMMPS dump and
+> XYZ molecular-dynamics trajectories and returns R data frames of CHILL+
+> ice labels, Franzblau primitive ring counts, hexagonal/double-diamond
+> cage membership, and Steinhardt bond-orientational order parameters,
+> computed by the bundled d-SEAMS C++ engine (compiled into the package,
+> not called as an external program). I am unsure which package-fit
+> category this falls under. `scientific software wrappers` is excluded
+> by its own definition, since the engine is a C++ library linked into
+> the package rather than a wrapped external utility. `data munging`
+> looks closest, since the package parses a scientific file format
+> produced by a simulation workflow into structured, documented data
+> frames, but several of its functions classify structures rather than
+> only reshape them. Does `dseams` fit the Software Peer Review scope,
+> and if so under which category?
 
 ## Technical checks
 
@@ -171,6 +274,8 @@ This package:
 ## Use of Generative AI
 
 - [x] Generative AI tools were used to produce some of the material in this submission.
+
+Generative AI tools were used while drafting and revising parts of this repository, including portions of the documentation and this submission issue. I have reviewed all AI-assisted contributions, including the parts of this file, and take full responsibility for the correctness of the code and the accuracy of the statements made here.
 
 ## Publication options
 
@@ -201,40 +306,133 @@ does not have yet. It is not requested by the checkboxes above.
 
 ## pkgcheck
 
-The pkgcheck run recorded in earlier drafts (pkgcheck 0.3.4) predates the
-move of the package into d-SEAMS/dseams-r, and its CI and coverage lines
-described seams-core. Run `pkgcheck::pkgcheck()` again on the pushed
-default branch and paste its summary here before opening the issue.
+Continuous integration is the four workflows in `.github/workflows/`.
+The run history is the Actions page:
+<https://github.com/d-SEAMS/dseams-r/actions>.
 
-What the repository gives pkgcheck now:
+- `r-cmd-check.yml` (`name: R-CMD-check`) runs on pushes and pull
+  requests to `main` and `release/**`, and on `workflow_dispatch`. The
+  bundled job copies the engine at the pin in `tools/seams-core.ref`
+  and runs `R CMD check --no-manual --as-cran` on Linux (R release and
+  devel), macOS, and Windows. On the Linux release cell that job also
+  checks that `cpp11::cpp_register()` leaves `R/cpp11.R` and
+  `src/cpp11.cpp` unchanged. The linked job
+  builds seams-core at that pin and runs `R CMD check --no-manual` with
+  the package linked against that build. Both jobs set
+  `_R_CHECK_FORCE_SUGGESTS_=true`.
+- `test-coverage.yml` (`name: test-coverage`) runs on the same events.
+  It links the package to a seams-core build at the pin and runs covr
+  on the R code (`.github/coverage.R`). `.covrignore` lists `src` and
+  `.pixi`, so the engine copy and the C and C++ glue under `src/` are
+  outside that figure. The workflow writes the per-file table to the
+  job summary and uploads the coverage object as an artifact. It does
+  not upload the figure to a coverage service.
+- `pkgdown.yml` (`name: pkgdown`) runs on pushes and pull requests to
+  `main`, and on `workflow_dispatch`. It builds the pkgdown site,
+  checks the site and README links, and on a push to `main` publishes
+  the site to GitHub Pages (<https://r.dseams.info/>). A later job
+  checks the links on the published pages.
+- `release.yml` (`name: Release`) runs on a `v*` tag. It checks that
+  the tag names the `Version` field in DESCRIPTION and that
+  `tools/seams-core.ref` pins `d-SEAMS/seams-core` at that tag, runs
+  `R CMD check --as-cran --no-manual`, and publishes the source
+  tarball for `d-SEAMS/dseams-r`.
 
-- CI: `.github/workflows/r-cmd-check.yml` (`name: R-CMD-check`) checks
-  the source package on Linux, macOS and Windows and links a seams-core
-  build at the pin. `.github/workflows/test-coverage.yml`
-  (`name: test-coverage`) runs covr. pkgcheck keeps runs whose name
-  matches `cmd` or `coverage`, so both count once they have run on the
-  default branch.
-- Coverage: covr on the R code is 100 percent (`R/capi.R`,
-  `R/dseams-package.R`, `R/dseams.R`, `R/s3.R`) with the package linked
-  against seams-core and `SEAMS_CPP_ORACLE` set, as the test-coverage
-  workflow runs it. `.covrignore` leaves out `src/`, the engine copy and
-  the C and C++ glue, which seams-core and the oracle test check, and
-  `.pixi/`, the local toolchain. The workflow writes the figure to the
-  job summary; nothing uploads it to a coverage service.
-- `R CMD check --as-cran` of the bundled tarball on R 4.5.3, including
-  the PDF manual: 0 errors, 0 warnings, 1 note (`New submission`).
-  `.github/workflows/release.yml` repeats `--as-cran --no-manual` on a
-  `v*` tag and publishes the source tarball only for d-SEAMS/dseams-r.
+`pkgcheck::pkgcheck(".", goodpractice = TRUE, use_cache = FALSE)`
+was run with R 4.5.3, pkgcheck 0.3.4.5, pkgstats 0.2.5 and
+goodpractice 1.2.0. CRAN pkgcheck 0.3.4 does not finish on this
+DESCRIPTION. It stops in `pkginfo_url_from_desc`:
 
-Expected notes, not checklist failures:
+```
+Error in type == "URL" && grepl("github\\.io", u, ignore.case = TRUE) :
+  'length = 2' in coercion to 'logical(1)'
+Calls: <Anonymous> -> pkgstats_info -> pkginfo_url_from_desc
+```
 
-- Ruhila S has no ORCID in the repository, so none was added.
-- `positions` and `symmetry` are also exported by other CRAN packages.
-  They stay, because those are the names of the frame coordinates and the
-  shell label.
-- `expect_equal()` stays in the ice tests where the comparison is a count
-  or a mean. `goodpractice` prefers `expect_identical()` for exact
-  values.
+The URL field has four URLs (DESCRIPTION lines 28-30). pkgcheck 0.3.4
+splits that field and, when more than one entry contains "git", keeps
+those. The two that remain are the GitHub repository URLs, and the
+`&&` comparison then fails with length 2. pkgcheck 0.3.4.5 is revision
+4569a193 of ropensci-review-tools/pkgcheck, which uses the first URL
+before that comparison. The URLs in DESCRIPTION were not edited to
+satisfy 0.3.4.
 
-`srr-standards.md` is the srr assessment. The package
-is not statistical software, so it does not carry `@srrstats` tags.
+The 0.3.4.5 run printed:
+
+```
+✖ Package has no continuous integration checks.
+✔ Package coverage is 100%.
+✔ All goodpractice linters passed.
+✔ All authors have ORCID IDs
+✖ R CMD check found 1 error.
+✖ R CMD check found 1 warning.
+```
+
+`pct_by_line` is 100. The CI sentence is pkgcheck reading GitHub
+Actions conclusions for workflows whose names match cmd or coverage.
+The four workflow files above are what the repository contains, and
+the Actions page is where their runs are listed. Coverage is this
+bundled run. `pdflatex` is not installed, and the log says `pdflatex
+not found! Not building PDF manual.` That is the error and the
+warning. `R CMD check --as-cran --no-manual` of the bundled tarball
+finished `Status: 1 NOTE`. The NOTE is `New submission`.
+
+`goodpractice::failed_checks` from that pkgcheck, and from a separate
+`goodpractice::gp(".", quiet = TRUE)`, is:
+
+```
+[1] "no_description_date"               "rcmdcheck_can_convert_rd_to_pdf_2"
+[3] "roxygen2_duplicate_params"
+```
+
+`spelling` is TRUE. The same three names are what
+`goodpractice::gp(".", quiet = FALSE)` printed. `quiet = TRUE`
+suppresses the progress bars; the checks still run.
+
+`Date: 2026-11-17` stays. It is the release date, the same day as
+`datePublished` in `codemeta.json` and `date-released` in
+`CITATION.cff`. `R CMD build` records the build date separately.
+
+The LaTeX item is the missing `pdflatex`. The `--no-manual` check did
+not report an Rd problem.
+
+The repeated `@param` lines are the same argument stated on each help
+page (`cutoff`, `frame`, `...`). Each page stands on its own, so the
+text is not folded into `@inheritParams`.
+
+The same tarball, linked against a seams-core develop build (meson
+`version: '2.14.0'`, commit 2c5d0fce), fails one test.
+`dseams_version()` returns `"2.14.0"` and the package version is
+`2.14.1`. `R CMD check --as-cran --no-manual` of that link finished
+`Status: 1 ERROR, 1 NOTE`. The NOTE is `New submission`. The test is
+unchanged: the package version is the engine version it binds, and
+the pin in `tools/seams-core.ref` is v2.14.1. The bundled check, which
+compiles that pin, passes the test.
+
+`testthat::test_local()` and `testthat::test_check()` both load and
+pass on the bundled build, and `cpp11::cpp_register()` leaves
+`R/cpp11.R` and `src/cpp11.cpp` unchanged. With `DSEAMS_ROOT` and
+`SEAMS_BIN` unset, `test_local()` skips 8 tests. Six are the example
+scripts in `tests/testthat/test-doc-examples.R`, and one is the
+cubic-ice test in `tests/testthat/test-ice.R`: each stops because
+`DSEAMS_ROOT` is unset. The eighth is the seeded-cage comparison in
+`test-ice.R`, which stops because `SEAMS_BIN` is unset. That
+`test_local()` run does not skip the submission-file test. That test
+skips only on an installed tree, where `tools/check-submission.R` is
+not beside the test, and that is the ninth skip in `test_check()` of
+an install. `R CMD check` of the source tarball runs the submission
+test from `00_pkg_src` and reports `checking tests ... OK`. On the
+linked install, `test_check()` reports the version failure above.
+
+Names shared with other packages stay. `positions()` is the frame
+coordinate matrix and `symmetry()` is the shell-symmetry code. `dseams` does not depend on the other packages that export
+those names, and neither name collides inside this package.
+
+`expect_equal()` stays where the comparison carries a tolerance.
+`tests/testthat/test-ice.R` compares a mean Steinhardt q3 to 0.374897
+with `tolerance = 1e-4`. `tests/testthat/test-s3.R` compares two means
+with `tolerance = 0`. `goodpractice` prefers `expect_identical()` for
+exact values; these two are not exact integer comparisons.
+
+`srr-standards.md` is the srr assessment. The package is not
+statistical software, so it does not carry `@srrstats` tags.

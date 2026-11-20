@@ -69,7 +69,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Ruhila S [contributor]
+  \item Ruhila Goswami (\href{https://orcid.org/0000-0002-5443-9356}{ORCID}) [contributor]
   \item d-SEAMS core team (seams-core engine sources bundled in src/seams) [copyright holder]
 }
 

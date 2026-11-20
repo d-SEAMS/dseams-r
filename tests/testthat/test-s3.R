@@ -13,10 +13,7 @@ test_that("an empty system stops with the handle text", {
 })
 
 test_that("summary methods print the frame", {
-  root <- Sys.getenv("DSEAMS_ROOT", unset = "")
-  tip <- file.path(root, "input", "traj", "exampleTraj.lammpstrj")
-  skip_if(root == "" || !file.exists(tip), "DSEAMS_ROOT is not set")
-  frame <- read_frame(tip, type = 2L)
+  frame <- read_frame(dseams_example("exampleTraj.lammpstrj"), type = 2L)
   expect_output(summary(frame), "dseams frame")
   ice <- chill_plus(frame)
   expect_s3_class(ice, "dseams_ice")
@@ -25,8 +22,10 @@ test_that("summary methods print the frame", {
 })
 
 test_that("a ring census prints and summarises", {
-  rings <- primitive_rings(read_frame(dseams_example("ice1h.lammpstrj"), type = -1L),
-                           graph = "cutoff", max_depth = 6L)
+  rings <- primitive_rings(
+    read_frame(dseams_example("ice1h.lammpstrj"), type = -1L),
+    graph = "cutoff", max_depth = 6L
+  )
   expect_s3_class(rings, "dseams_rings")
   expect_output(print(rings), "size")
   expect_output(summary(rings), "size")
@@ -48,13 +47,16 @@ test_that("cages, steinhardt and q4_q6 results print their counts", {
   expect_s3_class(qq, "dseams_q4_q6")
   expect_output(print(qq), "q4 q6, 128 atoms, mean q6")
   expect_output(summary(qq), "mean q4 .* mean q6")
-  # q6 of q4_q6 is the l = 6 parameter that steinhardt() reports.
-  expect_equal(mean(qq$q6), mean(st$ql))
+  # q4_q6() and steinhardt() call different C entry points, so compare
+  # numerically with zero tolerance instead of requiring bitwise identity.
+  expect_equal(mean(qq$q6), mean(st$ql), tolerance = 0)
 })
 
 test_that("a read system and its CHILL counts print", {
   sys <- seams_system_new()
-  expect_identical(seams_system_read(sys, dseams_example("ice1h.lammpstrj")), 128L)
+  expect_identical(
+    seams_system_read(sys, dseams_example("ice1h.lammpstrj")), 128L
+  )
   expect_output(print(sys), "dseams system 128 atoms")
   expect_output(summary(sys), "one loaded frame.*dseams system 128 atoms")
   chill <- seams_chill(sys)

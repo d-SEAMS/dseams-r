@@ -39,13 +39,15 @@ test_that("lang_tasks.R prints four bonds per water and the Ih rings", {
   expect_length(out, 1L)
   fields <- strsplit(trimws(out), " +")[[1]]
   expect_identical(fields[c(1L, 3L, 11L)], c("pairs", "rings", "chill"))
-  n <- nrow(positions(read_frame(file.path(root, "input", "traj", "ice1h.lammpstrj"),
-                                 type = -1L)))
+  n <- nrow(positions(read_frame(
+    file.path(root, "input", "traj", "ice1h.lammpstrj"),
+    type = -1L
+  )))
   # Every water in ice Ih has four neighbours inside 3.5 angstrom.
-  expect_equal(as.integer(fields[[2]]), 4L * n)
+  expect_identical(as.integer(fields[[2]]), 4L * n)
   # rings histogram: sizes 0 through 6.
-  expect_equal(as.integer(fields[[10]]), 256L)
-  expect_equal(sum(as.integer(fields[12:20])), n)
+  expect_identical(as.integer(fields[[10]]), 256L)
+  expect_identical(sum(as.integer(fields[12:20])), n)
 })
 
 test_that("science_tutorials.R reproduces the tutorial counts", {

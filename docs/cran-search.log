@@ -1,0 +1,61 @@
+CRAN package-index search for the dseams overlap note
+date: 2026-11-20T07:21:15Z
+command: curl -fsSL --retry 5 --retry-delay 2 -o /tmp/cran-evidence/available_packages_by_name.recorded.html https://CRAN.R-project.org/web/packages/available_packages_by_name.html
+index_bytes: 4274724
+index_sha256: 107d11ab68ef543b9cd6b241c5ac21f3fcd33fbedd58d3459f31a47d60d3062a
+packages: 25808
+match: case-insensitive substring of the package name or the title on that page
+
+term: chill
+hits: 3
+Achilles | Achilles Data Source Characterization
+ChillModels | Processing Chill and Heat Models for Temperate Fruit Trees
+chillR | Statistical Methods for Phenology Analysis in Temperate Fruit Trees
+
+term: clathrate
+hits: 0
+(none)
+
+term: hydrate
+hits: 0
+(none)
+
+term: molecular dynamics
+hits: 2
+SOMMD | Self Organising Maps for the Analysis of Molecular Dynamics Data
+xvm | Read, Parse and Visualize 'XVG'/'XPM' Files from Molecular Dynamics
+
+term: franzblau
+hits: 0
+(none)
+
+Package pages for every hit, description paragraph only
+command: curl -fsSL --retry 4 --retry-delay 2 -o /tmp/cran-evidence/pages/Achilles.recorded.html https://CRAN.R-project.org/web/packages/Achilles/index.html
+page_bytes: 7930
+page_sha256: 5a0454396c295dd46d4bf6f6bb879af69541d3ccee2694120ca32f425fd8f411
+package: Achilles
+description: Automated Characterization of Health Information at Large-Scale Longitudinal Evidence Systems. Creates a descriptive statistics summary for an Observational Medical Outcomes Partnership Common Data Model standardized data source. This package includes functions for executing summary queries on the specified data source and exporting reporting content for use across a variety of Observational Health Data Sciences and Informatics community applications.
+
+command: curl -fsSL --retry 4 --retry-delay 2 -o /tmp/cran-evidence/pages/ChillModels.recorded.html https://CRAN.R-project.org/web/packages/ChillModels/index.html
+page_bytes: 9087
+page_sha256: 9271571da56bc1287c256b02b13207c8b749455a37908311efbaa311797897b0
+package: ChillModels
+description: Calculates the chilling and heat accumulation for studies of the temperate fruit trees. The models in this package are: Utah (Richardson et al., 1974, ISSN:0018-5345), Positive Chill Units - PCU (Linsley-Noaks et al., 1995, ISSN:1017-0316), GDH-A - Growing Degree Hours by Anderson et al.(1986, ISSN:0567-7572), GDH-R - Growing Degree Hours by Richardson et al.(1975, ISSN:0018-5345), North Carolina (Shaltout e Unrath, 1983, ISSN:0003-1062), Landsberg Model (Landsberg, 1974, ISSN:0305-7364), Q10 Model (Bidabe, 1967, ISSN:0031-9368), Jones Model (Jones et al., 2013 <doi:10.1111/j.1438-8677.2012.00590.x>), Low-Chill Model (Gilreath and Buchanan, 1981, ISSN:0003-1062), Model for Cherry "Sweetheart" (Guak and Nielsen, 2013 <doi:10.1007/s13580-013-0140-9>), Model for apple "Gala" (Guak and Nielsen, 2013 <doi:10.1007/s13580-013-0140-9>), Taiwan Model (Lu et al., 2012 <doi:10.17660/ActaHortic.2012.962.35>), Dynamic Model (Fishman et al., 1987, ISSN:0022-5193) adapted from the function Dynamic_Model() of the 'chillR' package (Luedeling, 2018), Unified Model (Chuine et al., 2016 <doi:10.1111/gcb.13383>) and Heat Restriction model.
+
+command: curl -fsSL --retry 4 --retry-delay 2 -o /tmp/cran-evidence/pages/chillR.recorded.html https://CRAN.R-project.org/web/packages/chillR/index.html
+page_bytes: 12230
+page_sha256: aa4ab5fb0dadf42b9db0750de015acd9347e1465b11fe0856df3aad674ef69b5
+package: chillR
+description: The phenology of plants (i.e. the timing of their annual life phases) depends on climatic cues. For temperate trees and many other plants, spring phases, such as leaf emergence and flowering, have been found to result from the effects of both cool (chilling) conditions and heat. Fruit tree scientists (pomologists) have developed some metrics to quantify chilling and heat (e.g. see Luedeling (2012) <doi:10.1016/j.scienta.2012.07.011>). 'chillR' contains functions for processing temperature records into chilling (Chilling Hours, Utah Chill Units and Chill Portions) and heat units (Growing Degree Hours). Regarding chilling metrics, Chill Portions are often considered the most promising, but they are difficult to calculate. This package makes it easy. 'chillR' also contains procedures for conducting a PLS analysis relating phenological dates (e.g. bloom dates) to either mean temperatures or mean chill and heat accumulation rates, based on long-term weather and phenology records (Luedeling and Gassner (2012) <doi:10.1016/j.agrformet.2011.10.020>). As of version 0.65, it also includes functions for generating weather scenarios with a weather generator, for conducting climate change analyses for temperature-based climatic metrics and for plotting results from such analyses. Since version 0.70, 'chillR' contains a function for interpolating hourly temperature records.
+
+command: curl -fsSL --retry 4 --retry-delay 2 -o /tmp/cran-evidence/pages/SOMMD.recorded.html https://CRAN.R-project.org/web/packages/SOMMD/index.html
+page_bytes: 6977
+page_sha256: 5dbf4af8f1287166a36cec99978a54e521ca3e920aa9ddc26f659726c5a1446c
+package: SOMMD
+description: Processes data from Molecular Dynamics simulations using Self Organising Maps. Features include the ability to read different input formats. Trajectories can be analysed to identify groups of important frames. Output visualisation can be generated for maps and pathways. Methodological details can be found in Motta S et al (2022) <doi:10.1021/acs.jctc.1c01163>. I/O functions for xtc format files were implemented using the 'xdrfile' library available under open source license. The relevant information can be found in inst/COPYRIGHT.
+
+command: curl -fsSL --retry 4 --retry-delay 2 -o /tmp/cran-evidence/pages/xvm.recorded.html https://CRAN.R-project.org/web/packages/xvm/index.html
+page_bytes: 6906
+page_sha256: caf5ea6cacd325bf567eac606ce5dfa4016ff4f20bf39d45dc68c4f1795e140f
+package: xvm
+description: Provides tools for reading, parsing and visualizing simulation data stored in 'xvg'/'xpm' file formats (commonly generated by 'GROMACS' molecular dynamics software). Streamlines post-processing and analysis of molecular dynamics ('MD') simulation outputs, enabling efficient exploration of molecular stability and conformational changes. Supports import of trajectory metrics ('RMSD', energy, temperature) and creation of publication-ready visualizations through integration with 'ggplot2'.
