@@ -66,11 +66,21 @@ if [ -n "${SEAMS_LIBDIR:-}" ]; then
   link_mode=libdir
 fi
 
-# cargo and cmake are required for the bundled readers. A linked engine
-# already carries them, so those builds do not compile the copies.
-CARGO=$(command -v cargo || true)
-CMAKE=$(command -v cmake || true)
-OBJCOPY=$(command -v objcopy || true)
+# cargo, cmake and objcopy are required for the bundled readers. A linked
+# engine already carries them, so those builds do not compile the copies.
+# find_tool prints the path of the first named program on PATH, or nothing.
+find_tool() {
+  for tool in "$@"; do
+    if command -v "${tool}" >/dev/null 2>&1; then
+      command -v "${tool}"
+      return 0
+    fi
+  done
+  return 0
+}
+CARGO=$(find_tool cargo)
+CMAKE=$(find_tool cmake)
+OBJCOPY=$(find_tool objcopy llvm-objcopy)
 CHEMFILES_BUILD=""
 READER_DEPS=""
 
@@ -146,7 +156,7 @@ else
     exit 1
   fi
   if [ -z "${OBJCOPY}" ]; then
-    echo "configure: objcopy is required to build the bundled readers" >&2
+    echo "configure: objcopy (GNU binutils) or llvm-objcopy is required to build the bundled readers" >&2
     exit 1
   fi
   # The tarball stores cargo's checksum under a name that is not hidden.
