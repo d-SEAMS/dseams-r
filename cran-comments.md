@@ -19,45 +19,67 @@ C and C++ consoles.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 2 notes
 
 * checking CRAN incoming feasibility ... NOTE
-  Maintainer: 'Rohit Goswami <rgoswami@ieee.org>'
+  Maintainer: ‘Rohit Goswami <rgoswami@ieee.org>’
 
   New submission
 
-Checked with `R CMD check --as-cran --no-manual` on R 4.5.3 (2026-03-11),
-x86_64-conda-linux-gnu, conda-forge GCC 14.4.0, on Ubuntu 24.04.
+* checking HTML version of manual ... NOTE
+  Skipping checking HTML validation: no command 'tidy' found.
+
+`R CMD check --as-cran` finished `Status: 2 NOTEs`. The log is
+`logs/check-ascran-00check.log`.
+
+Checked on R 4.5.3 (2026-03-11), `x86_64-conda-linux-gnu`, on Ubuntu
+24.04.5 LTS. That log says R was compiled by
+`x86_64-conda-linux-gnu-cc (conda-forge gcc 14.4.0-7) 14.4.0`.
 conda-forge's R adds `-march=nocona`; that flag is the toolchain's and
-was named with `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`.
-`R CMD check` was run with `--no-manual`, so neither the PDF nor the HTML
-manual was built in this check. The readers were built with rustc 1.88.0,
-cargo 1.88.0 and cmake 3.28.3. With `DSEAMS_ROOT` naming a seams-core
-2.14.1 checkout for its example dumps, the tests report 188 passed and 2
-skipped. The skips compare with a `seams` CLI (`SEAMS_BIN`) and a C++
-oracle (`SEAMS_CPP_ORACLE`) built from seams-core, which a CRAN machine
-does not have. The shipped CON, PDB, GRO, XYZ, PQR, XSF, Gaussian cube,
-and AMBER restart files are read by tests that do not skip. The same
-tarball was also checked in a network namespace with no network: cargo,
-which runs with `--offline`, built the vendored crates, and the same
-tests passed. That run reports 2 notes: the CRAN-incoming check could
-not resolve any host, and the future-timestamp check was "unable to
-verify current time".
+was named with `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`. The
+same log reports `checking compilation flags used ... OK` and
+`checking PDF version of manual ... OK`. `R CMD build` (`logs/build.log`)
+does not build the PDF manual. The HTML note is the missing `tidy`
+command, quoted above from the check log.
 
-The source tarball is 7927049 bytes. Most of it is the vendored Rust
-crates and chemfiles with the libraries it bundles, which let the
-package build without a network connection.
+The install log (`logs/check-ascran-00install.out`) prints
+`rustc 1.100.0 (0ef1bc386 2026-11-09)`,
+`cargo 1.100.0 (3acc79c0c 2026-11-05)`, and
+`Running CMake version 3.28.3`. The C++ compile line defines
+`-DSEAMS_HAS_READCON=1`.
 
-Before the readers were bundled, a second check on the same host linked `libseams` and `libseams_lang`
-from a seams-core 2.14.1 build (`R CMD check --no-manual`, `DSEAMS_ROOT`,
-`SEAMS_LIBDIR`, `SEAMS_BIN` and `SEAMS_CPP_ORACLE` set). That run was
-Status: OK, with 118 passed and none skipped.
+`DSEAMS_ROOT`, `SEAMS_BIN`, and `SEAMS_CPP_ORACLE` were unset. The tests
+in that check (`logs/check-ascran-testthat.Rout`) print:
 
-The R-CMD-check workflow also checks Ubuntu (R release and devel), macOS
-and Windows, with `--as-cran --no-manual`. A `v*` tag on
-d-SEAMS/dseams-r runs `.github/workflows/release.yml`, which repeats that
-check and, only when it reports no errors and no warnings, publishes the
-source tarball.
+```
+[ FAIL 0 | WARN 0 | SKIP 8 | PASS 167 ]
+```
 
-The examples and tests run with at most two threads when
-`_R_CHECK_LIMIT_CORES_` is set.
+Seven skips are `DSEAMS_ROOT is not set` and one is `SEAMS_BIN is not set`.
+The shipped CON file is not one of those skips. The examples
+(`logs/check-ascran-examples.Rout`) print `nframes()` of
+`tiny_multi_cuh2.con` as 2 and `read_frame()` as `dseams frame 1 atoms 4`.
+`logs/test-suite.log` prints `CON_READ nframes=2 nrow=4 class=dseams_frame`.
+The string `readcon-core is not in this build; CON input needs it` is
+not in these logs.
+
+`testthat::test_local(".", load_package = "installed")` from this
+checkout prints `[ FAIL 0 | WARN 0 | SKIP 8 | PASS 168 ]` with the same
+eight skips (`logs/test-local.log`).
+`testthat::test_check("dseams")`, with the working directory set to the
+`tests/` directory of an installed copy outside this checkout, prints
+`[ FAIL 0 | WARN 0 | SKIP 9 | PASS 166 ]` (`logs/test-check-call.log`).
+The ninth skip is `tools/check-submission.R is not beside this test run`.
+
+The source tarball is 7946434 bytes, from the CRAN-incoming note in
+`logs/check-ascran-00check.log`.
+
+A check linked against a built seams-core and a check with no network
+were not run.
+
+The R-CMD-check workflow file runs on Ubuntu (R release and devel),
+macOS, and Windows, with `--no-manual` and `--as-cran`. A `v*` tag on
+d-SEAMS/dseams-r runs `.github/workflows/release.yml`, which runs
+`R CMD check --as-cran --no-manual` and exits if the `Status:` line
+contains `ERROR` or `WARNING`. Those workflow runs are not results
+recorded here.
