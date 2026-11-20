@@ -142,6 +142,25 @@ extern "C" SEXP seams_r_prisms(SEXP, SEXP);
 extern "C" SEXP seams_r_monolayer(SEXP, SEXP, SEXP, SEXP);
 extern "C" SEXP seams_r_vertices(SEXP, SEXP, SEXP, SEXP);
 extern "C" SEXP seams_r_site(SEXP, SEXP);
+extern "C" SEXP seams_r_capi_info(void);
+extern "C" SEXP seams_r_label_name(SEXP);
+extern "C" SEXP seams_r_ring_symmetry_name(SEXP);
+extern "C" SEXP seams_r_set_atoms(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern "C" SEXP seams_r_box(SEXP);
+extern "C" SEXP seams_r_positions(SEXP);
+extern "C" SEXP seams_r_types(SEXP);
+extern "C" SEXP seams_r_ids(SEXP);
+extern "C" SEXP seams_r_system_symmetry(SEXP, SEXP);
+extern "C" SEXP seams_r_q4q6(SEXP, SEXP, SEXP);
+extern "C" SEXP seams_r_q6bar(SEXP, SEXP, SEXP, SEXP);
+extern "C" SEXP seams_r_ql(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern "C" SEXP seams_r_cages_labels(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern "C" SEXP seams_r_signature_edge(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern "C" SEXP seams_r_neighbours(SEXP, SEXP, SEXP, SEXP);
+extern "C" SEXP seams_r_rings(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern "C" SEXP seams_r_rings_chordless(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern "C" SEXP seams_r_fingerprint_atoms(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern "C" SEXP seams_r_brine(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 #endif
 
 extern "C" {
@@ -185,6 +204,25 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dseams_seams_r_monolayer", (DL_FUNC) &seams_r_monolayer, 4},
     {"_dseams_seams_r_vertices", (DL_FUNC) &seams_r_vertices, 4},
     {"_dseams_seams_r_site", (DL_FUNC) &seams_r_site, 2},
+    {"_dseams_seams_r_capi_info", (DL_FUNC) &seams_r_capi_info, 0},
+    {"_dseams_seams_r_label_name", (DL_FUNC) &seams_r_label_name, 1},
+    {"_dseams_seams_r_ring_symmetry_name", (DL_FUNC) &seams_r_ring_symmetry_name, 1},
+    {"_dseams_seams_r_set_atoms", (DL_FUNC) &seams_r_set_atoms, 5},
+    {"_dseams_seams_r_box", (DL_FUNC) &seams_r_box, 1},
+    {"_dseams_seams_r_positions", (DL_FUNC) &seams_r_positions, 1},
+    {"_dseams_seams_r_types", (DL_FUNC) &seams_r_types, 1},
+    {"_dseams_seams_r_ids", (DL_FUNC) &seams_r_ids, 1},
+    {"_dseams_seams_r_system_symmetry", (DL_FUNC) &seams_r_system_symmetry, 2},
+    {"_dseams_seams_r_q4q6", (DL_FUNC) &seams_r_q4q6, 3},
+    {"_dseams_seams_r_q6bar", (DL_FUNC) &seams_r_q6bar, 4},
+    {"_dseams_seams_r_ql", (DL_FUNC) &seams_r_ql, 5},
+    {"_dseams_seams_r_cages_labels", (DL_FUNC) &seams_r_cages_labels, 6},
+    {"_dseams_seams_r_signature_edge", (DL_FUNC) &seams_r_signature_edge, 6},
+    {"_dseams_seams_r_neighbours", (DL_FUNC) &seams_r_neighbours, 4},
+    {"_dseams_seams_r_rings", (DL_FUNC) &seams_r_rings, 5},
+    {"_dseams_seams_r_rings_chordless", (DL_FUNC) &seams_r_rings_chordless, 5},
+    {"_dseams_seams_r_fingerprint_atoms", (DL_FUNC) &seams_r_fingerprint_atoms, 7},
+    {"_dseams_seams_r_brine", (DL_FUNC) &seams_r_brine, 6},
 #endif
     {NULL, NULL, 0}
 };

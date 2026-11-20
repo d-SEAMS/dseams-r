@@ -76,7 +76,26 @@
   "_dseams_seams_r_prisms",
   "_dseams_seams_r_monolayer",
   "_dseams_seams_r_vertices",
-  "_dseams_seams_r_site"
+  "_dseams_seams_r_site",
+  "_dseams_seams_r_capi_info",
+  "_dseams_seams_r_label_name",
+  "_dseams_seams_r_ring_symmetry_name",
+  "_dseams_seams_r_set_atoms",
+  "_dseams_seams_r_box",
+  "_dseams_seams_r_positions",
+  "_dseams_seams_r_types",
+  "_dseams_seams_r_ids",
+  "_dseams_seams_r_system_symmetry",
+  "_dseams_seams_r_q4q6",
+  "_dseams_seams_r_q6bar",
+  "_dseams_seams_r_ql",
+  "_dseams_seams_r_cages_labels",
+  "_dseams_seams_r_signature_edge",
+  "_dseams_seams_r_neighbours",
+  "_dseams_seams_r_rings",
+  "_dseams_seams_r_rings_chordless",
+  "_dseams_seams_r_fingerprint_atoms",
+  "_dseams_seams_r_brine"
 )
 
 .capi_call <- function(sym, ...) {

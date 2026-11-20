@@ -547,6 +547,526 @@ SEXP seams_r_site(SEXP ext, SEXP spec) {
   return kinds;
 }
 
+SEXP seams_r_capi_info(void) {
+  SEXP out = PROTECT(allocVector(VECSXP, 6));
+  SET_VECTOR_ELT(out, 0, ScalarInteger(seams_abi()));
+  SET_VECTOR_ELT(out, 1, ScalarInteger(seams_version()));
+  SET_VECTOR_ELT(out, 2, ScalarInteger(seams_version_major()));
+  SET_VECTOR_ELT(out, 3, ScalarInteger(seams_version_minor()));
+  SET_VECTOR_ELT(out, 4, ScalarInteger(seams_version_patch()));
+  SET_VECTOR_ELT(out, 5, mkString(seams_version_string()));
+  UNPROTECT(1);
+  return out;
+}
+
+SEXP seams_r_label_name(SEXP label) {
+  return mkString(seams_label_name(Rf_asInteger(label)));
+}
+
+SEXP seams_r_ring_symmetry_name(SEXP sym) {
+  return mkString(seams_ring_symmetry_name(Rf_asInteger(sym)));
+}
+
+SEXP seams_r_set_atoms(SEXP ext, SEXP xyz, SEXP box, SEXP types, SEXP ids) {
+  seams_system *sys = sys_of(ext);
+  SEXP dim = getAttrib(xyz, R_DimSymbol);
+  if (TYPEOF(dim) != INTSXP || LENGTH(dim) != 2 || INTEGER(dim)[1] != 3) {
+    error("xyz must be an n x 3 numeric matrix");
+  }
+  const int n = INTEGER(dim)[0];
+  if (TYPEOF(xyz) != REALSXP) {
+    error("xyz must be numeric");
+  }
+  if (TYPEOF(box) != REALSXP) {
+    error("box must be numeric");
+  }
+  const int *types_ptr = NULL;
+  if (!isNull(types)) {
+    if (TYPEOF(types) != INTSXP || LENGTH(types) != n) {
+      error("types must be an integer vector of length n");
+    }
+    types_ptr = INTEGER(types);
+  }
+  const int *ids_ptr = NULL;
+  if (!isNull(ids)) {
+    if (TYPEOF(ids) != INTSXP || LENGTH(ids) != n) {
+      error("ids must be an integer vector of length n");
+    }
+    ids_ptr = INTEGER(ids);
+  }
+  const size_t n_atoms = (size_t)(n > 0 ? n : 0);
+  double *packed = (double *)calloc(n_atoms > 0 ? n_atoms * 3 : 1, sizeof(double));
+  if (packed == NULL) {
+    error("out of memory");
+  }
+  const double *src = REAL(xyz);
+  for (int i = 0; i < n; ++i) {
+    packed[3 * (size_t)i + 0] = src[i];
+    packed[3 * (size_t)i + 1] = src[i + n];
+    packed[3 * (size_t)i + 2] = src[i + 2 * n];
+  }
+  const int code = seams_system_set_atoms(sys, packed, n_atoms, REAL(box),
+                                          (size_t)LENGTH(box), types_ptr, ids_ptr);
+  free(packed);
+  if (code != SEAMS_OK) {
+    die(sys);
+  }
+  return ScalarInteger(n);
+}
+
+SEXP seams_r_box(SEXP ext) {
+  seams_system *sys = sys_of(ext);
+  SEXP out = PROTECT(real_n(9));
+  if (seams_system_box(sys, REAL(out), 9) != SEAMS_OK) {
+    die(sys);
+  }
+  UNPROTECT(1);
+  return out;
+}
+
+SEXP seams_r_positions(SEXP ext) {
+  seams_system *sys = sys_of(ext);
+  size_t n = 0;
+  if (seams_system_natoms(sys, &n) != SEAMS_OK) {
+    die(sys);
+  }
+  double *buf = (double *)calloc(n > 0 ? n * 3 : 1, sizeof(double));
+  if (buf == NULL) {
+    error("out of memory");
+  }
+  if (n > 0 && seams_system_positions(sys, buf, n * 3) != SEAMS_OK) {
+    free(buf);
+    die(sys);
+  }
+  SEXP mat = PROTECT(allocMatrix(REALSXP, (int)n, 3));
+  double *dst = REAL(mat);
+  for (size_t i = 0; i < n; ++i) {
+    dst[i] = buf[3 * i + 0];
+    dst[i + n] = buf[3 * i + 1];
+    dst[i + 2 * n] = buf[3 * i + 2];
+  }
+  free(buf);
+  UNPROTECT(1);
+  return mat;
+}
+
+SEXP seams_r_types(SEXP ext) {
+  seams_system *sys = sys_of(ext);
+  size_t n = 0;
+  if (seams_system_natoms(sys, &n) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP out = PROTECT(allocVector(INTSXP, (R_xlen_t)n));
+  if (n > 0 && seams_system_types(sys, INTEGER(out), n) != SEAMS_OK) {
+    die(sys);
+  }
+  UNPROTECT(1);
+  return out;
+}
+
+SEXP seams_r_ids(SEXP ext) {
+  seams_system *sys = sys_of(ext);
+  size_t n = 0;
+  if (seams_system_natoms(sys, &n) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP out = PROTECT(allocVector(INTSXP, (R_xlen_t)n));
+  if (n > 0 && seams_system_ids(sys, INTEGER(out), n) != SEAMS_OK) {
+    die(sys);
+  }
+  UNPROTECT(1);
+  return out;
+}
+
+SEXP seams_r_system_symmetry(SEXP ext, SEXP shell_rmsd) {
+  seams_system *sys = sys_of(ext);
+  size_t n = 0;
+  if (seams_system_natoms(sys, &n) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP out = PROTECT(allocVector(INTSXP, (R_xlen_t)n));
+  if (seams_system_symmetry(sys, Rf_asReal(shell_rmsd), INTEGER(out), n) != SEAMS_OK) {
+    die(sys);
+  }
+  UNPROTECT(1);
+  return out;
+}
+
+SEXP seams_r_q4q6(SEXP ext, SEXP cutoff, SEXP type) {
+  seams_system *sys = sys_of(ext);
+  size_t n = 0;
+  if (seams_system_natoms(sys, &n) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP q4 = PROTECT(real_n((R_xlen_t)n));
+  SEXP q6 = PROTECT(real_n((R_xlen_t)n));
+  if (seams_q4q6_n(sys, Rf_asReal(cutoff), Rf_asInteger(type),
+                   REAL(q4), n, REAL(q6), n) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP out = PROTECT(allocVector(VECSXP, 2));
+  SET_VECTOR_ELT(out, 0, q4);
+  SET_VECTOR_ELT(out, 1, q6);
+  UNPROTECT(3);
+  return out;
+}
+
+SEXP seams_r_q6bar(SEXP ext, SEXP cutoff, SEXP type, SEXP ice_cut) {
+  seams_system *sys = sys_of(ext);
+  size_t n = 0;
+  if (seams_system_natoms(sys, &n) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP q6bar = PROTECT(real_n((R_xlen_t)n));
+  double mean = 0.0, median = 0.0;
+  int n_ice = 0;
+  if (seams_q6bar(sys, Rf_asReal(cutoff), Rf_asInteger(type), Rf_asReal(ice_cut),
+                  REAL(q6bar), n, &mean, &median, &n_ice) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP out = PROTECT(allocVector(VECSXP, 4));
+  SET_VECTOR_ELT(out, 0, q6bar);
+  SET_VECTOR_ELT(out, 1, ScalarReal(mean));
+  SET_VECTOR_ELT(out, 2, ScalarReal(median));
+  SET_VECTOR_ELT(out, 3, ScalarInteger(n_ice));
+  UNPROTECT(2);
+  return out;
+}
+
+SEXP seams_r_ql(SEXP ext, SEXP cutoff, SEXP type, SEXP order, SEXP graph) {
+  seams_system *sys = sys_of(ext);
+  size_t n = 0;
+  if (seams_system_natoms(sys, &n) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP ql = PROTECT(real_n((R_xlen_t)n));
+  SEXP qlbar = PROTECT(real_n((R_xlen_t)n));
+  if (seams_ql(sys, Rf_asReal(cutoff), Rf_asInteger(type), Rf_asInteger(order),
+               Rf_asInteger(graph), REAL(ql), n, REAL(qlbar), n) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP out = PROTECT(allocVector(VECSXP, 2));
+  SET_VECTOR_ELT(out, 0, ql);
+  SET_VECTOR_ELT(out, 1, qlbar);
+  UNPROTECT(3);
+  return out;
+}
+
+SEXP seams_r_cages_labels(SEXP ext, SEXP cutoff, SEXP type, SEXP graph, SEXP k, SEXP complete) {
+  seams_system *sys = sys_of(ext);
+  size_t n = 0;
+  if (seams_system_natoms(sys, &n) != SEAMS_OK) {
+    die(sys);
+  }
+  seams_cage_set *cages = NULL;
+  if (seams_cages(sys, Rf_asReal(cutoff), Rf_asInteger(type), Rf_asInteger(graph),
+                  Rf_asInteger(k), Rf_asInteger(complete), &cages) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP labels = PROTECT(allocVector(INTSXP, (R_xlen_t)n));
+  int n_hex = 0, n_cubic = 0, n_water = 0, n_both = 0;
+  int code = seams_cages_labels(cages, INTEGER(labels), n);
+  if (code == SEAMS_OK) {
+    code = seams_cages_counts(cages, &n_hex, &n_cubic, &n_water, &n_both);
+  }
+  char saved[512];
+  if (code != SEAMS_OK) {
+    copy_error(cages, saved, sizeof(saved));
+  }
+  seams_cages_destroy(cages);
+  if (code != SEAMS_OK) {
+    error("%s", saved);
+  }
+  SEXP counts = PROTECT(allocVector(INTSXP, 4));
+  INTEGER(counts)[0] = n_hex;
+  INTEGER(counts)[1] = n_cubic;
+  INTEGER(counts)[2] = n_water;
+  INTEGER(counts)[3] = n_both;
+  SEXP out = PROTECT(allocVector(VECSXP, 2));
+  SET_VECTOR_ELT(out, 0, labels);
+  SET_VECTOR_ELT(out, 1, counts);
+  UNPROTECT(3);
+  return out;
+}
+
+SEXP seams_r_signature_edge(SEXP ext, SEXP cutoff, SEXP type, SEXP graph, SEXP spec, SEXP edge) {
+  seams_system *sys = sys_of(ext);
+  size_t n_cages = 0, n_atoms = 0;
+  if (seams_signature_cages_edge(sys, Rf_asReal(cutoff), Rf_asInteger(type), Rf_asInteger(graph),
+                                 Rf_translateCharUTF8(STRING_ELT(spec, 0)),
+                                 Rf_translateCharUTF8(STRING_ELT(edge, 0)),
+                                 &n_cages, &n_atoms) != SEAMS_OK) {
+    die(sys);
+  }
+  SEXP out = PROTECT(allocVector(INTSXP, 2));
+  INTEGER(out)[0] = (int)n_cages;
+  INTEGER(out)[1] = (int)n_atoms;
+  UNPROTECT(1);
+  return out;
+}
+
+SEXP seams_r_neighbours(SEXP ext, SEXP cutoff, SEXP type, SEXP graph) {
+  seams_system *sys = sys_of(ext);
+  seams_neighbours *nb = NULL;
+  if (seams_neighbours_build(sys, Rf_asReal(cutoff), Rf_asInteger(type),
+                             Rf_asInteger(graph), &nb) != SEAMS_OK) {
+    die(sys);
+  }
+  size_t nrows = 0, n_off = 0, nnz = 0;
+  int code = seams_neighbours_nrows(nb, &nrows);
+  if (code == SEAMS_OK) {
+    code = seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz);
+  }
+  SEXP offsets = PROTECT(allocVector(INTSXP, (R_xlen_t)n_off));
+  SEXP cols = PROTECT(allocVector(INTSXP, (R_xlen_t)nnz));
+  int dummy = 0;
+  if (code == SEAMS_OK) {
+    code = seams_neighbours_copy(
+      nb,
+      n_off > 0 ? INTEGER(offsets) : &dummy, n_off, &n_off,
+      nnz > 0 ? INTEGER(cols) : &dummy, nnz, &nnz
+    );
+  }
+  char saved[512];
+  if (code != SEAMS_OK) {
+    copy_error(nb, saved, sizeof(saved));
+  }
+  seams_neighbours_destroy(nb);
+  if (code != SEAMS_OK) {
+    error("%s", saved);
+  }
+  SEXP out = PROTECT(allocVector(VECSXP, 3));
+  SET_VECTOR_ELT(out, 0, offsets);
+  SET_VECTOR_ELT(out, 1, cols);
+  SET_VECTOR_ELT(out, 2, ScalarInteger((int)nrows));
+  UNPROTECT(3);
+  return out;
+}
+
+SEXP seams_r_rings(SEXP ext, SEXP cutoff, SEXP type, SEXP graph, SEXP max_depth) {
+  seams_system *sys = sys_of(ext);
+  const int depth = Rf_asInteger(max_depth);
+  if (depth < 0) {
+    error("max_depth must be non-negative");
+  }
+  seams_rings *rings = NULL;
+  if (seams_rings_find(sys, Rf_asReal(cutoff), Rf_asInteger(type),
+                       Rf_asInteger(graph), depth, &rings) != SEAMS_OK) {
+    die(sys);
+  }
+  size_t n_rings = 0;
+  double frac = 0.0;
+  int code = seams_rings_nrings(rings, &n_rings);
+  if (code == SEAMS_OK) {
+    code = seams_rings_fraction(rings, 0, &frac);
+  }
+  SEXP hist = PROTECT(allocVector(INTSXP, depth + 1));
+  if (code == SEAMS_OK) {
+    code = seams_rings_histogram_n(rings, INTEGER(hist), (size_t)(depth + 1));
+  }
+  SEXP sizes = PROTECT(allocVector(INTSXP, (R_xlen_t)n_rings));
+  SEXP sym = PROTECT(allocVector(INTSXP, (R_xlen_t)n_rings));
+  if (code == SEAMS_OK && n_rings > 0) {
+    code = seams_rings_labels_n(rings, INTEGER(sizes), n_rings, INTEGER(sym), n_rings);
+  }
+  char saved[512];
+  if (code != SEAMS_OK) {
+    copy_error(rings, saved, sizeof(saved));
+  }
+  seams_rings_destroy(rings);
+  if (code != SEAMS_OK) {
+    error("%s", saved);
+  }
+  SEXP out = PROTECT(allocVector(VECSXP, 5));
+  SET_VECTOR_ELT(out, 0, ScalarInteger((int)n_rings));
+  SET_VECTOR_ELT(out, 1, hist);
+  SET_VECTOR_ELT(out, 2, sizes);
+  SET_VECTOR_ELT(out, 3, sym);
+  SET_VECTOR_ELT(out, 4, ScalarReal(frac));
+  UNPROTECT(4);
+  return out;
+}
+
+SEXP seams_r_rings_chordless(SEXP ext, SEXP cutoff, SEXP type, SEXP graph, SEXP size) {
+  seams_system *sys = sys_of(ext);
+  const int rsize = Rf_asInteger(size);
+  seams_neighbours *nb = NULL;
+  if (seams_neighbours_build(sys, Rf_asReal(cutoff), Rf_asInteger(type),
+                             Rf_asInteger(graph), &nb) != SEAMS_OK) {
+    die(sys);
+  }
+  size_t nrows = 0, n_rings = 0;
+  int dummy = 0;
+  int code = seams_neighbours_nrows(nb, &nrows);
+  SEXP per_atom = PROTECT(allocVector(INTSXP, (R_xlen_t)nrows));
+  if (code == SEAMS_OK) {
+    code = seams_rings_chordless(nb, rsize, NULL, 0, &n_rings,
+                                 nrows > 0 ? INTEGER(per_atom) : &dummy, nrows);
+  }
+  SEXP mat = PROTECT(allocMatrix(INTSXP, (int)n_rings, rsize > 0 ? rsize : 1));
+  if (code == SEAMS_OK && n_rings > 0) {
+    int *buf = (int *)calloc(n_rings * (size_t)rsize, sizeof(int));
+    if (buf == NULL) {
+      seams_neighbours_destroy(nb);
+      error("out of memory");
+    }
+    code = seams_rings_chordless(nb, rsize, buf, n_rings * (size_t)rsize, &n_rings, NULL, 0);
+    if (code == SEAMS_OK) {
+      int *dst = INTEGER(mat);
+      for (size_t r = 0; r < n_rings; ++r) {
+        for (int c = 0; c < rsize; ++c) {
+          dst[r + (size_t)c * n_rings] = buf[r * (size_t)rsize + (size_t)c];
+        }
+      }
+    }
+    free(buf);
+  }
+  char saved[512];
+  if (code != SEAMS_OK) {
+    copy_error(nb, saved, sizeof(saved));
+  }
+  seams_neighbours_destroy(nb);
+  if (code != SEAMS_OK) {
+    error("%s", saved);
+  }
+  SEXP out = PROTECT(allocVector(VECSXP, 3));
+  SET_VECTOR_ELT(out, 0, ScalarInteger((int)n_rings));
+  SET_VECTOR_ELT(out, 1, mat);
+  SET_VECTOR_ELT(out, 2, per_atom);
+  UNPROTECT(3);
+  return out;
+}
+
+SEXP seams_r_fingerprint_atoms(SEXP ext, SEXP cutoff, SEXP type, SEXP k,
+                               SEXP graph, SEXP hops, SEXP color_types) {
+  seams_system *sys = sys_of(ext);
+  size_t n = 0;
+  if (seams_system_natoms(sys, &n) != SEAMS_OK) {
+    die(sys);
+  }
+  seams_topo *fp = NULL;
+  if (seams_fingerprint(sys, Rf_asReal(cutoff), Rf_asInteger(type), Rf_asInteger(k),
+                        Rf_asInteger(graph), Rf_asInteger(hops),
+                        Rf_asInteger(color_types), &fp) != SEAMS_OK) {
+    die(sys);
+  }
+  char saved[512];
+  size_t key_len = 0;
+  int code = seams_fingerprint_key(fp, NULL, 0, &key_len);
+  char *key_buf = (char *)calloc(key_len + 1, 1);
+  if (key_buf == NULL) {
+    seams_fingerprint_destroy(fp);
+    error("out of memory");
+  }
+  if (code == SEAMS_OK) {
+    code = seams_fingerprint_key(fp, key_buf, key_len + 1, &key_len);
+  }
+  SEXP key_sexp = PROTECT(mkString(code == SEAMS_OK ? key_buf : ""));
+  free(key_buf);
+
+  SEXP atom_keys = PROTECT(allocVector(STRSXP, (R_xlen_t)n));
+  for (size_t i = 0; i < n && code == SEAMS_OK; ++i) {
+    size_t alen = 0;
+    code = seams_fingerprint_atom(fp, (int)i, NULL, 0, &alen);
+    if (code == SEAMS_OK) {
+      char *abuf = (char *)calloc(alen + 1, 1);
+      if (abuf == NULL) {
+        seams_fingerprint_destroy(fp);
+        error("out of memory");
+      }
+      code = seams_fingerprint_atom(fp, (int)i, abuf, alen + 1, &alen);
+      if (code == SEAMS_OK) {
+        SET_STRING_ELT(atom_keys, (R_xlen_t)i, mkChar(abuf));
+      }
+      free(abuf);
+    }
+  }
+  SEXP rings = PROTECT(allocVector(INTSXP, 13));
+  if (code == SEAMS_OK) {
+    code = seams_fingerprint_rings(fp, INTEGER(rings), 13);
+  }
+  if (code != SEAMS_OK) {
+    copy_error(fp, saved, sizeof(saved));
+  }
+  seams_fingerprint_destroy(fp);
+  if (code != SEAMS_OK) {
+    error("%s", saved);
+  }
+  SEXP out = PROTECT(allocVector(VECSXP, 3));
+  SET_VECTOR_ELT(out, 0, key_sexp);
+  SET_VECTOR_ELT(out, 1, atom_keys);
+  SET_VECTOR_ELT(out, 2, rings);
+  UNPROTECT(4);
+  return out;
+}
+
+SEXP seams_r_brine(SEXP ext, SEXP ice, SEXP water_type, SEXP ion_type,
+                   SEXP n_bins, SEXP axis) {
+  seams_system *sys = sys_of(ext);
+  if (TYPEOF(ice) != INTSXP) {
+    error("ice must be an integer vector");
+  }
+  seams_brine *front = NULL;
+  if (seams_brine_analyse(sys, INTEGER(ice), (size_t)LENGTH(ice),
+                          Rf_asInteger(water_type), Rf_asInteger(ion_type),
+                          Rf_asInteger(n_bins), Rf_asInteger(axis), &front) != SEAMS_OK) {
+    die(sys);
+  }
+  double z_enter = 0.0, z_exit = 0.0, thickness = 0.0;
+  int found = 0;
+  double c_ice = 0.0, c_liquid = 0.0, k_rej = 0.0;
+  int defined = 0;
+  int n_pockets = 0, reservoir = 0;
+  size_t prof_n = 0;
+  int code = seams_brine_fronts(front, &z_enter, &z_exit, &thickness, &found);
+  if (code == SEAMS_OK) {
+    code = seams_brine_rejection(front, &c_ice, &c_liquid, &k_rej, &defined);
+  }
+  if (code == SEAMS_OK) {
+    code = seams_brine_pockets(front, &n_pockets, &reservoir);
+  }
+  if (code == SEAMS_OK) {
+    code = seams_brine_profile(front, NULL, NULL, NULL, 0, &prof_n);
+  }
+  SEXP z_mid = PROTECT(real_n((R_xlen_t)prof_n));
+  SEXP molality = PROTECT(real_n((R_xlen_t)prof_n));
+  SEXP ice_frac = PROTECT(real_n((R_xlen_t)prof_n));
+  if (code == SEAMS_OK && prof_n > 0) {
+    code = seams_brine_profile(front, REAL(z_mid), REAL(molality), REAL(ice_frac),
+                               prof_n, &prof_n);
+  }
+  char saved[512];
+  if (code != SEAMS_OK) {
+    copy_error(front, saved, sizeof(saved));
+  }
+  seams_brine_destroy(front);
+  if (code != SEAMS_OK) {
+    error("%s", saved);
+  }
+  SEXP fronts = PROTECT(real_n(4));
+  REAL(fronts)[0] = z_enter;
+  REAL(fronts)[1] = z_exit;
+  REAL(fronts)[2] = thickness;
+  REAL(fronts)[3] = (double)found;
+  SEXP rej = PROTECT(real_n(4));
+  REAL(rej)[0] = c_ice;
+  REAL(rej)[1] = c_liquid;
+  REAL(rej)[2] = k_rej;
+  REAL(rej)[3] = (double)defined;
+  SEXP pockets = PROTECT(allocVector(INTSXP, 2));
+  INTEGER(pockets)[0] = n_pockets;
+  INTEGER(pockets)[1] = reservoir;
+  SEXP out = PROTECT(allocVector(VECSXP, 6));
+  SET_VECTOR_ELT(out, 0, fronts);
+  SET_VECTOR_ELT(out, 1, rej);
+  SET_VECTOR_ELT(out, 2, z_mid);
+  SET_VECTOR_ELT(out, 3, molality);
+  SET_VECTOR_ELT(out, 4, ice_frac);
+  SET_VECTOR_ELT(out, 5, pockets);
+  UNPROTECT(7);
+  return out;
+}
+
 #ifdef DSEAMS_SPLIT_CAPI
 #include <R_ext/Rdynload.h>
 #include <R_ext/Visibility.h>
@@ -574,6 +1094,25 @@ static const R_CallMethodDef CapiEntries[] = {
   {"_dseams_seams_r_monolayer", (DL_FUNC) &seams_r_monolayer, 4},
   {"_dseams_seams_r_vertices", (DL_FUNC) &seams_r_vertices, 4},
   {"_dseams_seams_r_site", (DL_FUNC) &seams_r_site, 2},
+  {"_dseams_seams_r_capi_info", (DL_FUNC) &seams_r_capi_info, 0},
+  {"_dseams_seams_r_label_name", (DL_FUNC) &seams_r_label_name, 1},
+  {"_dseams_seams_r_ring_symmetry_name", (DL_FUNC) &seams_r_ring_symmetry_name, 1},
+  {"_dseams_seams_r_set_atoms", (DL_FUNC) &seams_r_set_atoms, 5},
+  {"_dseams_seams_r_box", (DL_FUNC) &seams_r_box, 1},
+  {"_dseams_seams_r_positions", (DL_FUNC) &seams_r_positions, 1},
+  {"_dseams_seams_r_types", (DL_FUNC) &seams_r_types, 1},
+  {"_dseams_seams_r_ids", (DL_FUNC) &seams_r_ids, 1},
+  {"_dseams_seams_r_system_symmetry", (DL_FUNC) &seams_r_system_symmetry, 2},
+  {"_dseams_seams_r_q4q6", (DL_FUNC) &seams_r_q4q6, 3},
+  {"_dseams_seams_r_q6bar", (DL_FUNC) &seams_r_q6bar, 4},
+  {"_dseams_seams_r_ql", (DL_FUNC) &seams_r_ql, 5},
+  {"_dseams_seams_r_cages_labels", (DL_FUNC) &seams_r_cages_labels, 6},
+  {"_dseams_seams_r_signature_edge", (DL_FUNC) &seams_r_signature_edge, 6},
+  {"_dseams_seams_r_neighbours", (DL_FUNC) &seams_r_neighbours, 4},
+  {"_dseams_seams_r_rings", (DL_FUNC) &seams_r_rings, 5},
+  {"_dseams_seams_r_rings_chordless", (DL_FUNC) &seams_r_rings_chordless, 5},
+  {"_dseams_seams_r_fingerprint_atoms", (DL_FUNC) &seams_r_fingerprint_atoms, 7},
+  {"_dseams_seams_r_brine", (DL_FUNC) &seams_r_brine, 6},
   {NULL, NULL, 0}
 };
 
