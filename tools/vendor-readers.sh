@@ -74,8 +74,9 @@ cleanup_work() {
 }
 trap cleanup_work EXIT
 
-# readcon-core: library sources plus a lockfile of the default
-# dependencies, vendored so cargo build --offline does not touch crates.io.
+# readcon-core: library sources plus tools/readcon-Cargo.lock, which pins
+# the default dependencies, vendored so cargo build --offline does not
+# touch crates.io. inst/AUTHORS and LICENSE.note list that crate set.
 readcon_src=${READCON_SRC:-}
 if [ -z "$readcon_src" ]; then
   if ! command -v git >/dev/null 2>&1; then
@@ -100,6 +101,7 @@ dest=$pkg/src/readcon-core
 rm -rf "$dest"
 mkdir -p "$dest"
 cp "$pkg/tools/readcon-Cargo.toml" "$dest/Cargo.toml"
+cp "$pkg/tools/readcon-Cargo.lock" "$dest/Cargo.lock"
 cp "$readcon_src/build.rs" "$readcon_src/LICENSE" "$dest/"
 cp -R "$readcon_src/src" "$readcon_src/include" "$dest/"
 # [[nodiscard]] on the C++ wrapper becomes a warning under R CMD check
@@ -114,8 +116,7 @@ for f in "$dest"/include/*.h "$dest"/include/*.hpp; do
 done
 (
   cd "$dest"
-  cargo generate-lockfile
-  cargo vendor vendor >/dev/null
+  cargo vendor --locked vendor >/dev/null
 )
 if [ ! -f "$dest/vendor/dlpk/.cargo-checksum.json" ]; then
   echo "vendor-readers.sh: cargo vendor did not write readcon-core checksums" >&2
@@ -156,7 +157,8 @@ find "$dest/vendor" -depth \( \
   echo "readcon-core sources for the bundled CON reader."
   echo "revision: $readcon_rev"
   echo "upstream: $readcon_url"
-  echo "Cargo.toml is tools/readcon-Cargo.toml. Crates are vendored for cargo --offline."
+  echo "Cargo.toml is tools/readcon-Cargo.toml and Cargo.lock is tools/readcon-Cargo.lock."
+  echo "Crates are vendored for cargo --offline."
 } > "$dest/README"
 
 # chemfiles 0.10.4 with the seams-core patches (mmCIF, MOL2, frame visit,
