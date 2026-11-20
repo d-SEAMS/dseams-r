@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* Register the C `.Call()` entry points under their `seams_r_*` symbol
+  names so `cpp11::cpp_register()`, `pkgload::load_all()`, and
+  `testthat::test_local()` regenerate `src/cpp11.cpp` without symbol
+  mismatches.
 * Name Ruhila Goswami (`ctb`, ORCID 0000-0002-5443-9356) in the README,
   with the same role and ORCID as DESCRIPTION.
 * Restore reader guidance for source and linked-engine installs, native
