@@ -59,8 +59,10 @@ from `SEAMS_CORE_SRC` or `DSEAMS_ROOT`, else from the revision in
 The same step vendors readcon-core (the wrap revision in that seams-core
 tree, crates included) and patched chemfiles 0.10.4. A tarball from
 `R CMD build` carries those copies and installs with no network. The
-bundled compile needs Cargo, rustc >= 1.88, and cmake, and it always
-builds the CON reader and chemfiles. A linked engine is expected to have
+bundled compile needs GNU make, Cargo, rustc >= 1.88, cmake >= 3.15,
+and objcopy (or llvm-objcopy), and it always builds the CON reader and
+chemfiles. Cargo and CMake run at most two jobs, and Cargo's home is
+`src/readcon-core/cargo-home`, which the build removes. A linked engine is expected to have
 been built with those readers as well.
 
 ## Build and test

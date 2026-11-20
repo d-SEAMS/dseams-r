@@ -15,8 +15,9 @@ Steinhardt order parameters. The calculations are the
 
 ## Installation
 
-A C++20 compiler, Cargo, rustc >= 1.88, and cmake are required. The
-package compiles the engine, readcon-core, and chemfiles as it installs.
+A C++20 compiler, GNU make, Cargo, rustc >= 1.88, cmake >= 3.15, and
+objcopy (from GNU binutils, or llvm-objcopy) are required. The package
+compiles the engine, readcon-core, and chemfiles as it installs.
 
 ```r
 install.packages("remotes")

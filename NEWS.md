@@ -10,7 +10,9 @@
   default install reads CON files and the chemfiles formats the engine
   reads, including PDB and GRO, and the source tarball builds those
   libraries without a network connection. Building the bundled copy
-  needs Cargo, rustc >= 1.88, and cmake.
+  needs GNU make, Cargo, rustc >= 1.88, cmake >= 3.15, and objcopy (or
+  llvm-objcopy), all named in `SystemRequirements`. Cargo and CMake run
+  at most two jobs, and Cargo writes nothing under the user's home.
 * `inst/AUTHORS` names the authors of readcon-core, every vendored Rust
   crate, chemfiles, and the libraries chemfiles bundles, and
   `LICENSE.note` gives each one's licence. The `Copyright` field of
