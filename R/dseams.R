@@ -82,7 +82,7 @@ read_frame <- function(path, frame = 1L, type = 0L) {
 nframes <- function(path) {
   path <- normalizePath(path, mustWork = TRUE)
   tryCatch(
-    .capi_call("_dseams_seams_r_nframes", path),
+    .Call(`_dseams_seams_r_nframes`, path),
     error = function(e) {
       n <- tryCatch(nframes_(path), error = function(ignored) 0L)
       if (n > 0L) {

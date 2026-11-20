@@ -52,8 +52,6 @@
 #' @useDynLib dseams, .registration = TRUE
 "_PACKAGE"
 
-.capi <- new.env(parent = emptyenv())
-
 .capi_syms <- c(
   "_dseams_seams_r_system",
   "_dseams_seams_r_read",
@@ -98,14 +96,6 @@
   "_dseams_seams_r_brine"
 )
 
-.capi_call <- function(sym, ...) {
-  fn <- .capi[[sym]]
-  if (is.null(fn)) {
-    stop("C API symbol ", sym, " is not loaded", call. = FALSE)
-  }
-  .Call(fn, ...)
-}
-
 .onLoad <- function(libname, pkgname) {
   capi_pkg <- pkgname
   if ("dseams_capi" %in% names(getLoadedDLLs())) {
@@ -132,13 +122,18 @@
       capi_pkg <- "dseams_capi"
     }
   }
-  routines <- getDLLRegisteredRoutines(getLoadedDLLs()[[capi_pkg]])$.Call
-  for (name in .capi_syms) {
-    sym <- routines[[name]]
-    if (is.null(sym)) {
-      stop("C API symbol ", name, " is missing from ", capi_pkg, call. = FALSE)
+  if (identical(capi_pkg, "dseams_capi")) {
+    ns <- asNamespace(pkgname)
+    if (!environmentIsLocked(ns)) {
+      routines <- getDLLRegisteredRoutines(getLoadedDLLs()[[capi_pkg]])$.Call
+      for (name in .capi_syms) {
+        sym <- routines[[name]]
+        if (is.null(sym)) {
+          stop("C API symbol ", name, " is missing from ", capi_pkg, call. = FALSE)
+        }
+        assign(name, sym$address, envir = ns)
+      }
     }
-    .capi[[name]] <- sym
   }
   n <- getOption("dseams.threads")
   if (is.null(n)) {

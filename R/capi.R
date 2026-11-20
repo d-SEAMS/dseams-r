@@ -26,7 +26,7 @@
 #' sys
 #' @export
 seams_system_new <- function() {
-  ext <- .capi_call("_dseams_seams_r_system")
+  ext <- .Call(`_dseams_seams_r_system`)
   class(ext) <- "dseams_system"
   ext
 }
@@ -53,7 +53,7 @@ seams_system_new <- function() {
 #' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
 #' @export
 seams_system_read <- function(sys, path, frame = 1L, type = -1L) {
-  .capi_call("_dseams_seams_r_read", sys, normalizePath(path, mustWork = TRUE), as.integer(frame), as.integer(type))
+  .Call(`_dseams_seams_r_read`, sys, normalizePath(path, mustWork = TRUE), as.integer(frame), as.integer(type))
 }
 
 #' Atom count stored on a system.
@@ -66,7 +66,7 @@ seams_system_read <- function(sys, path, frame = 1L, type = -1L) {
 #' seams_system_count(sys)
 #' @export
 seams_system_count <- function(sys) {
-  .capi_call("_dseams_seams_r_count", sys)
+  .Call(`_dseams_seams_r_count`, sys)
 }
 
 #' Set the OpenMP width used by the next analysis.
@@ -78,7 +78,7 @@ seams_system_count <- function(sys) {
 #' seams_set_num_threads(1L)
 #' @export
 seams_set_num_threads <- function(n) {
-  .capi_call("_dseams_seams_r_threads", as.integer(n))
+  .Call(`_dseams_seams_r_threads`, as.integer(n))
 }
 
 #' Original CHILL population counts
@@ -105,7 +105,7 @@ seams_set_num_threads <- function(n) {
 #' seams_chill(sys)
 #' @export
 seams_chill <- function(sys, cutoff = 3.5, type = 0L, graph = 0L, rule = 0L) {
-  out <- .capi_call("_dseams_seams_r_chill", sys, cutoff, as.integer(type), as.integer(graph), as.integer(rule))
+  out <- .Call(`_dseams_seams_r_chill`, sys, cutoff, as.integer(type), as.integer(graph), as.integer(rule))
   names(out) <- .chill_names
   .tag(out, "dseams_chill")
 }
@@ -123,7 +123,7 @@ seams_chill <- function(sys, cutoff = 3.5, type = 0L, graph = 0L, rule = 0L) {
 #' seams_steinhardt(sys, order = 6L)
 #' @export
 seams_steinhardt <- function(sys, order, cutoff = 3.5, average = FALSE) {
-  out <- .capi_call("_dseams_seams_r_steinhardt", sys, cutoff, as.integer(order), as.integer(average))
+  out <- .Call(`_dseams_seams_r_steinhardt`, sys, cutoff, as.integer(order), as.integer(average))
   names(out) <- c("ql", "qlbar")
   .tag(out, "dseams_order")
 }
@@ -143,7 +143,7 @@ seams_steinhardt <- function(sys, order, cutoff = 3.5, average = FALSE) {
 #' seams_cages(sys)
 #' @export
 seams_cages <- function(sys, cutoff = 3.5, graph = 2L, k = 4L, complete = FALSE) {
-  out <- .capi_call("_dseams_seams_r_cages", sys, cutoff, as.integer(graph), as.integer(k), as.integer(complete))
+  out <- .Call(`_dseams_seams_r_cages`, sys, cutoff, as.integer(graph), as.integer(k), as.integer(complete))
   names(out) <- c("n_hex", "n_cubic", "n_water", "n_both")
   .tag(out, "dseams_cage_counts")
 }
@@ -161,7 +161,7 @@ seams_cages <- function(sys, cutoff = 3.5, graph = 2L, k = 4L, complete = FALSE)
 #' seams_signature_cages(sys, "512")
 #' @export
 seams_signature_cages <- function(sys, spec, cutoff = 3.5, graph = 0L) {
-  out <- .capi_call("_dseams_seams_r_signature", sys, cutoff, as.integer(graph), spec)
+  out <- .Call(`_dseams_seams_r_signature`, sys, cutoff, as.integer(graph), spec)
   names(out) <- c("n_cages", "n_atoms")
   .tag(out, "dseams_signature")
 }
@@ -179,7 +179,7 @@ seams_signature_cages <- function(sys, spec, cutoff = 3.5, graph = 0L) {
 #' seams_neighbours_knn(sys)
 #' @export
 seams_neighbours_knn <- function(sys, k = 4L, cutoff = 3.5, mutual = TRUE) {
-  .tag(.capi_call("_dseams_seams_r_knn", sys, as.integer(k), cutoff, as.integer(mutual)), "dseams_nnz")
+  .tag(.Call(`_dseams_seams_r_knn`, sys, as.integer(k), cutoff, as.integer(mutual)), "dseams_nnz")
 }
 
 #' Partial radial distribution.
@@ -194,7 +194,7 @@ seams_neighbours_knn <- function(sys, k = 4L, cutoff = 3.5, mutual = TRUE) {
 #' seams_rdf(sys)
 #' @export
 seams_rdf <- function(sys, rmax = 6, bins = 8L) {
-  out <- .capi_call("_dseams_seams_r_rdf", sys, rmax, as.integer(bins))
+  out <- .Call(`_dseams_seams_r_rdf`, sys, rmax, as.integer(bins))
   names(out) <- c("r", "g", "volume")
   .tag(out, "dseams_rdf")
 }
@@ -211,7 +211,7 @@ seams_rdf <- function(sys, rmax = 6, bins = 8L) {
 #' seams_running_cn(sys)
 #' @export
 seams_running_cn <- function(sys, rmax = 6, bins = 8L) {
-  .tag(.capi_call("_dseams_seams_r_running_cn", sys, rmax, as.integer(bins)), "dseams_running_cn")
+  .tag(.Call(`_dseams_seams_r_running_cn`, sys, rmax, as.integer(bins)), "dseams_running_cn")
 }
 
 #' Coordination number integrated to `rmax`.
@@ -226,7 +226,7 @@ seams_running_cn <- function(sys, rmax = 6, bins = 8L) {
 #' seams_coordination(sys)
 #' @export
 seams_coordination <- function(sys, rmax = 3.5, bins = 8L) {
-  .capi_call("_dseams_seams_r_coordination", sys, rmax, as.integer(bins))
+  .Call(`_dseams_seams_r_coordination`, sys, rmax, as.integer(bins))
 }
 
 #' Hydrogen-bond count.
@@ -248,7 +248,7 @@ seams_coordination <- function(sys, rmax = 3.5, bins = 8L) {
 #' @export
 seams_hbonds <- function(sys, cutoff = 3.5, oxygen_type = 1L, hydrogen_type = 2L,
                          dist = 2.42, angle = 30) {
-  .capi_call("_dseams_seams_r_hbonds", sys, cutoff, as.integer(oxygen_type),
+  .Call(`_dseams_seams_r_hbonds`, sys, cutoff, as.integer(oxygen_type),
              as.integer(hydrogen_type), dist, angle)
 }
 
@@ -265,7 +265,7 @@ seams_hbonds <- function(sys, cutoff = 3.5, oxygen_type = 1L, hydrogen_type = 2L
 #' seams_density_axis(sys)
 #' @export
 seams_density_axis <- function(sys, type = 0L, bins = 4L, axis = 2L) {
-  .tag(.capi_call("_dseams_seams_r_density", sys, as.integer(type), as.integer(bins), as.integer(axis)), "dseams_density")
+  .tag(.Call(`_dseams_seams_r_density`, sys, as.integer(type), as.integer(bins), as.integer(axis)), "dseams_density")
 }
 
 #' Topological fingerprint summary.
@@ -280,7 +280,7 @@ seams_density_axis <- function(sys, type = 0L, bins = 4L, axis = 2L) {
 #' seams_fingerprint(sys)
 #' @export
 seams_fingerprint <- function(sys, cutoff = 3.5, hops = 2L) {
-  out <- .capi_call("_dseams_seams_r_fingerprint", sys, cutoff, as.integer(hops))
+  out <- .Call(`_dseams_seams_r_fingerprint`, sys, cutoff, as.integer(hops))
   names(out) <- c("key_length", "ring_sum")
   .tag(out, "dseams_fingerprint")
 }
@@ -299,7 +299,7 @@ seams_fingerprint <- function(sys, cutoff = 3.5, hops = 2L) {
 #' seams_contact_pairs(sys, "1=cationHead")
 #' @export
 seams_contact_pairs <- function(sys, spec) {
-  out <- .capi_call("_dseams_seams_r_pairs", sys, spec)
+  out <- .Call(`_dseams_seams_r_pairs`, sys, spec)
   names(out) <- c("n_pairs", "n_cation", "n_anion")
   .tag(out, "dseams_contacts")
 }
@@ -320,7 +320,7 @@ seams_contact_pairs <- function(sys, spec) {
 #' seams_domains(sys, "1=waterO")
 #' @export
 seams_domains <- function(sys, spec, cutoff = 3.5, subset = 0L) {
-  out <- .capi_call("_dseams_seams_r_domains", sys, cutoff, spec, as.integer(subset))
+  out <- .Call(`_dseams_seams_r_domains`, sys, cutoff, spec, as.integer(subset))
   names(out) <- c("n_subset", "largest", "percolation")
   .tag(out, "dseams_domains")
 }
@@ -336,7 +336,7 @@ seams_domains <- function(sys, spec, cutoff = 3.5, subset = 0L) {
 #' seams_prisms(sys)
 #' @export
 seams_prisms <- function(sys, cutoff = 3.5) {
-  .tag(.capi_call("_dseams_seams_r_prisms", sys, cutoff), "dseams_prisms")
+  .tag(.Call(`_dseams_seams_r_prisms`, sys, cutoff), "dseams_prisms")
 }
 
 #' Primitive-ring histogram of a monolayer.
@@ -352,7 +352,7 @@ seams_prisms <- function(sys, cutoff = 3.5) {
 #' seams_monolayer(sys)
 #' @export
 seams_monolayer <- function(sys, cutoff = 3.5, max_depth = 6L, sheet_area = 100) {
-  .tag(.capi_call("_dseams_seams_r_monolayer", sys, cutoff, as.integer(max_depth), sheet_area), "dseams_monolayer")
+  .tag(.Call(`_dseams_seams_r_monolayer`, sys, cutoff, as.integer(max_depth), sheet_area), "dseams_monolayer")
 }
 
 #' Atom indices of one primitive ring.
@@ -368,7 +368,7 @@ seams_monolayer <- function(sys, cutoff = 3.5, max_depth = 6L, sheet_area = 100)
 #' seams_rings_vertices(sys)
 #' @export
 seams_rings_vertices <- function(sys, cutoff = 3.5, max_depth = 6L, index = 0L) {
-  .tag(.capi_call("_dseams_seams_r_vertices", sys, cutoff, as.integer(max_depth), as.integer(index)), "dseams_vertices")
+  .tag(.Call(`_dseams_seams_r_vertices`, sys, cutoff, as.integer(max_depth), as.integer(index)), "dseams_vertices")
 }
 
 #' Per-atom site kind.
@@ -382,7 +382,7 @@ seams_rings_vertices <- function(sys, cutoff = 3.5, max_depth = 6L, index = 0L) 
 #' seams_site_table(sys, "1=waterO")
 #' @export
 seams_site_table <- function(sys, spec) {
-  .tag(.capi_call("_dseams_seams_r_site", sys, spec), "dseams_sites")
+  .tag(.Call(`_dseams_seams_r_site`, sys, spec), "dseams_sites")
 }
 
 #' C API ABI and version metadata.
@@ -393,7 +393,7 @@ seams_site_table <- function(sys, spec) {
 #' seams_capi_info()
 #' @export
 seams_capi_info <- function() {
-  out <- .capi_call("_dseams_seams_r_capi_info")
+  out <- .Call(`_dseams_seams_r_capi_info`)
   names(out) <- c("abi", "version", "major", "minor", "patch", "version_string")
   out
 }
@@ -406,7 +406,7 @@ seams_capi_info <- function() {
 #' seams_label_name(1L)
 #' @export
 seams_label_name <- function(label) {
-  .capi_call("_dseams_seams_r_label_name", as.integer(label))
+  .Call(`_dseams_seams_r_label_name`, as.integer(label))
 }
 
 #' Human-readable ring symmetry name.
@@ -417,7 +417,7 @@ seams_label_name <- function(label) {
 #' seams_ring_symmetry_name(2L)
 #' @export
 seams_ring_symmetry_name <- function(symmetry) {
-  .capi_call("_dseams_seams_r_ring_symmetry_name", as.integer(symmetry))
+  .Call(`_dseams_seams_r_ring_symmetry_name`, as.integer(symmetry))
 }
 
 #' Populate a system handle from R arrays.
@@ -442,7 +442,7 @@ seams_system_set_atoms <- function(sys, xyz, box, types = NULL, ids = NULL) {
   box <- as.numeric(box)
   types_arg <- if (is.null(types)) NULL else as.integer(types)
   ids_arg <- if (is.null(ids)) NULL else as.integer(ids)
-  invisible(.capi_call("_dseams_seams_r_set_atoms", sys, xyz, box, types_arg, ids_arg))
+  invisible(.Call(`_dseams_seams_r_set_atoms`, sys, xyz, box, types_arg, ids_arg))
 }
 
 #' Simulation box stored on a system.
@@ -456,7 +456,7 @@ seams_system_set_atoms <- function(sys, xyz, box, types = NULL, ids = NULL) {
 #' seams_system_box(sys)
 #' @export
 seams_system_box <- function(sys) {
-  out <- .capi_call("_dseams_seams_r_box", sys)
+  out <- .Call(`_dseams_seams_r_box`, sys)
   names(out) <- c("ox", "oy", "oz", "lx", "ly", "lz", "xy", "xz", "yz")
   out
 }
@@ -471,7 +471,7 @@ seams_system_box <- function(sys) {
 #' head(seams_system_positions(sys))
 #' @export
 seams_system_positions <- function(sys) {
-  out <- .capi_call("_dseams_seams_r_positions", sys)
+  out <- .Call(`_dseams_seams_r_positions`, sys)
   colnames(out) <- c("x", "y", "z")
   out
 }
@@ -486,7 +486,7 @@ seams_system_positions <- function(sys) {
 #' head(seams_system_types(sys))
 #' @export
 seams_system_types <- function(sys) {
-  .capi_call("_dseams_seams_r_types", sys)
+  .Call(`_dseams_seams_r_types`, sys)
 }
 
 #' Atom IDs stored on a system.
@@ -499,7 +499,7 @@ seams_system_types <- function(sys) {
 #' head(seams_system_ids(sys))
 #' @export
 seams_system_ids <- function(sys) {
-  .capi_call("_dseams_seams_r_ids", sys)
+  .Call(`_dseams_seams_r_ids`, sys)
 }
 
 #' Shell symmetry labels on a system.
@@ -514,7 +514,7 @@ seams_system_ids <- function(sys) {
 #' table(seams_system_symmetry(sys))
 #' @export
 seams_system_symmetry <- function(sys, shell_rmsd = 0.12) {
-  .capi_call("_dseams_seams_r_system_symmetry", sys, shell_rmsd)
+  .Call(`_dseams_seams_r_system_symmetry`, sys, shell_rmsd)
 }
 
 #' Local q4 and q6 on the cutoff shell of a system.
@@ -529,7 +529,7 @@ seams_system_symmetry <- function(sys, shell_rmsd = 0.12) {
 #' head(seams_q4q6(sys))
 #' @export
 seams_q4q6 <- function(sys, cutoff = 3.5, type = 0L) {
-  out <- .capi_call("_dseams_seams_r_q4q6", sys, cutoff, as.integer(type))
+  out <- .Call(`_dseams_seams_r_q4q6`, sys, cutoff, as.integer(type))
   data.frame(q4 = out[[1L]], q6 = out[[2L]])
 }
 
@@ -546,7 +546,7 @@ seams_q4q6 <- function(sys, cutoff = 3.5, type = 0L) {
 #' seams_q6bar(sys)[c("mean", "median", "n_ice")]
 #' @export
 seams_q6bar <- function(sys, cutoff = 3.5, type = 0L, ice_cut = 0.36) {
-  out <- .capi_call("_dseams_seams_r_q6bar", sys, cutoff, as.integer(type), ice_cut)
+  out <- .Call(`_dseams_seams_r_q6bar`, sys, cutoff, as.integer(type), ice_cut)
   names(out) <- c("q6bar", "mean", "median", "n_ice")
   out
 }
@@ -565,7 +565,7 @@ seams_q6bar <- function(sys, cutoff = 3.5, type = 0L, ice_cut = 0.36) {
 #' seams_ql(sys, order = 6L, graph = 0L)
 #' @export
 seams_ql <- function(sys, order = 6L, cutoff = 3.5, type = 0L, graph = 0L) {
-  out <- .capi_call("_dseams_seams_r_ql", sys, cutoff, as.integer(type),
+  out <- .Call(`_dseams_seams_r_ql`, sys, cutoff, as.integer(type),
                     as.integer(order), as.integer(graph))
   names(out) <- c("ql", "qlbar")
   .tag(out, "dseams_order")
@@ -588,7 +588,7 @@ seams_ql <- function(sys, order = 6L, cutoff = 3.5, type = 0L, graph = 0L) {
 #' @export
 seams_cages_labels <- function(sys, cutoff = 3.5, type = 0L, graph = 2L,
                                k = 4L, complete = FALSE) {
-  out <- .capi_call("_dseams_seams_r_cages_labels", sys, cutoff, as.integer(type),
+  out <- .Call(`_dseams_seams_r_cages_labels`, sys, cutoff, as.integer(type),
                     as.integer(graph), as.integer(k), as.integer(complete))
   labels <- out[[1L]]
   counts <- out[[2L]]
@@ -613,7 +613,7 @@ seams_cages_labels <- function(sys, cutoff = 3.5, type = 0L, graph = 2L,
 #' @export
 seams_signature_cages_edge <- function(sys, spec, edge = "", cutoff = 3.5,
                                        type = 0L, graph = 0L) {
-  out <- .capi_call("_dseams_seams_r_signature_edge", sys, cutoff,
+  out <- .Call(`_dseams_seams_r_signature_edge`, sys, cutoff,
                     as.integer(type), as.integer(graph), spec, edge)
   names(out) <- c("n_cages", "n_atoms")
   .tag(out, "dseams_signature")
@@ -633,7 +633,7 @@ seams_signature_cages_edge <- function(sys, spec, edge = "", cutoff = 3.5,
 #' length(nb$cols)
 #' @export
 seams_neighbours <- function(sys, cutoff = 3.5, type = 0L, graph = 0L) {
-  out <- .capi_call("_dseams_seams_r_neighbours", sys, cutoff,
+  out <- .Call(`_dseams_seams_r_neighbours`, sys, cutoff,
                     as.integer(type), as.integer(graph))
   names(out) <- c("offsets", "cols", "n_rows")
   out
@@ -654,7 +654,7 @@ seams_neighbours <- function(sys, cutoff = 3.5, type = 0L, graph = 0L) {
 #' seams_rings(sys)$n_rings
 #' @export
 seams_rings <- function(sys, cutoff = 3.5, type = 0L, graph = 0L, max_depth = 6L) {
-  out <- .capi_call("_dseams_seams_r_rings", sys, cutoff, as.integer(type),
+  out <- .Call(`_dseams_seams_r_rings`, sys, cutoff, as.integer(type),
                     as.integer(graph), as.integer(max_depth))
   names(out) <- c("n_rings", "histogram", "sizes", "symmetry", "fraction")
   out
@@ -676,7 +676,7 @@ seams_rings <- function(sys, cutoff = 3.5, type = 0L, graph = 0L, max_depth = 6L
 #' @export
 seams_rings_chordless <- function(sys, size = 6L, cutoff = 3.5, type = 0L,
                                   graph = 0L) {
-  out <- .capi_call("_dseams_seams_r_rings_chordless", sys, cutoff,
+  out <- .Call(`_dseams_seams_r_rings_chordless`, sys, cutoff,
                     as.integer(type), as.integer(graph), as.integer(size))
   names(out) <- c("n_rings", "rings", "per_atom")
   out
@@ -700,7 +700,7 @@ seams_rings_chordless <- function(sys, size = 6L, cutoff = 3.5, type = 0L,
 #' @export
 seams_fingerprint_atoms <- function(sys, cutoff = 3.5, hops = 2L, type = 0L,
                                     k = 4L, graph = 0L, color_types = FALSE) {
-  out <- .capi_call("_dseams_seams_r_fingerprint_atoms", sys, cutoff,
+  out <- .Call(`_dseams_seams_r_fingerprint_atoms`, sys, cutoff,
                     as.integer(type), as.integer(k), as.integer(graph),
                     as.integer(hops), as.integer(color_types))
   names(out) <- c("key", "atom_keys", "rings")
@@ -723,7 +723,7 @@ seams_fingerprint_atoms <- function(sys, cutoff = 3.5, hops = 2L, type = 0L,
 #' @export
 seams_brine <- function(sys, ice, water_type = 0L, ion_type = 0L,
                         n_bins = 8L, axis = 2L) {
-  out <- .capi_call("_dseams_seams_r_brine", sys, as.integer(ice),
+  out <- .Call(`_dseams_seams_r_brine`, sys, as.integer(ice),
                     as.integer(water_type), as.integer(ion_type),
                     as.integer(n_bins), as.integer(axis))
   fronts <- out[[1L]]
