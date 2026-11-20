@@ -54,7 +54,8 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-2393-8056")),
     person("Amrita", "Goswami", role = "aut",
            comment = c(ORCID = "0000-0001-8706-2383")),
-    person("Ruhila", "S", role = "ctb"),
+    person("Ruhila", "Goswami", role = "ctb",
+           comment = c(ORCID = "0000-0002-5443-9356")),
     person("d-SEAMS core team", role = "cph",
            comment = "seams-core engine sources bundled in src/seams")
     )
@@ -95,7 +96,7 @@ Config/roxygen2/version: 8.1.1
 ```
 
 The R package is the root of that repository. Amrita Goswami is an
-author (`aut`) and Ruhila S a contributor (`ctb`) in the DESCRIPTION.
+author (`aut`) and Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION.
 Their GitHub handles are not recorded in the repository; add Amrita
 Goswami's between the author markers above if she should be on the issue.
 
@@ -222,10 +223,6 @@ Goswami's between the author markers above if she should be on the issue.
     coordinate matrix of a frame, and its reclassified point-group
     label), `dseams` does not depend on or re-export those packages, and
     neither name collides inside this package's own namespace.
-  - Authors without ORCID: Ruhila S (`ctb`) has no ORCID on file in the
-    repository. The DESCRIPTION lists only the package's existing
-    authors as given in the repository; this draft does not add ORCIDs
-    on their behalf or add authors.
 
 ### Presubmission inquiry
 
@@ -411,9 +408,6 @@ What the repository gives pkgcheck:
 
 Expected notes, not checklist failures:
 
-- Ruhila S (`ctb`) has no ORCID in the repository. The DESCRIPTION lists
-  only the package's existing authors; this draft adds neither an ORCID
-  nor a new author to clear the item.
 - `positions()` is also exported by `mixvlmc`, `splus2R` and
   `splusTimeSeries`; `symmetry()` by `DecomposeR` and `xnet`. Both stay:
   they are the plain names for the frame coordinate matrix and the
