@@ -59,4 +59,13 @@ Goswami, Goswami and Singh (2020), Journal of Chemical Information and
 Modeling. <https://doi.org/10.1021/acs.jcim.0c00031>. `citation("dseams")`
 prints the record.
 
+## Contributors
+
+- Rohit Goswami (author, maintainer; ORCID
+  [0000-0002-2393-8056](https://orcid.org/0000-0002-2393-8056))
+- Amrita Goswami (author; ORCID
+  [0000-0001-8706-2383](https://orcid.org/0000-0001-8706-2383))
+- Ruhila Goswami (contributor; ORCID
+  [0000-0002-5443-9356](https://orcid.org/0000-0002-5443-9356))
+
 Report bugs at <https://github.com/d-SEAMS/dseams-r/issues>.
