@@ -204,7 +204,8 @@ Goswami's between the author markers above if she should be on the issue.
 
 -   Explain reasons for any [`pkgcheck` items](https://docs.ropensci.org/pkgcheck/) which your package is unable to pass.
 
-  See the pkgcheck summary at the end of this file. Standards from the
+  The pkgcheck section quotes the run and says why each remaining
+  item stays. Standards from the
   statistical-software track are assessed in
   `srr-standards.md`. `dseams` is not statistical
   software, so the category standards (Bayesian, regression, machine
@@ -335,6 +336,87 @@ The run history is the Actions page:
   `tools/seams-core.ref` pins `d-SEAMS/seams-core` at that tag, runs
   `R CMD check --as-cran --no-manual`, and publishes the source
   tarball for `d-SEAMS/dseams-r`.
+
+`pkgcheck::pkgcheck(".", goodpractice = TRUE, use_cache = FALSE)`
+was run with R 4.5.3, pkgcheck 0.3.4.5, pkgstats 0.2.5 and
+goodpractice 1.2.0. CRAN pkgcheck 0.3.4 does not finish on this
+DESCRIPTION. It stops in `pkginfo_url_from_desc`:
+
+```
+Error in type == "URL" && grepl("github\\.io", u, ignore.case = TRUE) :
+  'length = 2' in coercion to 'logical(1)'
+Calls: <Anonymous> -> pkgstats_info -> pkginfo_url_from_desc
+```
+
+The field has two URLs. pkgcheck 0.3.4.5 is revision 4569a193 of
+ropensci-review-tools/pkgcheck, which uses the first URL before that
+comparison. The URLs in DESCRIPTION were not edited to satisfy 0.3.4.
+
+The 0.3.4.5 run printed:
+
+```
+✖ Package has no continuous integration checks.
+✔ Package coverage is 100%.
+✔ All goodpractice linters passed.
+✔ All authors have ORCID IDs
+✖ R CMD check found 1 error.
+✖ R CMD check found 1 warning.
+```
+
+`pct_by_line` is 100. The CI sentence is pkgcheck reading GitHub
+Actions conclusions for workflows whose names match cmd or coverage.
+The four workflow files above are what the repository contains, and
+the Actions page is where their runs are listed. Coverage is this
+bundled run. `pdflatex` is not installed, and the log says `pdflatex
+not found! Not building PDF manual.` That is the error and the
+warning. `R CMD check --as-cran --no-manual` of the bundled tarball
+finished `Status: 1 NOTE`. The NOTE is `New submission`.
+
+`goodpractice::failed_checks` from that pkgcheck, and from a separate
+`goodpractice::gp(".", quiet = TRUE)`, is:
+
+```
+[1] "no_description_date"               "rcmdcheck_can_convert_rd_to_pdf_2"
+[3] "roxygen2_duplicate_params"
+```
+
+`spelling` is TRUE. The same three names are what
+`goodpractice::gp(".", quiet = FALSE)` printed. `quiet = TRUE`
+suppresses the progress bars; the checks still run.
+
+`Date: 2026-11-17` stays. It is the release date, the same day as
+`datePublished` in `codemeta.json` and `date-released` in
+`CITATION.cff`. `R CMD build` records the build date separately.
+
+The LaTeX item is the missing `pdflatex`. The `--no-manual` check did
+not report an Rd problem.
+
+The repeated `@param` lines are the same argument stated on each help
+page (`cutoff`, `frame`, `...`). Each page stands on its own, so the
+text is not folded into `@inheritParams`.
+
+The same tarball, linked against a seams-core develop build (meson
+`version: '2.14.0'`, commit 2c5d0fce), fails one test.
+`dseams_version()` returns `"2.14.0"` and the package version is
+`2.14.1`. `R CMD check --as-cran --no-manual` of that link finished
+`Status: 1 ERROR, 1 NOTE`. The NOTE is `New submission`. The test is
+unchanged: the package version is the engine version it binds, and
+the pin in `tools/seams-core.ref` is v2.14.1. The bundled check, which
+compiles that pin, passes the test.
+
+`testthat::test_local()` does not load the package.
+`pkgbuild::compile_dll()` calls `cpp11::cpp_register()`, which
+rewrites `src/cpp11.cpp` so the shared library calls
+`_dseams_seams_r_*` symbols the sources do not define (`undefined
+symbol: _dseams_seams_r_cages`). The repository file was left as it
+was. `tests/testthat.R` calls `testthat::test_check()`, and that is
+what was run. On the bundled install it reports no failures. Nine
+tests skip because `DSEAMS_ROOT` and `SEAMS_BIN` are unset, and the
+submission-file test skips because an installed tree has no
+`tools/check-submission.R`. `R CMD check` of the source tarball runs
+that submission test from `00_pkg_src` and reports `checking tests
+... OK`. On the linked install, `test_check()` reports the version
+failure above.
 
 Names shared with other packages stay. `positions()` is the frame
 coordinate matrix and `symmetry()` is the reclassified point-group
