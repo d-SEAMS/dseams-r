@@ -34,7 +34,7 @@ dseams_example <- function(name = NULL) {
 #' LAMMPS dumps (`.lammpstrj`, `.dump`) and XYZ files are read on every
 #' build. When [dseams_features()] reports `chemfiles`, the path may be
 #' any format chemfiles 0.10 reads: PDB, GRO, DCD, XTC, TRR, TNG, NetCDF,
-#' SDF, CML, CSSR, MOL2, CIF, mmCIF, LAMMPS data, Tinker ARC, and MMTF.
+#' SDF, CML, CSSR, MOL2, CIF, mmCIF, Tinker ARC, and MMTF.
 #' When it reports `readcon`, a readcon `.con` file is read. readcon-core
 #' also defines `.convel`. `nframes()` asks the engine for both extensions.
 #' `read_frame()` and [seams_system_read()] pass a path to readcon when

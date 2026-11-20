@@ -48,7 +48,7 @@ when the file names an element.
 LAMMPS dumps (\code{.lammpstrj}, \code{.dump}) and XYZ files are read on every
 build. When \code{\link[=dseams_features]{dseams_features()}} reports \code{chemfiles}, the path may be
 any format chemfiles 0.10 reads: PDB, GRO, DCD, XTC, TRR, TNG, NetCDF,
-SDF, CML, CSSR, MOL2, CIF, mmCIF, LAMMPS data, Tinker ARC, and MMTF.
+SDF, CML, CSSR, MOL2, CIF, mmCIF, Tinker ARC, and MMTF.
 When it reports \code{readcon}, a readcon \code{.con} file is read. readcon-core
 also defines \code{.convel}. \code{nframes()} asks the engine for both extensions.
 \code{read_frame()} and \code{\link[=seams_system_read]{seams_system_read()}} pass a path to readcon when
