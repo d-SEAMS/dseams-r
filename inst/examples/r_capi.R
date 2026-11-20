@@ -25,9 +25,9 @@ stopifnot(
   seams_system_read(
     sys, file.path(root, "input/traj/ice1h.lammpstrj"), 1L, -1L
   ) == rows[["ih n"]],
-  seams_system_count(sys) == rows[["ih n"]]
+  seams_system_count(sys) == rows[["ih n"]],
+  as.numeric(seams_chill(sys)) == rows[["ih chill0"]]
 )
-stopifnot(as.numeric(seams_chill(sys)) == rows[["ih chill0"]])
 q3 <- seams_steinhardt(sys, 3L)
 q4 <- seams_steinhardt(sys, 4L)
 q6 <- seams_steinhardt(sys, 6L, average = TRUE)
