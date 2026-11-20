@@ -121,8 +121,10 @@ def holders_of(text):
 def key_words(h):
     s = re.sub(r"(?i)copyright|\(c\)|©|all rights reserved|\bby\b|\band\b", " ", h)
     s = re.sub(r"<[^>]*>|https?://\S+|\S+@\S+", " ", s)
-    s = re.sub(r"[0-9,\-–.:;()\[\]\"']+", " ", s)
-    stop = {"BSD", "MIT", "License", "Licence", "LICENSE", "See", "The", "THE"}
+    s = re.sub(r"[0-9,\-–.:;()\[\]\"'\\]+", " ", s)
+    # Licence prose and Windows resource keys that sit on notice lines.
+    stop = {"BSD", "MIT", "License", "Licence", "LICENSE", "See", "The", "THE",
+            "Agreement", "VALUE", "Legal", "LegalCopyright"}
     return [w for w in s.split() if len(w) > 2 and not w.islower() and w not in stop]
 
 
