@@ -19,7 +19,11 @@ nframes(path)
 \item{path}{Path to a trajectory. LAMMPS dumps, XYZ, and CON are read
 by the engine. PDB, GRO, DCD, and the other formats chemfiles supports
 are read when the package is built with the bundled chemfiles library,
-which the source package does by default.}
+which the source package does by default. That build also enables
+the VMD molfile readers chemfiles can compile, so files such as
+\code{.pqr}, \code{.xsf}, \code{.cube}, \code{.car}, \code{.cor}, \code{.rst7}, \code{.parm7}, \code{.mae},
+\code{.bgf}, \code{.vtf}, \code{.binpos}, \code{.dtr}, \code{.POSCAR} and \code{.OUTCAR} are read
+too. The format is chosen from the extension.}
 
 \item{frame}{1-based frame index.}
 

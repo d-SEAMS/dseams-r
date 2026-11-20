@@ -38,7 +38,11 @@ dseams_example <- function(name = NULL) {
 #' @param path Path to a trajectory. LAMMPS dumps, XYZ, and CON are read
 #'   by the engine. PDB, GRO, DCD, and the other formats chemfiles supports
 #'   are read when the package is built with the bundled chemfiles library,
-#'   which the source package does by default.
+#'   which the source package does by default. That build also enables
+#'   the VMD molfile readers chemfiles can compile, so files such as
+#'   `.pqr`, `.xsf`, `.cube`, `.car`, `.cor`, `.rst7`, `.parm7`, `.mae`,
+#'   `.bgf`, `.vtf`, `.binpos`, `.dtr`, `.POSCAR` and `.OUTCAR` are read
+#'   too. The format is chosen from the extension.
 #' @param frame 1-based frame index.
 #' @param type LAMMPS type filter.
 #' @param x A `dseams_frame`, for `print()`.

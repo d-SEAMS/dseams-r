@@ -13,6 +13,14 @@
   needs GNU make, Cargo, rustc >= 1.88, cmake >= 3.15, and objcopy (or
   llvm-objcopy), all named in `SystemRequirements`. Cargo and CMake run
   at most two jobs, and Cargo writes nothing under the user's home.
+* The bundled chemfiles also builds every VMD molfile plugin that
+  chemfiles lists as compilable and whose reader returns atoms, so
+  `read_frame()` reads 30 more formats, among them PQR, XSF, Gaussian
+  cube, AMBER7 restart and parm7, CHARMM coordinates, Maestro, VTF,
+  DESRES trajectories, and VASP POSCAR, OUTCAR, XDATCAR and vasprun.xml.
+  `tools/chemfiles-molfiles.py` enables them on every vendor. Counting
+  frames no longer passes a null timestep to a plugin, and an empty file
+  or a plugin that finds no atoms is an error instead of a crash.
 * `inst/AUTHORS` names the authors of readcon-core, every vendored Rust
   crate, chemfiles, and the libraries chemfiles bundles, and
   `LICENSE.note` gives each one's licence. The `Copyright` field of

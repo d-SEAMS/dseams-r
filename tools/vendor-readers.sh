@@ -210,6 +210,9 @@ if ! grep -q seams_with_frame "$pkg/src/chemfiles/src/Trajectory.cpp"; then
   echo "vendor-readers.sh: chemfiles frame-visit patch did not apply" >&2
   exit 1
 fi
+# Build every molfile plugin chemfiles lists as compilable and register
+# each one that reads atoms as a chemfiles format.
+python3 "$pkg/tools/chemfiles-molfiles.py" "$pkg/src/chemfiles"
 # Tests and diagnostic pragmas are not part of the library the package
 # compiles, and R CMD check rejects both the pragmas and the hidden files.
 rm -rf "$pkg/src/chemfiles/tests"
@@ -267,6 +270,8 @@ if [ ! -f "$con" ]; then
 fi
 cp "$con" "$extdata/tiny_multi_cuh2.con"
 cp "$pkg/tools/readers/tiny.pdb" "$pkg/tools/readers/tiny.gro" \
-  "$pkg/tools/readers/tiny.xyz" "$extdata/"
+  "$pkg/tools/readers/tiny.xyz" "$pkg/tools/readers/tiny.pqr" \
+  "$pkg/tools/readers/tiny.xsf" "$pkg/tools/readers/tiny.cube" \
+  "$pkg/tools/readers/tiny.rst7" "$extdata/"
 
 echo "vendor-readers.sh: readcon-core $readcon_rev and chemfiles 0.10.4"

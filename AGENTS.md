@@ -109,6 +109,11 @@ CI sets them, and so should a local run that touches an analysis.
 3. Wrap new C API symbols in `src/seams_call.c` and `R/capi.R`, document
    them with roxygen2, regenerate `man/` and `NAMESPACE`, and extend the
    tests.
+4. If the chemfiles pin changes the molfile plugins it lists as
+   compilable, `tools/chemfiles-molfiles.py` stops the vendor. Run
+   `sh tools/probe-molfiles.sh src/chemfiles/external/molfiles.tar.gz
+   PLUGIN...` and update its `READERS` or `EXCLUDED` table, then the
+   molfiles entries in `inst/AUTHORS` and `LICENSE.note`.
 
 ## Commits and changelog
 
