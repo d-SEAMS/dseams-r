@@ -314,11 +314,13 @@ The run history is the Actions page:
 
 - `r-cmd-check.yml` (`name: R-CMD-check`) runs on pushes and pull
   requests to `main` and `release/**`, and on `workflow_dispatch`. The
-  bundled job copies the engine at the pin in `tools/seams-core.ref`
-  and runs `R CMD check --no-manual --as-cran` on Linux (R release and
-  devel), macOS, and Windows. The linked job builds seams-core at that
-  pin and runs `R CMD check --no-manual` with the package linked
-  against that build. Both jobs set `_R_CHECK_FORCE_SUGGESTS_=true`.
+  bundled job copies the engine at the pin in `tools/seams-core.ref`,
+  checks that `cpp11::cpp_register()` leaves `R/cpp11.R` and
+  `src/cpp11.cpp` unchanged, and runs `R CMD check --no-manual --as-cran`
+  on Linux (R release and devel), macOS, and Windows. The linked job
+  builds seams-core at that pin and runs `R CMD check --no-manual` with
+  the package linked against that build. Both jobs set
+  `_R_CHECK_FORCE_SUGGESTS_=true`.
 - `test-coverage.yml` (`name: test-coverage`) runs on the same events.
   It links the package to a seams-core build at the pin and runs covr
   on the R code (`.github/coverage.R`). `.covrignore` lists `src` and
@@ -404,19 +406,14 @@ unchanged: the package version is the engine version it binds, and
 the pin in `tools/seams-core.ref` is v2.14.1. The bundled check, which
 compiles that pin, passes the test.
 
-`testthat::test_local()` does not load the package.
-`pkgbuild::compile_dll()` calls `cpp11::cpp_register()`, which
-rewrites `src/cpp11.cpp` so the shared library calls
-`_dseams_seams_r_*` symbols the sources do not define (`undefined
-symbol: _dseams_seams_r_cages`). The repository file was left as it
-was. `tests/testthat.R` calls `testthat::test_check()`, and that is
-what was run. On the bundled install it reports no failures. Nine
-tests skip because `DSEAMS_ROOT` and `SEAMS_BIN` are unset, and the
-submission-file test skips because an installed tree has no
-`tools/check-submission.R`. `R CMD check` of the source tarball runs
-that submission test from `00_pkg_src` and reports `checking tests
-... OK`. On the linked install, `test_check()` reports the version
-failure above.
+`testthat::test_local()` and `testthat::test_check()` both load and
+pass on the bundled build, and `cpp11::cpp_register()` leaves
+`R/cpp11.R` and `src/cpp11.cpp` unchanged. Nine tests skip when
+`DSEAMS_ROOT` and `SEAMS_BIN` are unset, and the submission-file test
+skips on an installed tree because it has no `tools/check-submission.R`.
+`R CMD check` of the source tarball runs that submission test from
+`00_pkg_src` and reports `checking tests ... OK`. On the linked
+install, `test_check()` reports the version failure above.
 
 Names shared with other packages stay. `positions()` is the frame
 coordinate matrix and `symmetry()` is the reclassified point-group
