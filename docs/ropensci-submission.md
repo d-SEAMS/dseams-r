@@ -97,8 +97,6 @@ Config/roxygen2/version: 8.1.1
 
 The R package is the root of that repository. Amrita Goswami is an
 author (`aut`) and Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION.
-Their GitHub handles are not recorded in the repository; add Amrita
-Goswami's between the author markers above if she should be on the issue.
 
 ## Scope
 
