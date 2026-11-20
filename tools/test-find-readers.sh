@@ -62,8 +62,12 @@ fi
 work=$(mktemp -d "${TMPDIR:-/tmp}/find-readers-test.XXXXXX")
 trap 'rm -rf "$work"' EXIT
 
+pass=0
 fail=0
-ok() { printf 'ok - %s\n' "$1"; }
+ok() {
+  pass=$((pass + 1))
+  printf 'ok - %s\n' "$1"
+}
 not_ok() {
   printf 'not ok - %s\n' "$1"
   fail=1
@@ -346,4 +350,4 @@ if [ "$fail" -ne 0 ]; then
   echo "# find-readers.sh checks failed"
   exit 1
 fi
-echo "# all find-readers.sh checks passed"
+echo "# all $pass find-readers.sh checks passed"

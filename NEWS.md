@@ -1,9 +1,34 @@
 # dseams (development version)
 
+* Release cage, neighbour, ring, fingerprint, and brine handles, and the
+  position and fingerprint scratch buffers, when an R allocation in those
+  C wrappers fails. The handles are freed by `R_UnwindProtect` and the
+  scratch buffers are R-managed, so an out-of-memory longjmp does not
+  leak them.
 * Fix `nframes()` on a readcon `.con` file when the package is linked
   against `libseams` and `libseams_lang`. Both libraries export
   `seams_path_nframes` with different arguments, and the linker bound
   the language one, which reports no frames for `.con`.
+* Isolate `dseams` (`libseams_lang`) and `dseams_capi` (`libseams`) in
+  linked-engine builds so `seams_path_nframes()` and `seams_last_error()`
+  never collide across the two shared libraries, and delegate `nframes()`
+  to the engine with no R-side extension whitelist.
+* Expand `test-readers.R` with per-format read fixtures for all 18
+  engine-supported formats (native LAMMPS and XYZ, chemfiles MOL2,
+  mmCIF, CIF, PDB, GRO, DCD, XTC, TRR, TNG, NetCDF, SDF, CML, CSSR,
+  Tinker ARC, MMTF, and readcon `.con`) and remove the unsupported
+  `LAMMPS data` claim from `read_frame()` documentation.
+* Wrap the remaining active `libseams` C API functions:
+  `seams_capi_info()`, `seams_label_name()`, `seams_ring_symmetry_name()`,
+  `seams_system_set_atoms()`, `seams_system_box()`,
+  `seams_system_positions()`, `seams_system_types()`,
+  `seams_system_ids()`, `seams_system_symmetry()`, `seams_q4q6()`,
+  `seams_q6bar()`, `seams_ql()`, `seams_cages_labels()`,
+  `seams_signature_cages_edge()`, `seams_neighbours()`, `seams_rings()`,
+  `seams_rings_chordless()`, `seams_fingerprint_atoms()`, and
+  `seams_brine()`.
+* Credit Ruhila Goswami with ORCID 0000-0002-5443-9356 in `README.md`
+  to match `DESCRIPTION`.
 * Restore reader guidance for source and linked-engine installs, native
   object ownership, and the complete R language-task example.
 * Redirect the former standalone print and summary reference pages to their

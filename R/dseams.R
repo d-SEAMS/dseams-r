@@ -34,7 +34,7 @@ dseams_example <- function(name = NULL) {
 #' LAMMPS dumps (`.lammpstrj`, `.dump`) and XYZ files are read on every
 #' build. When [dseams_features()] reports `chemfiles`, the path may be
 #' any format chemfiles 0.10 reads: PDB, GRO, DCD, XTC, TRR, TNG, NetCDF,
-#' SDF, CML, CSSR, MOL2, CIF, mmCIF, LAMMPS data, Tinker ARC, and MMTF.
+#' SDF, CML, CSSR, MOL2, CIF, mmCIF, Tinker ARC, and MMTF.
 #' When it reports `readcon`, a readcon `.con` file is read. readcon-core
 #' also defines `.convel`. `nframes()` asks the engine for both extensions.
 #' `read_frame()` and [seams_system_read()] pass a path to readcon when
@@ -80,7 +80,22 @@ read_frame <- function(path, frame = 1L, type = 0L) {
 #' @rdname read_frame
 #' @export
 nframes <- function(path) {
-  nframes_(normalizePath(path, mustWork = TRUE))
+  path <- normalizePath(path, mustWork = TRUE)
+  tryCatch(
+    .Call(`_dseams_seams_r_nframes`, path),
+    error = function(e) {
+      n <- tryCatch(nframes_(path), error = function(ignored) 0L)
+      if (n > 0L) {
+        return(n)
+      }
+      if (!isTRUE(dseams_features()[["readcon"]]) &&
+          grepl("\\.con(vel)?$", path, ignore.case = TRUE)) {
+        stop("readcon-core is not in this build; CON input needs it",
+             call. = FALSE)
+      }
+      stop(e)
+    }
+  )
 }
 
 #' Atom positions

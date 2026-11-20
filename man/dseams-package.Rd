@@ -20,7 +20,7 @@ fingerprints, coordination, density profiles, and jump_tau90.
 \code{\link[=read_frame]{read_frame()}} loads one frame. \code{\link[=dseams_features]{dseams_features()}} reports which
 readers this build compiled. \code{\link[=chill_plus]{chill_plus()}}, \code{\link[=primitive_rings]{primitive_rings()}},
 \code{\link[=cages]{cages()}}, \code{\link[=signature_cages]{signature_cages()}}, \code{\link[=symmetry]{symmetry()}}, \code{\link[=steinhardt]{steinhardt()}},
-\code{\link[=q4_q6]{q4_q6()}}, and \code{\link[=jump_tau90]{jump_tau90()}} analyse that frame. The \code{seams_*}
+\code{\link[=q4_q6]{q4_q6()}}, and \code{\link[=jump_tau90]{jump_tau90()}} analyse that frame. The \verb{seams_*}
 functions are the same analyses on a system handle, plus hydrogen
 bonds, radial distribution, coordination, density, prisms, domains,
 monolayers, and fingerprints.

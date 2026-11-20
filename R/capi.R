@@ -249,7 +249,7 @@ seams_coordination <- function(sys, rmax = 3.5, bins = 8L) {
 seams_hbonds <- function(sys, cutoff = 3.5, oxygen_type = 1L, hydrogen_type = 2L,
                          dist = 2.42, angle = 30) {
   .Call(`_dseams_seams_r_hbonds`, sys, cutoff, as.integer(oxygen_type),
-        as.integer(hydrogen_type), dist, angle)
+             as.integer(hydrogen_type), dist, angle)
 }
 
 #' Number density along one cell axis.
@@ -383,4 +383,359 @@ seams_rings_vertices <- function(sys, cutoff = 3.5, max_depth = 6L, index = 0L) 
 #' @export
 seams_site_table <- function(sys, spec) {
   .tag(.Call(`_dseams_seams_r_site`, sys, spec), "dseams_sites")
+}
+
+#' C API ABI and version metadata.
+#'
+#' @return A list with `abi`, `version`, `major`, `minor`, `patch`, and
+#'   `version_string`.
+#' @examples
+#' seams_capi_info()
+#' @export
+seams_capi_info <- function() {
+  out <- .Call(`_dseams_seams_r_capi_info`)
+  names(out) <- c("abi", "version", "major", "minor", "patch", "version_string")
+  out
+}
+
+#' Human-readable CHILL/CHILL+ label name.
+#'
+#' @param label Integer label code (0 to 8).
+#' @return A character string.
+#' @examples
+#' seams_label_name(1L)
+#' @export
+seams_label_name <- function(label) {
+  .Call(`_dseams_seams_r_label_name`, as.integer(label))
+}
+
+#' Human-readable ring symmetry name.
+#'
+#' @param symmetry Integer ring symmetry code (0 to 11).
+#' @return A character string.
+#' @examples
+#' seams_ring_symmetry_name(2L)
+#' @export
+seams_ring_symmetry_name <- function(symmetry) {
+  .Call(`_dseams_seams_r_ring_symmetry_name`, as.integer(symmetry))
+}
+
+#' Populate a system handle from R arrays.
+#'
+#' @param sys A `dseams_system`.
+#' @param xyz Numeric matrix with `n` rows and 3 columns (`x`, `y`, `z`)
+#'   in angstrom.
+#' @param box Numeric vector of length 9: `c(ox, oy, oz, lx, ly, lz, xy, xz, yz)`.
+#' @param types Optional integer vector of atom types of length `n`.
+#' @param ids Optional integer vector of atom IDs of length `n`.
+#' @return The atom count `n`, invisibly.
+#' @examples
+#' sys <- seams_system_new()
+#' xyz <- matrix(c(1, 2, 3, 1.5, 2, 3, 1, 2.8, 3), ncol = 3, byrow = TRUE)
+#' box <- c(0, 0, 0, 20, 20, 20, 0, 0, 0)
+#' seams_system_set_atoms(sys, xyz, box)
+#' seams_system_count(sys)
+#' @export
+seams_system_set_atoms <- function(sys, xyz, box, types = NULL, ids = NULL) {
+  xyz <- as.matrix(xyz)
+  storage.mode(xyz) <- "double"
+  box <- as.numeric(box)
+  types_arg <- if (is.null(types)) NULL else as.integer(types)
+  ids_arg <- if (is.null(ids)) NULL else as.integer(ids)
+  invisible(.Call(`_dseams_seams_r_set_atoms`, sys, xyz, box, types_arg, ids_arg))
+}
+
+#' Simulation box stored on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @return Named numeric vector of length 9 (`ox`, `oy`, `oz`, `lx`, `ly`,
+#'   `lz`, `xy`, `xz`, `yz`).
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' seams_system_box(sys)
+#' @export
+seams_system_box <- function(sys) {
+  out <- .Call(`_dseams_seams_r_box`, sys)
+  names(out) <- c("ox", "oy", "oz", "lx", "ly", "lz", "xy", "xz", "yz")
+  out
+}
+
+#' Atom positions stored on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @return Numeric matrix with `n` rows and columns `x`, `y`, `z`.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' head(seams_system_positions(sys))
+#' @export
+seams_system_positions <- function(sys) {
+  out <- .Call(`_dseams_seams_r_positions`, sys)
+  colnames(out) <- c("x", "y", "z")
+  out
+}
+
+#' Atom types stored on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @return An integer vector of atom types.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' head(seams_system_types(sys))
+#' @export
+seams_system_types <- function(sys) {
+  .Call(`_dseams_seams_r_types`, sys)
+}
+
+#' Atom IDs stored on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @return An integer vector of atom IDs.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' head(seams_system_ids(sys))
+#' @export
+seams_system_ids <- function(sys) {
+  .Call(`_dseams_seams_r_ids`, sys)
+}
+
+#' Shell symmetry labels on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @param shell_rmsd Largest RMSD threshold for matching the ice template.
+#' @return An integer vector: `0` ice Ih, `1` ice Ic, `2` stacking-disordered,
+#'   `-1` otherwise.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' table(seams_system_symmetry(sys))
+#' @export
+seams_system_symmetry <- function(sys, shell_rmsd = 0.12) {
+  .Call(`_dseams_seams_r_system_symmetry`, sys, shell_rmsd)
+}
+
+#' Local q4 and q6 on the cutoff shell of a system.
+#'
+#' @param sys A `dseams_system`.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type Species filter.
+#' @return A data.frame with columns `q4` and `q6`.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' head(seams_q4q6(sys))
+#' @export
+seams_q4q6 <- function(sys, cutoff = 3.5, type = 0L) {
+  out <- .Call(`_dseams_seams_r_q4q6`, sys, cutoff, as.integer(type))
+  data.frame(q4 = out[[1L]], q6 = out[[2L]])
+}
+
+#' Lechner-Dellago q6bar summary on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type Species filter.
+#' @param ice_cut Threshold on `q6bar` for counting ice-like atoms.
+#' @return A list with `q6bar`, `mean`, `median`, and `n_ice`.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' seams_q6bar(sys)[c("mean", "median", "n_ice")]
+#' @export
+seams_q6bar <- function(sys, cutoff = 3.5, type = 0L, ice_cut = 0.36) {
+  out <- .Call(`_dseams_seams_r_q6bar`, sys, cutoff, as.integer(type), ice_cut)
+  names(out) <- c("q6bar", "mean", "median", "n_ice")
+  out
+}
+
+#' Steinhardt q_l and Lechner-Dellago average on any neighbour graph.
+#'
+#' @param sys A `dseams_system`.
+#' @param order Spherical-harmonic degree (3, 4, 6, 8, or 12).
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type Species filter.
+#' @param graph `0` cutoff, `1` mutual.
+#' @return A list of class `dseams_order` with elements `ql` and `qlbar`.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' seams_ql(sys, order = 6L, graph = 0L)
+#' @export
+seams_ql <- function(sys, order = 6L, cutoff = 3.5, type = 0L, graph = 0L) {
+  out <- .Call(`_dseams_seams_r_ql`, sys, cutoff, as.integer(type),
+                    as.integer(order), as.integer(graph))
+  names(out) <- c("ql", "qlbar")
+  .tag(out, "dseams_order")
+}
+
+#' Per-atom cage membership labels on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type Species filter.
+#' @param graph `2` seeded, `1` mutual, `0` cutoff.
+#' @param k Neighbour count for the seeded graph.
+#' @param complete When true, run ring-adjacent completion.
+#' @return An integer vector (`0` water, `1` hexagonal, `2` cubic, `3` both)
+#'   with `counts` attribute `c(n_hex, n_cubic, n_water, n_both)`.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' table(seams_cages_labels(sys))
+#' @export
+seams_cages_labels <- function(sys, cutoff = 3.5, type = 0L, graph = 2L,
+                               k = 4L, complete = FALSE) {
+  out <- .Call(`_dseams_seams_r_cages_labels`, sys, cutoff, as.integer(type),
+                    as.integer(graph), as.integer(k), as.integer(complete))
+  labels <- out[[1L]]
+  counts <- out[[2L]]
+  names(counts) <- c("n_hex", "n_cubic", "n_water", "n_both")
+  attr(labels, "counts") <- counts
+  labels
+}
+
+#' Closed cages of one ring census with an edge filter.
+#'
+#' @param sys A `dseams_system`.
+#' @param spec Census text such as `"512"`.
+#' @param edge Edge-count filter specification, or `""` for the default window.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type Species filter.
+#' @param graph `0` cutoff or `1` mutual.
+#' @return An integer vector `c(n_cages, n_atoms)`, class `dseams_signature`.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' seams_signature_cages_edge(sys, "512")
+#' @export
+seams_signature_cages_edge <- function(sys, spec, edge = "", cutoff = 3.5,
+                                       type = 0L, graph = 0L) {
+  out <- .Call(`_dseams_seams_r_signature_edge`, sys, cutoff,
+                    as.integer(type), as.integer(graph), spec, edge)
+  names(out) <- c("n_cages", "n_atoms")
+  .tag(out, "dseams_signature")
+}
+
+#' CSR neighbour list on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type Species filter.
+#' @param graph `0` cutoff, `1` mutual, `2` seeded.
+#' @return A list with `offsets`, `cols` (0-based indices), and `n_rows`.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' nb <- seams_neighbours(sys)
+#' length(nb$cols)
+#' @export
+seams_neighbours <- function(sys, cutoff = 3.5, type = 0L, graph = 0L) {
+  out <- .Call(`_dseams_seams_r_neighbours`, sys, cutoff,
+                    as.integer(type), as.integer(graph))
+  names(out) <- c("offsets", "cols", "n_rows")
+  out
+}
+
+#' Primitive ring census, labels, and ring fraction on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type Species filter.
+#' @param graph `0` cutoff or `1` mutual.
+#' @param max_depth Largest ring size.
+#' @return A list with `n_rings`, `histogram` (sizes `0..max_depth`),
+#'   `sizes`, `symmetry`, and `fraction`.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' seams_rings(sys)$n_rings
+#' @export
+seams_rings <- function(sys, cutoff = 3.5, type = 0L, graph = 0L, max_depth = 6L) {
+  out <- .Call(`_dseams_seams_r_rings`, sys, cutoff, as.integer(type),
+                    as.integer(graph), as.integer(max_depth))
+  names(out) <- c("n_rings", "histogram", "sizes", "symmetry", "fraction")
+  out
+}
+
+#' Chordless rings of a given size on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @param size Ring size (3 to 12).
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type Species filter.
+#' @param graph `0` cutoff or `1` mutual.
+#' @return A list with `n_rings`, `rings` (matrix of 0-based atom indices),
+#'   and `per_atom` counts.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' seams_rings_chordless(sys, size = 6L)$n_rings
+#' @export
+seams_rings_chordless <- function(sys, size = 6L, cutoff = 3.5, type = 0L,
+                                  graph = 0L) {
+  out <- .Call(`_dseams_seams_r_rings_chordless`, sys, cutoff,
+                    as.integer(type), as.integer(graph), as.integer(size))
+  names(out) <- c("n_rings", "rings", "per_atom")
+  out
+}
+
+#' Frame and per-atom topological fingerprints on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param hops Neighbourhood depth.
+#' @param type Species filter.
+#' @param k Neighbour count.
+#' @param graph `0` cutoff or `1` mutual.
+#' @param color_types Whether to include species colors in the fingerprint.
+#' @return A list with `key`, `atom_keys`, and `rings`.
+#' @examples
+#' sys <- seams_system_new()
+#' seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' fp <- seams_fingerprint_atoms(sys)
+#' length(fp$atom_keys)
+#' @export
+seams_fingerprint_atoms <- function(sys, cutoff = 3.5, hops = 2L, type = 0L,
+                                    k = 4L, graph = 0L, color_types = FALSE) {
+  out <- .Call(`_dseams_seams_r_fingerprint_atoms`, sys, cutoff,
+                    as.integer(type), as.integer(k), as.integer(graph),
+                    as.integer(hops), as.integer(color_types))
+  names(out) <- c("key", "atom_keys", "rings")
+  out
+}
+
+#' Planar ice/brine front analysis on a system.
+#'
+#' @param sys A `dseams_system`.
+#' @param ice Integer vector of length equal to atom count (`1` ice, `0` non-ice).
+#' @param water_type Water species filter (`0` for all).
+#' @param ion_type Ion species filter (`0` for none).
+#' @param n_bins Number of profile bins along `axis`.
+#' @param axis Axis index (`0`, `1`, or `2`).
+#' @return A list with `fronts`, `rejection`, `profile` data.frame, and `pockets`.
+#' @examples
+#' sys <- seams_system_new()
+#' n <- seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+#' seams_brine(sys, rep(1L, n), n_bins = 4L)
+#' @export
+seams_brine <- function(sys, ice, water_type = 0L, ion_type = 0L,
+                        n_bins = 8L, axis = 2L) {
+  out <- .Call(`_dseams_seams_r_brine`, sys, as.integer(ice),
+                    as.integer(water_type), as.integer(ion_type),
+                    as.integer(n_bins), as.integer(axis))
+  fronts <- out[[1L]]
+  names(fronts) <- c("z_enter", "z_exit", "thickness", "found")
+  rejection <- out[[2L]]
+  names(rejection) <- c("c_ice", "c_liquid", "k", "defined")
+  profile <- data.frame(
+    z_mid = out[[3L]],
+    molality = out[[4L]],
+    ice_fraction = out[[5L]]
+  )
+  pockets <- out[[6L]]
+  names(pockets) <- c("n_pockets", "reservoir_waters")
+  list(fronts = fronts, rejection = rejection, profile = profile, pockets = pockets)
 }
