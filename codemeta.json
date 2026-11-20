@@ -2,7 +2,7 @@
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
   "identifier": "dseams",
-  "description": "Structural analysis of water and ice in molecular dynamics trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh (2020) <doi:10.1021/acs.jcim.0c00031>). Reads 'LAMMPS' dumps and 'XYZ' files and returns data frames of 'CHILL+' ice labels (Nguyen and Molinero (2015) <doi:10.1021/jp510289t>), primitive ring counts (Franzblau (1991) <doi:10.1103/PhysRevB.44.4925>), hexagonal and double-diamond cages, and Steinhardt bond-orientational order parameters (Steinhardt, Nelson and Ronchetti (1983) <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled C++ sources.",
+  "description": "Structural analysis of water and ice in molecular dynamics trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh (2020) <doi:10.1021/acs.jcim.0c00031>). Reads 'LAMMPS' dumps, 'XYZ' files, 'CON' files, and the trajectory formats from 'chemfiles', and returns data frames of 'CHILL+' ice labels (Nguyen and Molinero (2015) <doi:10.1021/jp510289t>), primitive ring counts (Franzblau (1991) <doi:10.1103/PhysRevB.44.4925>), hexagonal and double-diamond cages, and Steinhardt bond-orientational order parameters (Steinhardt, Nelson and Ronchetti (1983) <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled C++ sources.",
   "name": "dseams: Ice Classification and Ring Statistics for Molecular Simulations",
   "relatedLink": ["https://docs.dseams.info", "https://github.com/d-SEAMS/seams-core"],
   "codeRepository": "https://github.com/d-SEAMS/dseams-r",
@@ -112,7 +112,7 @@
       "name": "R",
       "version": ">= 4.2.0"
     },
-    "SystemRequirements": "C++20"
+    "SystemRequirements": "C++20, Cargo (Rust's package manager), rustc (>= 1.88), cmake (>= 3.5)"
   },
   "keywords": ["molecular-dynamics", "trajectory-analysis", "ice", "clathrate-hydrates", "ring-statistics", "d-seams"],
   "fileSize": "142.736KB",

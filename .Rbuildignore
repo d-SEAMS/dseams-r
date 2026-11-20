@@ -4,6 +4,10 @@
 ^src/.*\.o$
 ^src/.*\.so$
 ^src/Makevars$
+^src/readcon-core/target
+^src/chemfiles-build
+^src/chemfiles-install
+^src/reader-stamp$
 ^src/.*\.dll$
 ^\.Rhistory$
 ^\.RData$

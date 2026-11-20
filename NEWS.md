@@ -6,6 +6,11 @@
   mismatches.
 * Name Ruhila Goswami (`ctb`, ORCID 0000-0002-5443-9356) in the README,
   with the same role and ORCID as DESCRIPTION.
+* Bundle readcon-core and patched chemfiles in the source package. A
+  default install reads CON files and the chemfiles formats the engine
+  reads, including PDB and GRO, and the source tarball builds those
+  libraries without a network connection. Building the bundled copy
+  needs Cargo, rustc >= 1.88, and cmake.
 * Restore reader guidance for source and linked-engine installs, native
   object ownership, and the complete R language-task example.
 * Redirect the former standalone print and summary reference pages to their

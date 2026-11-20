@@ -2,7 +2,8 @@
 
 #' @description
 #' Structural analysis of water and ice in one molecular-dynamics frame.
-#' Reads a LAMMPS dump or an XYZ file and returns data frames of CHILL+
+#' Reads a LAMMPS dump, an XYZ file, a CON file, or a chemfiles trajectory
+#' and returns data frames of CHILL+
 #' ice labels, primitive ring counts, hexagonal and double-diamond cages,
 #' and Steinhardt bond-orientational order parameters.
 #'

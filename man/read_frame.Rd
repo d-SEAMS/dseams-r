@@ -16,7 +16,10 @@ nframes(path)
 \method{summary}{dseams_frame}(object, ...)
 }
 \arguments{
-\item{path}{Path to a LAMMPS dump, or an XYZ file.}
+\item{path}{Path to a trajectory. LAMMPS dumps, XYZ, and CON are read
+by the engine. PDB, GRO, DCD, and the other formats chemfiles supports
+are read when the package is built with the bundled chemfiles library,
+which the source package does by default.}
 
 \item{frame}{1-based frame index.}
 
@@ -30,8 +33,8 @@ nframes(path)
 }
 \value{
 \code{read_frame()} returns an object of class \code{dseams_frame}.
-\code{nframes()} returns the number of LAMMPS timesteps; an XYZ file counts
-as one. \code{print()} and \code{summary()} return the frame, invisibly.
+\code{nframes()} returns the number of frames. A single-structure file
+counts as one. \code{print()} and \code{summary()} return the frame, invisibly.
 }
 \description{
 \code{type = 0} guesses oxygen (LAMMPS type 2, otherwise type 1). A positive
@@ -46,4 +49,7 @@ path <- dseams_example("ice1h.lammpstrj")
 nframes(path)
 frame <- read_frame(path, type = -1L)
 frame
+con <- dseams_example("tiny_multi_cuh2.con")
+nframes(con)
+read_frame(con, type = -1L)
 }

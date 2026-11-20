@@ -1,8 +1,14 @@
 CXX_STD = CXX20
 
-PKG_CPPFLAGS = -I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='"2.14.1"' -DSEAMS_HAS_OPENMP=1
+PKG_CPPFLAGS = -I. -Iseams -Iseams/include -Ireadcon-core/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='"2.14.1"' -DSEAMS_HAS_OPENMP=1 -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
-PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a -lws2_32 -luserenv -lbcrypt -lntdll -lpthread
+
+CARGO = cargo
+CMAKE = cmake
+OBJCOPY = objcopy
+CHEMFILES_BUILD = $(TEMP)/dseams-chemfiles-build
+READER_DEPS = readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a
 
 # The same engine objects as src/Makevars.in; tools/vendor.sh checks that
 # the two lists agree.
@@ -56,3 +62,50 @@ SEAMS_OBJECTS = \
   seams/ylm_cartesian.o
 
 OBJECTS = cpp11.o dseams.o dseams_r_io.o seams_call.o $(SEAMS_OBJECTS)
+
+# This target is first so it stays the default goal. A target earlier
+# than `all` would be what `make` builds, and the shared library would
+# never be linked.
+all: $(SHLIB)
+
+reader-stamp: $(READER_DEPS)
+	@touch reader-stamp
+
+$(OBJECTS): reader-stamp
+
+readcon-core/target/release/libreadcon_core.a: readcon-core/Cargo.toml readcon-core/Cargo.lock
+	rustc --version
+	find readcon-core/vendor -name cargo-checksum.json -exec sh -c \
+	  'cp "$$1" "$$(dirname "$$1")/.cargo-checksum.json"' _ {} \;
+	CARGO_PROFILE_RELEASE_LTO=off CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 \
+	  RUSTFLAGS="-C relocation-model=pic -A non_camel_case_types" \
+	  "$(CARGO)" rustc --offline --locked --release --lib --crate-type staticlib \
+	    --manifest-path readcon-core/Cargo.toml \
+	    --config 'source.crates-io.replace-with="vendored-sources"' \
+	    --config 'source.vendored-sources.directory="readcon-core/vendor"' \
+	    --target-dir readcon-core/target
+	sh ../tools/reader-symbols.sh "$(OBJCOPY)" $@
+	find readcon-core/vendor -name '.cargo-checksum.json' -delete
+
+chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
+	"$(CMAKE)" -Wno-dev -S chemfiles -B "$(CHEMFILES_BUILD)" \
+	  -DCMAKE_BUILD_TYPE=Release \
+	  -DCMAKE_INSTALL_PREFIX="$(CURDIR)/chemfiles-install" \
+	  -DCMAKE_INSTALL_LIBDIR=lib \
+	  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+	  -DCMAKE_C_COMPILER="$(firstword $(CC))" \
+	  -DCMAKE_CXX_COMPILER="$(firstword $(CXX))" \
+	  -DCMAKE_C_FLAGS="-O2 -fPIC -w" \
+	  -DCMAKE_CXX_FLAGS="-O2 -fPIC -w" \
+	  -DCMAKE_C_FLAGS_RELEASE="-O2" \
+	  -DCMAKE_CXX_FLAGS_RELEASE="-O2" \
+	  -DBUILD_SHARED_LIBS=OFF \
+	  -DCHFL_BUILD_TESTS=OFF \
+	  -DCHFL_BUILD_DOCUMENTATION=OFF \
+	  -DCHFL_SYSTEM_ZLIB=OFF \
+	  -DCHFL_SYSTEM_LZMA=OFF \
+	  -DCHFL_SYSTEM_BZIP2=OFF
+	"$(CMAKE)" --build "$(CHEMFILES_BUILD)" --parallel
+	"$(CMAKE)" --install "$(CHEMFILES_BUILD)"
+	rm -rf "$(CHEMFILES_BUILD)"
+	sh ../tools/reader-symbols.sh "$(OBJCOPY)" $@

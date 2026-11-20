@@ -61,8 +61,9 @@ Authors@R: c(
     )
 Description: Structural analysis of water and ice in molecular dynamics
     trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh
-    (2020) <doi:10.1021/acs.jcim.0c00031>). Reads 'LAMMPS' dumps and
-    'XYZ' files and returns data frames of 'CHILL+' ice labels
+    (2020) <doi:10.1021/acs.jcim.0c00031>). Reads 'LAMMPS' dumps, 'XYZ'
+    files, 'CON' files, and the trajectory formats from 'chemfiles',
+    and returns data frames of 'CHILL+' ice labels
     (Nguyen and Molinero (2015) <doi:10.1021/jp510289t>), primitive
     ring counts (Franzblau (1991) <doi:10.1103/PhysRevB.44.4925>),
     hexagonal and double-diamond cages, and Steinhardt bond-orientational

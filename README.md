@@ -1,7 +1,8 @@
 # dseams
 
 Ice classification and ring statistics for molecular simulations. `dseams`
-reads one frame of a LAMMPS dump or an XYZ file and returns data frames:
+reads one frame of a LAMMPS dump, an XYZ file, a CON file, or a
+chemfiles trajectory and returns data frames:
 CHILL+ labels, primitive rings, hexagonal and double-diamond cages, and
 Steinhardt order parameters. The calculations are the
 [d-SEAMS](https://dseams.info) engine.
@@ -14,20 +15,21 @@ Steinhardt order parameters. The calculations are the
 
 ## Installation
 
-A C++20 compiler is required. The package compiles the engine as it
-installs.
+A C++20 compiler, Cargo, rustc >= 1.88, and cmake are required. The
+package compiles the engine, readcon-core, and chemfiles as it installs.
 
 ```r
 install.packages("remotes")
 remotes::install_github("d-SEAMS/dseams-r")
 ```
 
-An `R CMD build` source tarball carries the engine and installs without a
-separate seams-core checkout or a network connection. A git checkout instead
-copies the engine from `SEAMS_CORE_SRC` or downloads the revision in
-`tools/seams-core.ref`; set `DSEAMS_NO_DOWNLOAD=1` to require a local source
-tree. The [R API guide](https://github.com/d-SEAMS/dseams-r/blob/main/docs/api/r.md#installing-from-source) also shows how
-to link an existing seams-core installation or build tree.
+An `R CMD build` source tarball carries the engine, vendored readcon-core
+crates, and patched chemfiles, and installs without a separate seams-core
+checkout or a network connection. A git checkout instead copies the engine
+from `SEAMS_CORE_SRC` or downloads the revision in `tools/seams-core.ref`;
+set `DSEAMS_NO_DOWNLOAD=1` to require a local source tree. The
+[R API guide](https://github.com/d-SEAMS/dseams-r/blob/main/docs/api/r.md#installing-from-source) also shows how to link
+an existing seams-core installation or build tree.
 
 ## Classify one frame
 

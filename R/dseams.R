@@ -5,6 +5,9 @@
 #' waters, type 2 is oxygen). `"nucleation_f1.lammpstrj"` is the first frame
 #' of the d-SEAMS mW nucleation trajectory (4096 waters). Each dump has a
 #' `.source.txt` file or a header that names its origin.
+#' `"tiny_multi_cuh2.con"` is two CON frames of four atoms (readcon-core).
+#' `"tiny.pdb"`, `"tiny.gro"`, and `"tiny.xyz"` are one water, read through
+#' chemfiles (XYZ also has a native reader).
 #'
 #' @param name File name. `NULL` lists the files.
 #' @return A path, or a character vector of file names when `name` is `NULL`.
@@ -15,7 +18,7 @@
 dseams_example <- function(name = NULL) {
   dir <- system.file("extdata", package = "dseams", mustWork = TRUE)
   if (is.null(name)) {
-    return(list.files(dir, pattern = "\\.lammpstrj$"))
+    return(list.files(dir, pattern = "\\.(lammpstrj|con|pdb|gro|xyz)$"))
   }
   path <- file.path(dir, name)
   if (!file.exists(path)) {
@@ -32,20 +35,26 @@ dseams_example <- function(name = NULL) {
 #' `print()` reports the frame index and the atom count. `summary()` also
 #' reports the file and the type filter. Both return the frame, invisibly.
 #'
-#' @param path Path to a LAMMPS dump, or an XYZ file.
+#' @param path Path to a trajectory. LAMMPS dumps, XYZ, and CON are read
+#'   by the engine. PDB, GRO, DCD, and the other formats chemfiles supports
+#'   are read when the package is built with the bundled chemfiles library,
+#'   which the source package does by default.
 #' @param frame 1-based frame index.
 #' @param type LAMMPS type filter.
 #' @param x A `dseams_frame`, for `print()`.
 #' @param object A `dseams_frame`, for `summary()`.
 #' @param ... Ignored.
 #' @return `read_frame()` returns an object of class `dseams_frame`.
-#'   `nframes()` returns the number of LAMMPS timesteps; an XYZ file counts
-#'   as one. `print()` and `summary()` return the frame, invisibly.
+#'   `nframes()` returns the number of frames. A single-structure file
+#'   counts as one. `print()` and `summary()` return the frame, invisibly.
 #' @examples
 #' path <- dseams_example("ice1h.lammpstrj")
 #' nframes(path)
 #' frame <- read_frame(path, type = -1L)
 #' frame
+#' con <- dseams_example("tiny_multi_cuh2.con")
+#' nframes(con)
+#' read_frame(con, type = -1L)
 #' @export
 read_frame <- function(path, frame = 1L, type = 0L) {
   path <- normalizePath(path, mustWork = TRUE)

@@ -1,7 +1,8 @@
 #!/bin/sh
 # Copyright (c) d-SEAMS developers
 # Copy the engine sources that libseams_lang needs into src/seams, and the
-# example dumps into inst/extdata, so that `R CMD build` makes a source
+# example dumps into inst/extdata, and (via tools/vendor-readers.sh) the
+# readcon-core and chemfiles sources, so that `R CMD build` makes a source
 # package which compiles with no seams-core checkout and no network.
 #
 #   sh tools/vendor.sh [SEAMS_CORE_SRC]
@@ -180,5 +181,7 @@ for f in ice1h.lammpstrj ice1h.source.txt exampleTraj.lammpstrj \
   nucleation_f1.lammpstrj nucleation_f1.source.txt; do
   cp "$root/input/traj/$f" "$extdata/"
 done
+
+sh "$pkg/tools/vendor-readers.sh" "$root" "$pkg"
 
 echo "vendor.sh: $(echo $engine | wc -w | tr -d ' ') engine sources from $rev"
