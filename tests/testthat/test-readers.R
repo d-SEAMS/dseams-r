@@ -14,21 +14,49 @@ local_fixture <- function(name) {
   path
 }
 
-expect_water3_reader <- function(path, feature = NULL, tol = 1e-3) {
+# inst/extdata/water3.xyz lines 3-5, in angstrom. Written here so a
+# reader that shifts every format the same way cannot be its own oracle.
+water3_positions <- matrix(
+  c(
+    1.000, 2.000, 3.000,
+    1.500, 2.000, 3.000,
+    1.000, 2.800, 3.000
+  ),
+  ncol = 3L,
+  byrow = TRUE
+)
+
+water3_ids <- c(1L, 2L, 3L)
+
+# ox, oy, oz, lx, ly, lz, xy, xz, yz.
+water3_cell20 <- c(0, 0, 0, 20, 20, 20, 0, 0, 0)
+water3_cell0 <- c(0, 0, 0, 0, 0, 0, 0, 0, 0)
+# water3.gro writes the cell in nanometres: 20 nm is 200 angstrom.
+water3_cell_gro <- c(0, 0, 0, 200, 200, 200, 0, 0, 0)
+# A native XYZ read has no lattice. The cell is the coordinate span.
+water3_cell_xyz_native <- c(1, 2, 3, 0.5, 0.8, 0, 0, 0, 0)
+
+expect_water3_reader <- function(path, feature = NULL, tol = 1e-3,
+                                 types, ids = water3_ids,
+                                 box = water3_cell20) {
   if (!is.null(feature)) {
     skip_if_not(
       isTRUE(dseams_features()[[feature]]),
       paste(feature, "is not compiled in")
     )
   }
-  xyz <- positions(read_frame(ext_fixture("water3.xyz"), type = -1L))
   frame <- read_frame(path, type = -1L)
   got <- positions(frame)
   expect_equal(nrow(got), 3L)
-  expect_equal(got, xyz, tolerance = tol)
+  expect_equal(unname(got), water3_positions, tolerance = tol)
   expect_equal(nframes(path), 1L)
   sys <- seams_system_new()
   expect_identical(seams_system_read(sys, path, 1L, -1L), 3L)
+  capi_pos <- seams_system_positions(sys)
+  expect_equal(unname(capi_pos), water3_positions, tolerance = tol)
+  expect_identical(seams_system_types(sys), types)
+  expect_identical(seams_system_ids(sys), ids)
+  expect_equal(unname(seams_system_box(sys)), box, tolerance = 1e-6)
 }
 
 test_that("dseams_features names the compiled readers", {
@@ -64,75 +92,112 @@ test_that("a CON file needs readcon", {
 })
 
 test_that("native reader reads lammps", {
-  expect_water3_reader(ext_fixture("water3.lammpstrj"), tol = 1e-6)
+  # The dump column is `id type x y z`: types 1, 2, 2 and ids 1, 2, 3.
+  # BOX BOUNDS is 0 to 20 on each axis.
+  expect_water3_reader(
+    ext_fixture("water3.lammpstrj"),
+    tol = 1e-6,
+    types = c(1L, 2L, 2L)
+  )
 })
 
 test_that("native reader reads xyz", {
-  expect_water3_reader(ext_fixture("water3.xyz"), tol = 1e-6)
+  path <- ext_fixture("water3.xyz")
+  if (isTRUE(dseams_features()[["chemfiles"]])) {
+    # O and H are atomic numbers. The comment line has no lattice.
+    expect_water3_reader(path, tol = 1e-6, types = c(8L, 1L, 1L), box = water3_cell0)
+  } else {
+    # O is the first element name and H the second, so the types are 1, 2, 2.
+    expect_water3_reader(
+      path,
+      tol = 1e-6,
+      types = c(1L, 2L, 2L),
+      box = water3_cell_xyz_native
+    )
+  }
 })
 
 test_that("chemfiles reader reads mol2", {
-  expect_water3_reader(local_fixture("water3.mol2"), feature = "chemfiles")
+  expect_water3_reader(local_fixture("water3.mol2"), feature = "chemfiles", types = c(8L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads mmcif", {
-  expect_water3_reader(local_fixture("water3.mmcif"), feature = "chemfiles")
+  expect_water3_reader(local_fixture("water3.mmcif"), feature = "chemfiles", types = c(8L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads cif", {
-  expect_water3_reader(local_fixture("water3.cif"), feature = "chemfiles")
+  expect_water3_reader(local_fixture("water3.cif"), feature = "chemfiles", types = c(8L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads pdb", {
-  expect_water3_reader(ext_fixture("water3.pdb"), feature = "chemfiles")
+  expect_water3_reader(ext_fixture("water3.pdb"), feature = "chemfiles", types = c(8L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads gro", {
-  expect_water3_reader(ext_fixture("water3.gro"), feature = "chemfiles")
+  # Names are O, H1, H2. H1 and H2 are not the element token H.
+  expect_water3_reader(
+    ext_fixture("water3.gro"),
+    feature = "chemfiles",
+    types = c(8L, 0L, 0L),
+    box = water3_cell_gro
+  )
 })
 
 test_that("chemfiles reader reads dcd", {
-  expect_water3_reader(local_fixture("water3.dcd"), feature = "chemfiles")
+  # DCD stores coordinates and the cell, not element names.
+  expect_water3_reader(local_fixture("water3.dcd"), feature = "chemfiles", types = c(1L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads xtc", {
-  expect_water3_reader(local_fixture("water3.xtc"), feature = "chemfiles")
+  expect_water3_reader(local_fixture("water3.xtc"), feature = "chemfiles", types = c(1L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads trr", {
-  expect_water3_reader(local_fixture("water3.trr"), feature = "chemfiles")
+  expect_water3_reader(local_fixture("water3.trr"), feature = "chemfiles", types = c(1L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads tng", {
-  expect_water3_reader(local_fixture("water3.tng"), feature = "chemfiles")
+  expect_water3_reader(local_fixture("water3.tng"), feature = "chemfiles", types = c(8L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads netcdf", {
-  expect_water3_reader(local_fixture("water3.nc"), feature = "chemfiles")
+  expect_water3_reader(local_fixture("water3.nc"), feature = "chemfiles", types = c(1L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads sdf", {
-  expect_water3_reader(local_fixture("water3.sdf"), feature = "chemfiles")
+  # The V2000 block has elements and no crystal.
+  expect_water3_reader(
+    local_fixture("water3.sdf"),
+    feature = "chemfiles",
+    types = c(8L, 1L, 1L),
+    box = water3_cell0
+  )
 })
 
 test_that("chemfiles reader reads cml", {
-  expect_water3_reader(local_fixture("water3.cml"), feature = "chemfiles")
+  expect_water3_reader(local_fixture("water3.cml"), feature = "chemfiles", types = c(8L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads cssr", {
-  expect_water3_reader(local_fixture("water3.cssr"), feature = "chemfiles")
+  expect_water3_reader(local_fixture("water3.cssr"), feature = "chemfiles", types = c(8L, 1L, 1L))
 })
 
 test_that("chemfiles reader reads arc", {
-  expect_water3_reader(local_fixture("water3.arc"), feature = "chemfiles")
+  # Atom names are O, H1, H2. H1 and H2 are not the element token H.
+  expect_water3_reader(local_fixture("water3.arc"), feature = "chemfiles", types = c(8L, 0L, 0L))
 })
 
 test_that("chemfiles reader reads mmtf", {
-  expect_water3_reader(local_fixture("water3.mmtf"), feature = "chemfiles")
+  expect_water3_reader(local_fixture("water3.mmtf"), feature = "chemfiles", types = c(8L, 1L, 1L))
 })
 
 test_that("readcon reader reads con", {
-  expect_water3_reader(ext_fixture("water3.con"), feature = "readcon", tol = 1e-4)
+  expect_water3_reader(
+    ext_fixture("water3.con"),
+    feature = "readcon",
+    tol = 1e-4,
+    types = c(8L, 1L, 1L)
+  )
 })
 
 test_that("nframes counts a CON file through libseams", {
