@@ -348,9 +348,13 @@ Error in type == "URL" && grepl("github\\.io", u, ignore.case = TRUE) :
 Calls: <Anonymous> -> pkgstats_info -> pkginfo_url_from_desc
 ```
 
-The field has two URLs. pkgcheck 0.3.4.5 is revision 4569a193 of
-ropensci-review-tools/pkgcheck, which uses the first URL before that
-comparison. The URLs in DESCRIPTION were not edited to satisfy 0.3.4.
+The URL field has four URLs (DESCRIPTION lines 28-30). pkgcheck 0.3.4
+splits that field and, when more than one entry contains "git", keeps
+those. The two that remain are the GitHub repository URLs, and the
+`&&` comparison then fails with length 2. pkgcheck 0.3.4.5 is revision
+4569a193 of ropensci-review-tools/pkgcheck, which uses the first URL
+before that comparison. The URLs in DESCRIPTION were not edited to
+satisfy 0.3.4.
 
 The 0.3.4.5 run printed:
 
