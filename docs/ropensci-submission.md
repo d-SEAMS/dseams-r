@@ -140,8 +140,8 @@ author (`aut`) and Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION.
   build a neighbour graph from the coordinates and classify or count ring
   and cage membership in it, values that are not present in the input
   file at all; and `symmetry()` (`R/dseams.R:286-294`) assigns a
-  point-group code from an RMSD to a reference ice template.
-  `steinhardt()` (`R/dseams.R:321-335`) and `q4_q6()` (`R/dseams.R:354-363`)
+  shell-symmetry code from an RMSD to a reference ice template.
+  `steinhardt()` (`R/dseams.R:321-336`) and `q4_q6()` (`R/dseams.R:354-364`)
   are the closest to a plain reformat, computing bond-orientational order
   parameters per atom and returning them as data frames. See the
   presubmission-inquiry note below.
@@ -169,7 +169,7 @@ author (`aut`) and Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION.
   structure classification, and `xvm` reads and plots 'GROMACS' own
   scalar time series ('XVG'/'XPM' files: RMSD, energy, temperature),
   not 'LAMMPS' dumps or 'XYZ' trajectories, and computes none of
-  CHILL+ labels, primitive rings, or cage/point-group classification.
+  CHILL+ labels, primitive rings, or cage or shell-symmetry classification.
   Neither package does what `dseams` does. Outside CRAN,
   [OVITO](https://www.ovito.org/) is, by its own description, "scientific
   data visualization and analysis software for particle-based simulation
@@ -211,14 +211,14 @@ author (`aut`) and Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION.
   series, unsupervised learning) do not apply, and the package does not
   carry `@srrstats` tags.
 
-  Two further pkgcheck/goodpractice items are kept rather than changed:
+  Two exported names that other packages also use are kept:
 
   - Function names duplicated in other packages: `positions()` is also
     exported by `mixvlmc`, `splus2R` and `splusTimeSeries`, and
     `symmetry()` by `DecomposeR` and `xnet`. Both names are kept because
     they are the plain English names for what they return here (the atom
-    coordinate matrix of a frame, and its reclassified point-group
-    label), `dseams` does not depend on or re-export those packages, and
+    coordinate matrix of a frame, and its shell-symmetry code),
+    `dseams` does not depend on or re-export those packages, and
     neither name collides inside this package's own namespace.
 
 ### Presubmission inquiry
@@ -226,7 +226,7 @@ author (`aut`) and Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION.
 None of the listed categories is an exact match: `data munging` is the
 closest honest fit (see above), but `chill_plus()`, `cages()`,
 `primitive_rings()` and `symmetry()` classify structures (CHILL+ ice
-labels, ring and cage membership, point-group symmetry) computed from a
+labels, ring and cage membership, shell symmetry) computed from a
 neighbour graph, rather than only reshaping values already present in
 the input file (see the function-by-function detail above). Given that,
 a pre-submission inquiry to confirm scope before opening the full review
@@ -312,10 +312,11 @@ The run history is the Actions page:
 
 - `r-cmd-check.yml` (`name: R-CMD-check`) runs on pushes and pull
   requests to `main` and `release/**`, and on `workflow_dispatch`. The
-  bundled job copies the engine at the pin in `tools/seams-core.ref`,
+  bundled job copies the engine at the pin in `tools/seams-core.ref`
+  and runs `R CMD check --no-manual --as-cran` on Linux (R release and
+  devel), macOS, and Windows. On the Linux release cell that job also
   checks that `cpp11::cpp_register()` leaves `R/cpp11.R` and
-  `src/cpp11.cpp` unchanged, and runs `R CMD check --no-manual --as-cran`
-  on Linux (R release and devel), macOS, and Windows. The linked job
+  `src/cpp11.cpp` unchanged. The linked job
   builds seams-core at that pin and runs `R CMD check --no-manual` with
   the package linked against that build. Both jobs set
   `_R_CHECK_FORCE_SUGGESTS_=true`.
@@ -424,8 +425,7 @@ test from `00_pkg_src` and reports `checking tests ... OK`. On the
 linked install, `test_check()` reports the version failure above.
 
 Names shared with other packages stay. `positions()` is the frame
-coordinate matrix and `symmetry()` is the reclassified point-group
-label. `dseams` does not depend on the other packages that export
+coordinate matrix and `symmetry()` is the shell-symmetry code. `dseams` does not depend on the other packages that export
 those names, and neither name collides inside this package.
 
 `expect_equal()` stays where the comparison carries a tolerance.
