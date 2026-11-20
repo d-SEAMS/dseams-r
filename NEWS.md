@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* Fix `nframes()` on a readcon `.con` file when the package is linked
+  against `libseams` and `libseams_lang`. Both libraries export
+  `seams_path_nframes` with different arguments, and the linker bound
+  the language one, which reports no frames for `.con`.
 * Restore reader guidance for source and linked-engine installs, native
   object ownership, and the complete R language-task example.
 * Redirect the former standalone print and summary reference pages to their

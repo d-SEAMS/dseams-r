@@ -1,13 +1,35 @@
 /* Copyright (c) d-SEAMS developers */
 /* .Call shim over include/seams.h. No C++ and no engine headers. */
 
+/* dlopen's RTLD_NOLOAD and RTLD_NEXT are glibc extensions. macOS
+ * declares them without this macro. The Windows package build defines
+ * SEAMS_STATIC (src/Makevars.win, which configure.win fills) and does
+ * not include this header. */
+#ifndef SEAMS_STATIC
+#ifndef _WIN32
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#endif
+#endif
+
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <R.h>
 #include <Rinternals.h>
 
 #include "seams.h"
+
+#ifndef SEAMS_STATIC
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+#endif
 
 static seams_system *sys_of(SEXP ext) {
   if (TYPEOF(ext) != EXTPTRSXP) {
@@ -62,18 +84,147 @@ SEXP seams_r_read(SEXP ext, SEXP path, SEXP frame, SEXP type) {
 
 SEXP seams_r_count(SEXP ext) { return ScalarInteger(seams_system_count(sys_of(ext))); }
 
+/* libseams and libseams_lang both export seams_path_nframes.
+ * libseams_lang's takes the path and returns a count, and that count
+ * is 0 for a .con file, which the language counter does not hand to
+ * readcon. libseams's writes the count through a size_t * and returns
+ * SEAMS_OK, which is also 0. configure links -lseams_lang first, so
+ * the reloc for the call below binds the language symbol: the 0 comes
+ * back as success and the count stays 0. dseams.cpp and
+ * seams_lang.cpp call the one-argument form on purpose, so the link
+ * order has to stay. The bundled copy defines SEAMS_STATIC and
+ * tools/vendor.sh renames the language symbol, so the direct call
+ * there is libseams's. configure.win builds only that copy.
+ *
+ * seams_system_create is the C symbol behind R's seams_system_new. It
+ * is exported by libseams and not by libseams_lang, so the object that
+ * holds it is libseams. The address of the call from this file can be
+ * this object's PLT stub, which names the wrong object; RTLD_NEXT
+ * (and, on Windows, the import of the dllimport declaration) is the
+ * address inside libseams. */
+#ifndef SEAMS_STATIC
+typedef seams_status (*seams_capi_path_nframes_fn)(const char *path, size_t *nframes);
+
+static seams_capi_path_nframes_fn capi_path_nframes = NULL;
+
+static int bind_fail(const char **message, const char *text) {
+  if (message != NULL) {
+    *message = text;
+  }
+  return -1;
+}
+
+static int bind_capi_path_nframes(const char **message) {
+  if (capi_path_nframes != NULL) {
+    return 0;
+  }
+#if defined(_WIN32)
+  {
+    HMODULE mod = NULL;
+    FARPROC proc = NULL;
+    union {
+      seams_system *(*fn)(void);
+      const char *addr;
+    } pun;
+    pun.fn = seams_system_create;
+    if (pun.addr == NULL ||
+        !GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                                GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                            pun.addr, &mod) ||
+        mod == NULL) {
+      return bind_fail(message, "could not locate the libseams that exports seams_system_create");
+    }
+    proc = GetProcAddress(mod, "seams_path_nframes");
+    if (proc == NULL) {
+      proc = GetProcAddress(mod, "_seams_path_nframes");
+    }
+    if (proc == NULL) {
+      return bind_fail(message, "libseams does not export seams_path_nframes");
+    }
+    memcpy(&capi_path_nframes, &proc, sizeof(capi_path_nframes));
+  }
+#else
+  {
+    void *anchor = dlsym(RTLD_NEXT, "seams_system_create");
+    void *handle = NULL;
+    void *sym = NULL;
+    Dl_info info;
+    int flags = RTLD_LAZY | RTLD_LOCAL;
+    if (anchor == NULL) {
+      anchor = dlsym(RTLD_DEFAULT, "seams_system_create");
+    }
+    memset(&info, 0, sizeof(info));
+    if (anchor == NULL || dladdr(anchor, &info) == 0 || info.dli_fname == NULL ||
+        info.dli_fname[0] == '\0') {
+      return bind_fail(message, "could not locate the libseams that exports seams_system_create");
+    }
+#ifdef RTLD_NOLOAD
+    flags |= RTLD_NOLOAD;
+#endif
+#ifdef RTLD_FIRST
+    flags |= RTLD_FIRST;
+#endif
+    handle = dlopen(info.dli_fname, flags);
+    if (handle == NULL) {
+      /* macOS refuses RTLD_NOLOAD when dli_fname is not the path the
+       * image was loaded under. Opening that path maps the same file
+       * the package already links, and dlclose drops the extra
+       * reference below. */
+      flags = RTLD_LAZY | RTLD_LOCAL;
+#ifdef RTLD_FIRST
+      flags |= RTLD_FIRST;
+#endif
+      handle = dlopen(info.dli_fname, flags);
+    }
+    if (handle == NULL) {
+      return bind_fail(message, "could not open the libseams that exports seams_system_create");
+    }
+    sym = dlsym(handle, "seams_path_nframes");
+    dlclose(handle);
+    if (sym == NULL) {
+      return bind_fail(message, "libseams does not export seams_path_nframes");
+    }
+    /* dlsym on a handle also searches that object's dependencies.
+     * libseams defines this symbol itself; a hit in another object is
+     * the language binding's one-argument function. */
+    {
+      Dl_info sym_info;
+      memset(&sym_info, 0, sizeof(sym_info));
+      if (dladdr(sym, &sym_info) == 0 || sym_info.dli_fbase != info.dli_fbase) {
+        return bind_fail(message, "seams_path_nframes did not resolve inside libseams");
+      }
+    }
+    memcpy(&capi_path_nframes, &sym, sizeof(capi_path_nframes));
+  }
+#endif
+  if (capi_path_nframes == NULL) {
+    return bind_fail(message, "could not resolve seams_path_nframes in libseams");
+  }
+  return 0;
+}
+#endif
+
 /* Frame count through the C API. The language counter does not report
  * a readcon file. message receives the engine text and stays valid
  * until the next C API call on this thread. */
 int seams_capi_nframes(const char *path, const char **message) {
   size_t n = 0;
+  seams_status status;
   if (path == NULL) {
     if (message != NULL) {
       *message = "path is null";
     }
     return -1;
   }
-  if (seams_path_nframes(path, &n) != SEAMS_OK) {
+#ifndef SEAMS_STATIC
+  if (bind_capi_path_nframes(message) != 0) {
+    return -1;
+  }
+  status = capi_path_nframes(path, &n);
+#else
+  status = seams_path_nframes(path, &n);
+#endif
+  if (status != SEAMS_OK) {
     if (message != NULL) {
       const char *text = seams_last_error_message();
       *message = (text == NULL || text[0] == '\0') ? "unreadable trajectory" : text;

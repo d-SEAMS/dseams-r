@@ -87,3 +87,16 @@ test_that("readcon CON matches the XYZ and LAMMPS fixtures", {
   sys <- seams_system_new()
   expect_identical(seams_system_read(sys, path, 1L, -1L), 3L)
 })
+
+test_that("nframes counts a CON file through libseams", {
+  skip_if_not(
+    isTRUE(dseams_features()[["readcon"]]),
+    "readcon is not compiled in"
+  )
+  # libseams_lang's seams_path_nframes(path) returns 0 for a .con file.
+  # libseams's seams_path_nframes(path, size_t *) writes the real count.
+  # A linked build that binds the language symbol from the C API reports
+  # 0 here. water3.con holds one frame. Bundled builds rename the
+  # language symbol, so they do not hit this.
+  expect_equal(nframes(fixture("water3.con")), 1L)
+})
