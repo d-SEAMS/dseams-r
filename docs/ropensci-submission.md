@@ -155,9 +155,9 @@ author (`aut`) and Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION.
 -   Are there other R packages that accomplish the same thing? If so, how does yours differ or meet [our criteria for best-in-category](https://ropensci.github.io/dev_guide/policies.html#overlap)?
 
   Checked the live CRAN package index
-  (<https://CRAN.R-project.org/web/packages/available_packages_by_name.html>,
-  fetched during this review; the exact search and full result list
-  are in `logs/cran-search.log`) for "chill", "clathrate", "hydrate",
+  (<https://CRAN.R-project.org/web/packages/available_packages_by_name.html>;
+  the command, the date, and every title hit are in
+  `docs/cran-search.log`) for "chill", "clathrate", "hydrate",
   "molecular dynamics" and "franzblau": no CRAN package performs CHILL+
   ice classification, Franzblau primitive rings, or a clathrate/cage
   census. The only genuine "chill" hits are agricultural chill-hour
