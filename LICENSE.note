@@ -125,6 +125,8 @@ miniz_oxide 0.9.1
 ndarray 0.17.2
   License: MIT OR Apache-2.0
   Text: vendor/ndarray/LICENSE-APACHE, vendor/ndarray/LICENSE-MIT
+  vendor/ndarray/src/doc/ndarray_for_numpy_users/rk_step.rs quotes
+    SciPy code under SciPy's BSD-3-Clause licence, text in the file
 
 num-complex 0.4.6
   License: MIT OR Apache-2.0
@@ -181,6 +183,8 @@ serde_derive 1.0.229
 serde_json 1.0.154
   License: MIT OR Apache-2.0
   Text: vendor/serde_json/LICENSE-APACHE, vendor/serde_json/LICENSE-MIT
+  vendor/serde_json/src/lexical is derived from the lexical crate,
+    also MIT OR Apache-2.0
 
 simd-adler32 0.3.10
   License: MIT
@@ -220,15 +224,33 @@ src/chemfiles/cmake/FindPythonLibsNew.cmake
   License: BSD-3-Clause (text in the file header)
 src/chemfiles/cmake/CheckCompilerFlags/*.cmake
   License: BSD-3-Clause (CMake's licence, https://cmake.org/licensing)
+src/chemfiles/examples/c/*.c, src/chemfiles/examples/cpp/*.cpp,
+src/chemfiles/doc/src/c-tutorials.rst,
+src/chemfiles/doc/src/cxx-tutorials.rst
+  License: public domain (CC0-1.0 dedication in each example)
 
 Libraries in src/chemfiles/external (paths inside each archive):
 
 bzip2.tar.gz
-  License: bzip2-1.0.6 (BSD-style)
+  License: bzip2-1.0.6 (BSD-style), except the file below
   Text: bzip2/LICENSE
+  bzip2/dlltest.c: public domain, by its author's statement in the file
 fmt.tar.gz
-  License: MIT
+  License: MIT, except the files below
   Text: fmt/LICENSE.rst
+  Files under other terms, none of them compiled:
+    fmt/test/gtest, fmt/test/gmock, fmt/test/gmock-gtest-all.cc
+      (Google Test and Google Mock): BSD-3-Clause, text in the headers
+    fmt/support/docopt.py: MIT, text in the file
+    fmt/doc/python-license.txt: Python Software Foundation License, for
+      the parts of fmt's documentation taken from Python's; the file is
+      the text
+    fmt/doc/_static/bootstrap.min.js, fmt/doc/bootstrap,
+      fmt/doc/_static/fonts (Bootstrap 3.3.4 with its Glyphicons
+      Halflings fonts): MIT,
+      https://github.com/twbs/bootstrap/blob/v3.3.4/LICENSE
+    fmt/doc/basic-bootstrap/layout.html, fmt/doc/_templates/search.html
+      (Sphinx templates): BSD, https://github.com/sphinx-doc/sphinx
 gemmi.tar.gz
   License: MPL-2.0, https://mozilla.org/MPL/2.0/
   The archive holds gemmi's headers only. Its third-party headers:
@@ -245,7 +267,8 @@ lzma.tar.gz
 mmtf-cpp.tar.gz
   License: MIT
   Text: mmtf-cpp/LICENSE
-  mmtf-cpp/msgpack-c: BSL-1.0 (text at the end of this file)
+  mmtf-cpp/msgpack-c: BSL-1.0 (text at the end of this file), with its
+    copies of Boost.Preprocessor and Boost.Predef, also BSL-1.0
 molfiles.tar.gz
   License: University of Illinois Open Source License (NCSA) for every
     file not listed below
@@ -286,8 +309,10 @@ pugixml.tar.gz
   License: MIT
   Text: pugixml/LICENSE.md
 tng.tar.gz
-  License: BSD-3-Clause
+  License: BSD-3-Clause, except the files below
   Text: tng/COPYING
+  tng/include/tng/md5.h, tng/src/lib/md5.c: the zlib-style licence of
+    Aladdin Enterprises, text in each file header
 toml11.tar.gz
   License: MIT
   Text: toml11/LICENSE

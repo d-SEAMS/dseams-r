@@ -112,6 +112,8 @@ ndarray 0.17.2
   Authors: Ulrik Sverdrup bluss, Jim Turner
   License: MIT OR Apache-2.0
   Source: https://github.com/rust-ndarray/ndarray
+  src/doc/ndarray_for_numpy_users/rk_step.rs quotes SciPy code:
+    Enthought, Inc. and the SciPy Developers; BSD-3-Clause
 
 num-complex 0.4.6
   Authors: The Rust Project Developers
@@ -179,6 +181,8 @@ serde_json 1.0.154
   Authors: The serde_json developers (Cargo.toml lists no authors)
   License: MIT OR Apache-2.0
   Source: https://github.com/serde-rs/json
+  src/lexical is derived from the lexical crate: Alexander Huszagh;
+    MIT OR Apache-2.0
 
 simd-adler32 0.3.10
   Authors: Marvin Countryman
@@ -214,6 +218,9 @@ zmij 1.0.23
     (src/chemfiles/AUTHORS)
   License: BSD-3-Clause
   Source: https://github.com/chemfiles/chemfiles
+  The C and C++ examples and tutorials (src/chemfiles/examples,
+    src/chemfiles/doc/src/*-tutorials.rst) are dedicated to the public
+    domain (CC0-1.0).
 
 Header-only code in src/chemfiles/include/chemfiles/external:
 
@@ -242,9 +249,25 @@ CheckCompilerFlags/*.cmake
 bzip2.tar.gz (bzip2 and libbzip2)
   Authors: Julian R Seward
   License: bzip2-1.0.6 (BSD-style)
+  dlltest.c: Yoshioka Tsuneo; public domain
 fmt.tar.gz (fmt)
   Authors: Victor Zverovich and contributors
   License: MIT
+  Contributors named in file headers, under fmt's MIT licence: Paul
+    Dreik (part of include/fmt/chrono.h, test/fuzzing), Remotion (Igor
+    Schulz) (include/fmt/ranges.h, test/ranges-test.cc)
+  Copied code and documentation under their own terms:
+    test/gtest, test/gmock, test/gmock-gtest-all.cc (Google Test and
+      Google Mock): Google Inc.; BSD-3-Clause
+    support/docopt.py: Vladimir Keleshev; MIT
+    doc/python-license.txt, for the documentation taken from Python's:
+      Python Software Foundation, BeOpen.com, Corporation for National
+      Research Initiatives (CNRI), Stichting Mathematisch Centrum
+      Amsterdam; Python Software Foundation License
+    doc/_static/bootstrap.min.js, doc/bootstrap, doc/_static/fonts
+      (Bootstrap 3.3.4, Glyphicons Halflings): Twitter, Inc.; MIT
+    doc/basic-bootstrap/layout.html, doc/_templates/search.html: the
+      Sphinx team (Sphinx AUTHORS); BSD
 gemmi.tar.gz (gemmi headers)
   Authors: Global Phasing Ltd.
   License: MPL-2.0 (gemmi's licence; the archive holds the headers only)
@@ -266,7 +289,14 @@ mmtf-cpp.tar.gz (mmtf-cpp)
   Authors: University of California San Diego
   License: MIT
   Includes msgpack-c (mmtf-cpp/msgpack-c):
-    FURUHASHI Sadayuki and the msgpack-c contributors; BSL-1.0
+    FURUHASHI Sadayuki, KONDO Takatoshi, Vladimir Volodko, MIZUKI
+      Hirata and the msgpack-c contributors; BSL-1.0
+    Its copy of Boost.Preprocessor (msgpack-c/include/msgpack/preprocessor
+      and preprocessor.hpp): Paul Mensonides, Edward Diener; BSL-1.0
+    Its copy of Boost.Predef (msgpack-c/include/msgpack/predef and
+      predef.h): Rene
+      Rivera, Charly Chevalier, Joel Falcou, Franz Detro, Jessica
+      Hamilton, Microsoft Corporation; BSL-1.0
 molfiles.tar.gz (VMD molfile plugins)
   Copyright: The Board of Trustees of the University of Illinois, for
     the Theoretical and Computational Biophysics Group, University of
@@ -298,11 +328,17 @@ molfiles.tar.gz (VMD molfile plugins)
 pugixml.tar.gz (pugixml)
   Authors: Arseny Kapoulkine
   License: MIT
+  pugixml is based on pugxml by Kristen Wegner, credited in its headers.
 tng.tar.gz (TNG trajectory library)
   Authors: The GROMACS development team (Magnus Lundborg, Daniel
     Spångberg, Rossen Apostolov, Anders Gärdenäs, Hugo
     MacDermott-Opeskin and contributors)
   License: BSD-3-Clause
+  src/compression/xtc2.c and xtc3.c, by Daniel Spångberg, are based on
+    the xtc compression of Frans van Hoesel and of GROMACS (Erik
+    Lindahl, David van der Spoel), under tng's BSD-3-Clause licence.
+  include/tng/md5.h, src/lib/md5.c: Aladdin Enterprises (L. Peter
+    Deutsch); zlib-style licence
 toml11.tar.gz (toml11)
   Authors: Toru Niina
   License: MIT
