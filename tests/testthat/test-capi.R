@@ -1,5 +1,37 @@
 # Copyright (c) d-SEAMS developers
 
+test_that("capi wrappers that hold native memory survive repeated gctorture", {
+  # Run before the ice1h cases so the forced collections walk a small heap.
+  # water3 still allocates every handle and every returned vector.
+  # Torture is on for the wrappers and off for the expectations: the
+  # expectations allocate too, and collecting on each of those allocations
+  # does not exercise the native handles.
+  sys <- seams_system_new()
+  n <- seams_system_read(sys, dseams_example("water3.lammpstrj"))
+  expect_identical(n, 3L)
+  ice <- rep(1L, n)
+  on.exit(gctorture(FALSE), add = TRUE)
+  reps <- 8L
+  for (i in seq_len(reps)) {
+    gctorture(TRUE)
+    pos <- seams_system_positions(sys)
+    cl <- seams_cages_labels(sys)
+    nb <- seams_neighbours(sys)
+    rg <- seams_rings(sys, graph = 0L, max_depth = 6L)
+    ch <- seams_rings_chordless(sys, size = 6L, graph = 0L)
+    fp <- seams_fingerprint_atoms(sys)
+    br <- seams_brine(sys, ice, n_bins = 4L, axis = 2L)
+    gctorture(FALSE)
+    expect_equal(nrow(pos), n)
+    expect_length(cl, n)
+    expect_identical(nb$n_rows, n)
+    expect_length(rg$histogram, 7L)
+    expect_length(ch$per_atom, n)
+    expect_length(fp$atom_keys, n)
+    expect_equal(nrow(br$profile), 4L)
+  }
+})
+
 test_that("seams_capi_info and label/symmetry names work", {
   info <- seams_capi_info()
   expect_identical(info$abi, 1L)

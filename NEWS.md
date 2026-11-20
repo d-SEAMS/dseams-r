@@ -1,5 +1,10 @@
 # dseams (development version)
 
+* Release cage, neighbour, ring, fingerprint, and brine handles, and the
+  position and fingerprint scratch buffers, when an R allocation in those
+  C wrappers fails. The handles are freed by `R_UnwindProtect` and the
+  scratch buffers are R-managed, so an out-of-memory longjmp does not
+  leak them.
 * Fix `nframes()` on a readcon `.con` file when the package is linked
   against `libseams` and `libseams_lang`. Both libraries export
   `seams_path_nframes` with different arguments, and the linker bound
