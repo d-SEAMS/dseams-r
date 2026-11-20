@@ -128,8 +128,14 @@ fi
 # cargo runs. Other dotted vendor files are not needed to build.
 find "$dest/vendor" -name '.cargo-checksum.json' -exec sh -c \
   'mv "$1" "$(dirname "$1")/cargo-checksum.json"' _ {} \;
-# Drop checksum entries for the hidden files removed above. Cargo refuses
-# to build offline when a listed file is absent.
+# Hidden names are an R CMD check note, and they are not inputs to the
+# static library. Remove them before rewriting the checksums. Cargo
+# hashes every path listed in the checksum and stops if one is absent.
+find "$dest/vendor" -depth \( \
+  -name '.cargo_vcs_info.json' -o -name '.github' -o -name '.ignore' \
+  -o -name '.vim' -o -name '.reuse' -o -name '.travis.yml' \
+  -o -name '.rustfmt.toml' -o -name '.codecov.yml' -o -name '.gitignore' \
+  \) -exec rm -rf {} +
 python3 - "$dest/vendor" << 'PY'
 import json
 import sys
@@ -148,11 +154,6 @@ for checksum in root.rglob("cargo-checksum.json"):
     }
     checksum.write_text(json.dumps(data, separators=(",", ":")) + "\n")
 PY
-find "$dest/vendor" -depth \( \
-  -name '.cargo_vcs_info.json' -o -name '.github' -o -name '.ignore' \
-  -o -name '.vim' -o -name '.reuse' -o -name '.travis.yml' \
-  -o -name '.rustfmt.toml' -o -name '.codecov.yml' -o -name '.gitignore' \
-  \) -exec rm -rf {} +
 {
   echo "readcon-core sources for the bundled CON reader."
   echo "revision: $readcon_rev"

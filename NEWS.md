@@ -6,6 +6,9 @@
   mismatches.
 * Name Ruhila Goswami (`ctb`, ORCID 0000-0002-5443-9356) in the README,
   with the same role and ORCID as DESCRIPTION.
+* Rewrite vendored crate checksums after the hidden files are removed.
+  Cargo hashes every path named in those checksums, and a missing path
+  stops the offline build of readcon-core.
 * Bundle readcon-core and patched chemfiles in the source package. A
   default install reads CON files and the chemfiles formats the engine
   reads, including PDB and GRO, and the source tarball builds those
