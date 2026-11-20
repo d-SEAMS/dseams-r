@@ -8,10 +8,34 @@ d-SEAMS core team.
 The source package also carries readcon-core, the Rust crates it builds
 with, and chemfiles with the libraries chemfiles bundles. Each keeps its
 own licence, listed below with the path of its licence text inside the
-source package. Every licence here allows redistribution in source form
-alongside MIT code. Where a part offers a choice ("A OR B"), dseams
+source package. Where a part offers a choice ("A OR B"), dseams
 redistributes it under either. inst/AUTHORS names the authors of each
 part.
+
+Every licence here allows the source package to be copied and
+redistributed alongside MIT code, on these conditions:
+
+- All parts: keep the copyright notices and licence texts. The BSD,
+  NCSA and similar licences also forbid using a holder's name to
+  endorse a derived product.
+- gemmi (MPL-2.0): its files stay under MPL-2.0, and whoever ships
+  them, also inside a binary, makes their source available under
+  MPL-2.0.
+- molfiles/src/abinitplugin.c: its author allows the code "for as long
+  as it is part of an open source project" and does "not allow" it "to
+  be part of any closed source project". The bundled build compiles it.
+- molfiles/src/ply.c and molfiles/src/ply.h: permission is given on
+  condition "that you do not sell the software". They ship in the
+  archive but are not compiled.
+- molfiles/src/ReadPARM.h and molfiles/src/ReadPARM7.h: their notice is
+  kept unmodified and any change to the rest of the file is noted in
+  comments. The bundled build compiles them (parm and parm7 plugins).
+
+dseams is open source (MIT) and is not sold, which meets the ABINIT and
+Georgia Tech conditions. They bind anyone who redistributes dseams too:
+the source package, and any build of it that contains the ABINIT
+plugin, may not become part of closed-source software, and the source
+package, which contains ply.c, may not be sold.
 
 
 readcon-core 0.16.2 (src/readcon-core)
@@ -223,8 +247,41 @@ mmtf-cpp.tar.gz
   Text: mmtf-cpp/LICENSE
   mmtf-cpp/msgpack-c: BSL-1.0 (text at the end of this file)
 molfiles.tar.gz
-  License: University of Illinois Open Source License (NCSA)
+  License: University of Illinois Open Source License (NCSA) for every
+    file not listed below
   Text: molfiles/LICENSE
+  Most files carry "(C) Copyright ... The Board of Trustees of the
+  University of Illinois". Files with no notice of their own, such as
+  molfiles/src/unit_conversion.h and molfiles/src/periodic_table.h, are
+  covered by molfiles/LICENSE as part of the plugin distribution.
+  Files under other terms, each with its text in its own header:
+    molfiles/src/abinitplugin.c: Rob Lahaye's terms. The code may be
+      included only while it is part of an open-source project, never
+      in a closed-source one. There is no other licence text.
+    molfiles/src/dmsplugin.cxx, molfiles/src/dtrplugin.cxx,
+    molfiles/src/dtrplugin.hxx, molfiles/src/maeffplugin.cxx:
+      BSD-3-Clause, Copyright 2009 D. E. Shaw Research, LLC.
+    molfiles/src/ply.c, molfiles/src/ply.h: Copyright 1998 Georgia
+      Institute of Technology. Use, copying, modification and
+      distribution are permitted without fee with the notice kept, on
+      condition that the software is not sold.
+    molfiles/src/ReadPARM.h, molfiles/src/ReadPARM7.h: Copyright 1992
+      Regents of the University of California (Bill Ross, UCSF). They
+      may be distributed if the notice is kept unmodified and changes
+      to the rest of the file are noted in comments.
+    molfiles/src/hoomdplugin.c: Copyright 2009 Axel Kohlmeyer, with no
+      licence statement of its own; it is distributed as part of the
+      plugins under molfiles/LICENSE.
+  Compiled by the bundled build (src/chemfiles/external/CMakeLists.txt,
+  set by tools/chemfiles-molfiles.py): abinitplugin, bgfplugin,
+  binposplugin, carplugin, corplugin, cpmdplugin, cubeplugin,
+  dlpolyplugin, dtrplugin, gamessplugin, gromacsplugin, jsplugin,
+  maeffplugin, mdfplugin, moldenplugin, namdbinplugin, parm7plugin,
+  parmplugin, pqrplugin, psfplugin, rst7plugin, tinkerplugin,
+  vasp5xdatcarplugin, vaspoutcarplugin, vaspposcarplugin,
+  vaspxdatcarplugin, vaspxmlplugin, vtfplugin, xbgfplugin and xsfplugin,
+  with the headers they include. The other files ship in the archive
+  and are not compiled.
 pugixml.tar.gz
   License: MIT
   Text: pugixml/LICENSE.md

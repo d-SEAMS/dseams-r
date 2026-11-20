@@ -267,9 +267,33 @@ mmtf-cpp.tar.gz (mmtf-cpp)
   Includes msgpack-c (mmtf-cpp/msgpack-c):
     FURUHASHI Sadayuki and the msgpack-c contributors; BSL-1.0
 molfiles.tar.gz (VMD molfile plugins)
-  Authors: Theoretical and Computational Biophysics Group, University
-    of Illinois at Urbana-Champaign
-  License: University of Illinois Open Source License (NCSA)
+  Copyright: The Board of Trustees of the University of Illinois, for
+    the Theoretical and Computational Biophysics Group, University of
+    Illinois at Urbana-Champaign
+  License: University of Illinois Open Source License (NCSA), except the
+    files below
+  Plugin authors (the `author` field of each plugin): John Stone, Justin
+    Gullingsrud, Axel Kohlmeyer, Eamon Caddigan, Jan Saam, Markus
+    Dittrich, Johan Strumpfer, Alexey Titov, Peter Freddolino, Brian
+    Bennion, Brendan McMorrow, Leonardo Trabuco, David Norris, Magnus
+    Lundborg, Marco Kalweit, Lutz Maibaum, James Phillips, Konrad
+    Hinsen, Francois-Xavier Coudert, Alexander Spaar, Alin M Elena, Sung
+    Sakong, Olaf Lenz, Mauricio Carrillo Tripp, Rob Lahaye, and D. E.
+    Shaw Research
+  molfiles/src/Gromacs.h implements the 3dfcoord algorithm by Frans van
+    Hoesel (Europort project, 1995).
+  Files with their own copyright holders and terms:
+    abinitplugin.c: Rob Lahaye, Sungkyunkwan University; may be used
+      only as part of an open-source project
+    dmsplugin.cxx, dtrplugin.cxx, dtrplugin.hxx, maeffplugin.cxx:
+      D. E. Shaw Research, LLC; BSD-3-Clause
+    ply.c, ply.h: Georgia Institute of Technology; free use, copying,
+      modification and distribution with the notice kept, provided the
+      software is not sold
+    ReadPARM.h, ReadPARM7.h: Regents of the University of California,
+      code by Bill Ross (UCSF); distributable with the notice kept
+      unmodified and changes noted
+    hoomdplugin.c: Axel Kohlmeyer; no licence statement of its own
 pugixml.tar.gz (pugixml)
   Authors: Arseny Kapoulkine
   License: MIT

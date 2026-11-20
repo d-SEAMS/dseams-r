@@ -25,6 +25,14 @@
   crate, chemfiles, and the libraries chemfiles bundles, and
   `LICENSE.note` gives each one's licence. The `Copyright` field of
   DESCRIPTION points to both.
+* `LICENSE.note` and `inst/AUTHORS` list each vendored file whose
+  licence or copyright holder differs from its library's: in the VMD
+  molfile plugins, `abinitplugin.c` (open-source use only), the D. E.
+  Shaw Research BSD-3-Clause files, Georgia Tech's `ply.c` (not to be
+  sold) and the Regents of the University of California's `ReadPARM.h`,
+  and in the other bundled libraries, the copied code and documentation
+  under other terms. `LICENSE.note` states the conditions these place on
+  redistribution.
 * Restore reader guidance for source and linked-engine installs, native
   object ownership, and the complete R language-task example.
 * Redirect the former standalone print and summary reference pages to their
