@@ -27,7 +27,7 @@ Below, please enter values for (1) submitting author GitHub handle (replacing "@
 
 Submitting Author Name: Rohit Goswami
 Submitting Author Github Handle: <!--author1-->@HaoZeke<!--end-author1-->
-Other Package Authors Github handles: (comma separated, delete if none) <!--author-others--><!--end-author-others-->
+Other Package Authors Github handles: (comma separated, delete if none) <!--author-others-->@amritagos, @RuhiRG<!--end-author-others-->
 Repository:  <!--repourl-->https://github.com/d-SEAMS/dseams-r<!--end-repourl-->
 Version submitted: 2.14.1
 Submission type: <!--submission-type-->Standard<!--end-submission-type-->
@@ -280,6 +280,8 @@ This package:
 ## Use of Generative AI
 
 - [x] Generative AI tools were used to produce some of the material in this submission.
+
+Generative AI tools were used while drafting and revising parts of this repository, including portions of the documentation and this submission issue. I have reviewed all AI-assisted contributions, including the parts of this file, and take full responsibility for the correctness of the code and the accuracy of the statements made here.
 
 ## Publication options
 
