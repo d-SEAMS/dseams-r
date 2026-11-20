@@ -1,5 +1,7 @@
 # dseams (development version)
 
+* Name Ruhila Goswami (`ctb`, ORCID 0000-0002-5443-9356) in the README,
+  with the same role and ORCID as DESCRIPTION.
 * Restore reader guidance for source and linked-engine installs, native
   object ownership, and the complete R language-task example.
 * Redirect the former standalone print and summary reference pages to their

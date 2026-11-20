@@ -48,6 +48,15 @@ repeats this crystal and then a mixed TIP4P frame, including cages and
 order parameters. The function reference is at
 <https://r.dseams.info/reference/>.
 
+## Authors
+
+Rohit Goswami (`aut`, `cre`), ORCID 0000-0002-2393-8056, and Amrita
+Goswami (`aut`), ORCID 0000-0001-8706-2383, wrote the package.
+Ruhila Goswami (`ctb`), ORCID 0000-0002-5443-9356, contributed. The
+d-SEAMS core team (`cph`) holds the copyright in the seams-core engine
+sources bundled in `src/seams`. These are the DESCRIPTION `Authors@R`
+roles.
+
 ## Citation
 
 Goswami, Goswami and Singh (2020), Journal of Chemical Information and
