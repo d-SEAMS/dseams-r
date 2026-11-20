@@ -75,8 +75,22 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           working-directory: dseams
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+            any::rcmdcheck
+            any::brio
+            any::cli
+            any::decor
+            any::desc
+            any::glue
+            any::tibble
+            any::vctrs
           needs: check
+      - name: Check cpp11 registration
+        if: runner.os == 'Linux' && matrix.config.r == 'release'
+        working-directory: dseams
+        run: |
+          Rscript -e 'cpp11::cpp_register(quiet = FALSE)'
+          git diff --exit-code -- R/cpp11.R src/cpp11.cpp
       - uses: r-lib/actions/check-r-package@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           working-directory: dseams
