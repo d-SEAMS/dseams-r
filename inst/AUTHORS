@@ -250,7 +250,8 @@ gemmi.tar.gz (gemmi headers)
   License: MPL-2.0 (gemmi's licence; the archive holds the headers only)
   Third-party headers in gemmi/include/gemmi/third_party:
     tao/pegtl: Dr. Colin Hirsch and Daniel Frey; MIT
-    pocketfft_hdronly.h: Max-Planck-Society, Peter Bell, Matteo Frigo,
+    pocketfft_hdronly.h: authors Martin Reinecke and Peter Bell;
+      copyright Max-Planck-Society, Peter Bell, Matteo Frigo,
       Massachusetts Institute of Technology; BSD-3-Clause
     sajson.h: Chad Austin; MIT
     stb_sprintf.h: Jeff Roberts (RAD Game Tools), Sean Barrett and
