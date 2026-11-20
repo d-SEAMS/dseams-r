@@ -52,7 +52,75 @@
 #' @useDynLib dseams, .registration = TRUE
 "_PACKAGE"
 
+.capi <- new.env(parent = emptyenv())
+
+.capi_syms <- c(
+  "_dseams_seams_r_system",
+  "_dseams_seams_r_read",
+  "_dseams_seams_r_count",
+  "_dseams_seams_r_nframes",
+  "_dseams_seams_r_threads",
+  "_dseams_seams_r_chill",
+  "_dseams_seams_r_steinhardt",
+  "_dseams_seams_r_cages",
+  "_dseams_seams_r_signature",
+  "_dseams_seams_r_knn",
+  "_dseams_seams_r_rdf",
+  "_dseams_seams_r_running_cn",
+  "_dseams_seams_r_coordination",
+  "_dseams_seams_r_hbonds",
+  "_dseams_seams_r_density",
+  "_dseams_seams_r_fingerprint",
+  "_dseams_seams_r_pairs",
+  "_dseams_seams_r_domains",
+  "_dseams_seams_r_prisms",
+  "_dseams_seams_r_monolayer",
+  "_dseams_seams_r_vertices",
+  "_dseams_seams_r_site"
+)
+
+.capi_call <- function(sym, ...) {
+  fn <- .capi[[sym]]
+  if (is.null(fn)) {
+    stop("C API symbol ", sym, " is not loaded", call. = FALSE)
+  }
+  .Call(fn, ...)
+}
+
 .onLoad <- function(libname, pkgname) {
+  capi_pkg <- pkgname
+  if ("dseams_capi" %in% names(getLoadedDLLs())) {
+    capi_pkg <- "dseams_capi"
+  } else {
+    pkg_dir <- if (identical(basename(libname), pkgname) &&
+                   file.exists(file.path(libname, "DESCRIPTION"))) {
+      libname
+    } else {
+      file.path(libname, pkgname)
+    }
+    arch <- .Platform$r_arch
+    capi_so <- paste0("dseams_capi", .Platform$dynlib.ext)
+    capi_path <- if (nzchar(arch)) {
+      file.path(pkg_dir, "libs", arch, capi_so)
+    } else {
+      file.path(pkg_dir, "libs", capi_so)
+    }
+    if (file.exists(capi_path)) {
+      library.dynam("dseams_capi", pkgname, dirname(pkg_dir), local = TRUE)
+      capi_pkg <- "dseams_capi"
+    } else if (file.exists(file.path(pkg_dir, "src", capi_so))) {
+      dyn.load(file.path(pkg_dir, "src", capi_so), local = TRUE)
+      capi_pkg <- "dseams_capi"
+    }
+  }
+  routines <- getDLLRegisteredRoutines(getLoadedDLLs()[[capi_pkg]])$.Call
+  for (name in .capi_syms) {
+    sym <- routines[[name]]
+    if (is.null(sym)) {
+      stop("C API symbol ", name, " is missing from ", capi_pkg, call. = FALSE)
+    }
+    .capi[[name]] <- sym
+  }
   n <- getOption("dseams.threads")
   if (is.null(n)) {
     limit <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
@@ -63,4 +131,15 @@
   if (!is.null(n)) {
     set_threads_(as.integer(n))
   }
+}
+
+.onUnload <- function(libpath) {
+  dlls <- getLoadedDLLs()
+  if ("dseams_capi" %in% names(dlls)) {
+    tryCatch(
+      library.dynam.unload("dseams_capi", libpath),
+      error = function(e) dyn.unload(dlls[["dseams_capi"]][["path"]])
+    )
+  }
+  library.dynam.unload("dseams", libpath)
 }

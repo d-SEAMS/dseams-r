@@ -80,7 +80,22 @@ read_frame <- function(path, frame = 1L, type = 0L) {
 #' @rdname read_frame
 #' @export
 nframes <- function(path) {
-  nframes_(normalizePath(path, mustWork = TRUE))
+  path <- normalizePath(path, mustWork = TRUE)
+  tryCatch(
+    .capi_call("_dseams_seams_r_nframes", path),
+    error = function(e) {
+      n <- tryCatch(nframes_(path), error = function(ignored) 0L)
+      if (n > 0L) {
+        return(n)
+      }
+      if (!isTRUE(dseams_features()[["readcon"]]) &&
+          grepl("\\.con(vel)?$", path, ignore.case = TRUE)) {
+        stop("readcon-core is not in this build; CON input needs it",
+             call. = FALSE)
+      }
+      stop(e)
+    }
+  )
 }
 
 #' Atom positions

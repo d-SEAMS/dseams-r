@@ -240,6 +240,16 @@ int seams_capi_nframes(const char *path, const char **message) {
   return (int)n;
 }
 
+SEXP seams_r_nframes(SEXP path) {
+  const char *text = Rf_translateCharUTF8(STRING_ELT(path, 0));
+  const char *message = NULL;
+  int n = seams_capi_nframes(text, &message);
+  if (n < 0) {
+    error("%s", message == NULL ? "unreadable trajectory" : message);
+  }
+  return ScalarInteger(n);
+}
+
 SEXP seams_r_threads(SEXP n) {
   int threads = Rf_asInteger(n);
   if (seams_set_num_threads(threads) != SEAMS_OK) {
@@ -536,3 +546,40 @@ SEXP seams_r_site(SEXP ext, SEXP spec) {
   UNPROTECT(1);
   return kinds;
 }
+
+#ifdef DSEAMS_SPLIT_CAPI
+#include <R_ext/Rdynload.h>
+#include <R_ext/Visibility.h>
+
+static const R_CallMethodDef CapiEntries[] = {
+  {"_dseams_seams_r_system", (DL_FUNC) &seams_r_system, 0},
+  {"_dseams_seams_r_read", (DL_FUNC) &seams_r_read, 4},
+  {"_dseams_seams_r_count", (DL_FUNC) &seams_r_count, 1},
+  {"_dseams_seams_r_nframes", (DL_FUNC) &seams_r_nframes, 1},
+  {"_dseams_seams_r_threads", (DL_FUNC) &seams_r_threads, 1},
+  {"_dseams_seams_r_chill", (DL_FUNC) &seams_r_chill, 5},
+  {"_dseams_seams_r_steinhardt", (DL_FUNC) &seams_r_steinhardt, 4},
+  {"_dseams_seams_r_cages", (DL_FUNC) &seams_r_cages, 5},
+  {"_dseams_seams_r_signature", (DL_FUNC) &seams_r_signature, 4},
+  {"_dseams_seams_r_knn", (DL_FUNC) &seams_r_knn, 4},
+  {"_dseams_seams_r_rdf", (DL_FUNC) &seams_r_rdf, 3},
+  {"_dseams_seams_r_running_cn", (DL_FUNC) &seams_r_running_cn, 3},
+  {"_dseams_seams_r_coordination", (DL_FUNC) &seams_r_coordination, 3},
+  {"_dseams_seams_r_hbonds", (DL_FUNC) &seams_r_hbonds, 6},
+  {"_dseams_seams_r_density", (DL_FUNC) &seams_r_density, 4},
+  {"_dseams_seams_r_fingerprint", (DL_FUNC) &seams_r_fingerprint, 3},
+  {"_dseams_seams_r_pairs", (DL_FUNC) &seams_r_pairs, 2},
+  {"_dseams_seams_r_domains", (DL_FUNC) &seams_r_domains, 4},
+  {"_dseams_seams_r_prisms", (DL_FUNC) &seams_r_prisms, 2},
+  {"_dseams_seams_r_monolayer", (DL_FUNC) &seams_r_monolayer, 4},
+  {"_dseams_seams_r_vertices", (DL_FUNC) &seams_r_vertices, 4},
+  {"_dseams_seams_r_site", (DL_FUNC) &seams_r_site, 2},
+  {NULL, NULL, 0}
+};
+
+attribute_visible void R_init_dseams_capi(DllInfo *dll) {
+  R_registerRoutines(dll, NULL, CapiEntries, NULL, NULL);
+  R_useDynamicSymbols(dll, FALSE);
+  R_forceSymbols(dll, TRUE);
+}
+#endif
