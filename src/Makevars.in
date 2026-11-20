@@ -78,13 +78,16 @@ reader-stamp: $(READER_DEPS)
 
 $(OBJECTS): reader-stamp
 
+# Cargo and CMake run at most two jobs, as CRAN's policy for Rust
+# packages asks.
 readcon-core/target/release/libreadcon_core.a: readcon-core/Cargo.toml readcon-core/Cargo.lock
 	rustc --version
+	"$(CARGO)" --version
 	find readcon-core/vendor -name cargo-checksum.json -exec sh -c \
 	  'cp "$$1" "$$(dirname "$$1")/.cargo-checksum.json"' _ {} \;
 	CARGO_PROFILE_RELEASE_LTO=off CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 \
 	  RUSTFLAGS="-C relocation-model=pic -A non_camel_case_types" \
-	  "$(CARGO)" rustc --offline --locked --release --lib --crate-type staticlib \
+	  "$(CARGO)" rustc -j 2 --offline --locked --release --lib --crate-type staticlib \
 	    --manifest-path readcon-core/Cargo.toml \
 	    --config 'source.crates-io.replace-with="vendored-sources"' \
 	    --config 'source.vendored-sources.directory="readcon-core/vendor"' \
@@ -110,7 +113,7 @@ chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	  -DCHFL_SYSTEM_ZLIB=OFF \
 	  -DCHFL_SYSTEM_LZMA=OFF \
 	  -DCHFL_SYSTEM_BZIP2=OFF
-	"$(CMAKE)" --build "$(CHEMFILES_BUILD)" --parallel
+	"$(CMAKE)" --build "$(CHEMFILES_BUILD)" --parallel 2
 	"$(CMAKE)" --install "$(CHEMFILES_BUILD)"
 	rm -rf "$(CHEMFILES_BUILD)"
 	sh ../tools/reader-symbols.sh "$(OBJCOPY)" $@
