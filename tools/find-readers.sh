@@ -471,20 +471,23 @@ scope_pc_env() {
 }
 
 # Put PKG_CONFIG_PATH and PKG_CONFIG_LIBDIR back exactly as
-# save_pc_env() found them, unset if they were unset, rather than set to
-# an empty string: pkg-config can treat "unset" and "set to empty"
-# differently (an empty PKG_CONFIG_LIBDIR, for one, does not necessarily
-# disable the compiled-in default directories the way leaving it unset
-# and PKG_CONFIG_PATH alone does).
+# save_pc_env() found them, unset if they were unset, rather than set
+# to an empty string. pkgconf searches its compiled-in default
+# directories when PKG_CONFIG_LIBDIR is unset, and does not search them
+# when PKG_CONFIG_LIBDIR is set, including when the value is empty: an
+# empty value replaces the defaults with nothing. Restoring an unset
+# variable as an empty string would hide those defaults from the
+# ambient lookup that follows an explicit root. PKG_CONFIG_PATH only
+# adds directories in front of the defaults; it does not replace them.
 save_pc_env() {
   saved_pc=${PKG_CONFIG_PATH-}
-  have_pc=${PKG_CONFIG_PATH+x}
+  had_pc_path=${PKG_CONFIG_PATH+x}
   saved_pc_libdir=${PKG_CONFIG_LIBDIR-}
   have_pc_libdir=${PKG_CONFIG_LIBDIR+x}
 }
 
 restore_pc_env() {
-  if [ "${have_pc:-}" = x ]; then
+  if [ "${had_pc_path:-}" = x ]; then
     PKG_CONFIG_PATH=$saved_pc
     export PKG_CONFIG_PATH
   else
