@@ -5,6 +5,7 @@
 ^src/.*\.so$
 ^src/Makevars$
 ^src/readcon-core/target
+^src/readcon-core/cargo-home
 ^src/chemfiles-build
 ^src/chemfiles-install
 ^src/reader-stamp$
