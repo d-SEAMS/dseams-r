@@ -20,10 +20,12 @@ close_to <- function(got, want) {
 mean_of <- function(values) if (length(values) == 0) 0 else mean(values)
 
 sys <- seams_system_new()
+stopifnot(seams_system_count(sys) == 0L)
 stopifnot(
   seams_system_read(
     sys, file.path(root, "input/traj/ice1h.lammpstrj"), 1L, -1L
-  ) == rows[["ih n"]]
+  ) == rows[["ih n"]],
+  seams_system_count(sys) == rows[["ih n"]]
 )
 stopifnot(as.numeric(seams_chill(sys)) == rows[["ih chill0"]])
 q3 <- seams_steinhardt(sys, 3L)
@@ -109,4 +111,11 @@ stopifnot(
   ) == rows[["tri n"]]
 )
 close_to(mean_of(seams_steinhardt(tri, 6L)[[1]]), rows[["tri q6"]])
+
+old_threads <- dseams_threads()
+stopifnot(
+  seams_set_num_threads(1L) == 1L,
+  seams_set_num_threads(0L) >= 1L
+)
+dseams_threads(old_threads)
 cat("r capi ok\n")
