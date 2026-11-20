@@ -32,18 +32,23 @@ C and C++ consoles.
 Checked with `R CMD check --as-cran --no-manual` on R 4.5.3 (2026-03-11),
 x86_64-conda-linux-gnu, conda-forge GCC 14.4.0, on Ubuntu 24.04.
 conda-forge's R adds `-march=nocona`; that flag is the toolchain's and
-was named with `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`. Both
-`R CMD build` and `R CMD check` were run with `--no-manual`, so neither
-the PDF nor the HTML manual was built in this check. Tests: 131 passed, 8
-skipped. The skips are the comparisons that need `DSEAMS_ROOT` and
-`SEAMS_BIN`, which a CRAN machine does not have. The shipped CON, PDB,
-GRO, and XYZ files are read by tests that do not skip. The same tarball
-was also checked with the network blocked and cargo offline: the readers
-still built, and the same tests passed. That run's CRAN-incoming note is
-the URL check failing because the network was blocked, plus the same
-future-timestamp note.
+was named with `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`.
+`R CMD check` was run with `--no-manual`, so neither the PDF nor the HTML
+manual was built in this check. The readers were built with rustc 1.88.0,
+cargo 1.88.0 and cmake 3.28.3. Tests: 131 passed, 8 skipped. The skips
+are the comparisons that need `DSEAMS_ROOT` and `SEAMS_BIN`, which a CRAN
+machine does not have. The shipped CON, PDB, GRO, and XYZ files are read
+by tests that do not skip. The same tarball was also checked in a network
+namespace with no network: cargo, which runs with `--offline`, built the
+vendored crates, and the same tests passed. That run's CRAN-incoming note
+is the URL check failing because hosts could not be resolved, plus the
+same future-timestamp note.
 
-A second check on the same host linked `libseams` and `libseams_lang`
+The source tarball is 7910943 bytes. Most of it is the vendored Rust
+crates and chemfiles with the libraries it bundles, which let the
+package build without a network connection.
+
+Before the readers were bundled, a second check on the same host linked `libseams` and `libseams_lang`
 from a seams-core 2.14.1 build (`R CMD check --no-manual`, `DSEAMS_ROOT`,
 `SEAMS_LIBDIR`, `SEAMS_BIN` and `SEAMS_CPP_ORACLE` set). That run was
 Status: OK, with 118 passed and none skipped.
