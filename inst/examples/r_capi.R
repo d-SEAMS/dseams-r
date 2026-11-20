@@ -20,8 +20,8 @@ close_to <- function(got, want) {
 mean_of <- function(values) if (length(values) == 0) 0 else mean(values)
 
 sys <- seams_system_new()
-stopifnot(seams_system_count(sys) == 0L)
 stopifnot(
+  seams_system_count(sys) == 0L,
   seams_system_read(
     sys, file.path(root, "input/traj/ice1h.lammpstrj"), 1L, -1L
   ) == rows[["ih n"]],
@@ -64,9 +64,7 @@ fp <- seams_fingerprint(sys)
 stopifnot(
   fp[[1]] == rows[["ih fp"]][1],
   fp[[2]] == rows[["ih fp"]][2],
-  seams_site_table(sys, "1=waterO")[[1]] == rows[["ih site"]]
-)
-stopifnot(
+  seams_site_table(sys, "1=waterO")[[1]] == rows[["ih site"]],
   as.numeric(seams_contact_pairs(sys, "1=cationHead")) == rows[["ih pairs"]]
 )
 domain <- seams_domains(sys, "1=waterO")
@@ -84,9 +82,9 @@ guest <- seams_system_new()
 stopifnot(
   seams_system_read(
     guest, file.path(root, "input/traj/genice_sI.lammpstrj"), 1L, 1L
-  ) == rows[["si n"]]
+  ) == rows[["si n"]],
+  as.numeric(seams_signature_cages(guest, "512")) == rows[["si sig"]]
 )
-stopifnot(as.numeric(seams_signature_cages(guest, "512")) == rows[["si sig"]])
 
 xyz <- seams_system_new()
 stopifnot(
@@ -100,9 +98,9 @@ con <- seams_system_new()
 stopifnot(
   seams_system_read(
     con, file.path(root, "input/eon/tiny_multi_cuh2.con"), 1L, -1L
-  ) == rows[["con n"]]
+  ) == rows[["con n"]],
+  seams_hbonds(con, oxygen_type = 0L) == rows[["con hbond"]]
 )
-stopifnot(seams_hbonds(con, oxygen_type = 0L) == rows[["con hbond"]])
 
 tri <- seams_system_new()
 stopifnot(

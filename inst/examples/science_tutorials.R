@@ -43,9 +43,11 @@ cat("nucleus axis x layers CHHHCHHHHHHHHH\n")
 
 sii <- file.path(root, "input", "traj", "genice_sII.lammpstrj")
 sh <- file.path(root, "input", "traj", "genice_sH.lammpstrj")
-stopifnot(cages_of(sii, "512") == 16L, cages_of(sii, "51264") == 8L)
-stopifnot(cages_of(sh, "512") == 12L, cages_of(sh, "sh") == 8L,
-          cages_of(sh, "51268") == 4L)
+stopifnot(
+  cages_of(sii, "512") == 16L, cages_of(sii, "51264") == 8L,
+  cages_of(sh, "512") == 12L, cages_of(sh, "sh") == 8L,
+  cages_of(sh, "51268") == 4L
+)
 cat("cages sII 512 16\n")
 cat("cages sII 51264 8\n")
 cat("cages sH 512 12\n")
@@ -64,8 +66,10 @@ hexagonal_oxygens <- function(path) {
 
 brine <- c(Sys.getenv("DSEAMS_BRINE_T0"), Sys.getenv("DSEAMS_BRINE_TEND"))
 if (all(nzchar(brine)) && all(file.exists(brine))) {
-  stopifnot(hexagonal_oxygens(brine[[1]]) == 733L)
-  stopifnot(hexagonal_oxygens(brine[[2]]) == 741L)
+  stopifnot(
+    hexagonal_oxygens(brine[[1]]) == 733L,
+    hexagonal_oxygens(brine[[2]]) == 741L
+  )
   cat("brine t0 hexagonal 733\nbrine tend hexagonal 741\n")
 } else {
   cat(

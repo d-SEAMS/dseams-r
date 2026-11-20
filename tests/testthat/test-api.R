@@ -44,7 +44,9 @@ test_that("the OVITO rule is selectable", {
 test_that("C API wrapper outputs are shaped as documented", {
   sys <- seams_system_new()
   expect_identical(
-    seams_system_read(sys, dseams_example("ice1h.lammpstrj"), frame = 1L, type = -1L),
+    seams_system_read(
+      sys, dseams_example("ice1h.lammpstrj"), frame = 1L, type = -1L
+    ),
     128L
   )
 

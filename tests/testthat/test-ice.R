@@ -98,5 +98,8 @@ test_that("cubic ice is 4096 cubic and 4096 double-diamond", {
   expect_identical(nrow(order), 4096L)
   tau <- jump_tau90(frame, frame, dt = 1)
   expect_true(is.na(tau) || is.finite(tau))
-  expect_identical(nrow(steinhardt(frame, order_l = 6L, graph = "cutoff")), 4096L)
+  expect_identical(
+    nrow(steinhardt(frame, order_l = 6L, graph = "cutoff")),
+    4096L
+  )
 })
