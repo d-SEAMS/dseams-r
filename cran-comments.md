@@ -19,15 +19,12 @@ C and C++ consoles.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 2 notes
+0 errors | 0 warnings | 1 note
 
 * checking CRAN incoming feasibility ... NOTE
   Maintainer: 'Rohit Goswami <rgoswami@ieee.org>'
 
   New submission
-
-* checking for future file timestamps ... NOTE
-  unable to verify current time
 
 Checked with `R CMD check --as-cran --no-manual` on R 4.5.3 (2026-03-11),
 x86_64-conda-linux-gnu, conda-forge GCC 14.4.0, on Ubuntu 24.04.
@@ -35,16 +32,19 @@ conda-forge's R adds `-march=nocona`; that flag is the toolchain's and
 was named with `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`.
 `R CMD check` was run with `--no-manual`, so neither the PDF nor the HTML
 manual was built in this check. The readers were built with rustc 1.88.0,
-cargo 1.88.0 and cmake 3.28.3. Tests: 131 passed, 8 skipped. The skips
-are the comparisons that need `DSEAMS_ROOT` and `SEAMS_BIN`, which a CRAN
-machine does not have. The shipped CON, PDB, GRO, and XYZ files are read
-by tests that do not skip. The same tarball was also checked in a network
-namespace with no network: cargo, which runs with `--offline`, built the
-vendored crates, and the same tests passed. That run's CRAN-incoming note
-is the URL check failing because hosts could not be resolved, plus the
-same future-timestamp note.
+cargo 1.88.0 and cmake 3.28.3. With `DSEAMS_ROOT` naming a seams-core
+2.14.1 checkout for its example dumps, the tests report 188 passed and 2
+skipped. The skips compare with a `seams` CLI (`SEAMS_BIN`) and a C++
+oracle (`SEAMS_CPP_ORACLE`) built from seams-core, which a CRAN machine
+does not have. The shipped CON, PDB, GRO, XYZ, PQR, XSF, Gaussian cube,
+and AMBER restart files are read by tests that do not skip. The same
+tarball was also checked in a network namespace with no network: cargo,
+which runs with `--offline`, built the vendored crates, and the same
+tests passed. That run reports 2 notes: the CRAN-incoming check could
+not resolve any host, and the future-timestamp check was "unable to
+verify current time".
 
-The source tarball is 7910943 bytes. Most of it is the vendored Rust
+The source tarball is 7927049 bytes. Most of it is the vendored Rust
 crates and chemfiles with the libraries it bundles, which let the
 package build without a network connection.
 
