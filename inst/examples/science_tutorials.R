@@ -54,9 +54,10 @@ cat("cages sH 51268 4\n")
 
 hexagonal_oxygens <- function(path) {
   rows <- readLines(path)
-  oxygen <- grep("^O ", rows, value = TRUE)
+  oxygen <- rows[startsWith(rows, "O ")]
   sum(vapply(
-    strsplit(oxygen, " "), function(parts) parts[[5]] == "hexagonal",
+    strsplit(oxygen, " ", fixed = TRUE),
+    function(parts) parts[[5]] == "hexagonal",
     logical(1)
   ))
 }

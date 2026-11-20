@@ -16,3 +16,16 @@ holds 256 primitive six-rings.
 
 The positions are the coordinates in the file. The ring table has one
 row for each size that occurs. ``name`` is the CHILL+ label.
+
+The package returns positions rather than the engine's neighbour list.
+The complete example therefore counts directed cutoff pairs from those
+positions using the minimum image of the orthorhombic box. It also expands
+the sparse ring table to one histogram entry for every size from 0 through
+6.
+
+.. literalinclude:: ../../../inst/examples/lang_tasks.R
+   :language: r
+
+``tests/testthat/test-doc-examples.R`` runs this file when
+``DSEAMS_ROOT`` names a seams-core checkout, and checks four directed
+pairs per water, 256 six-rings, and one CHILL+ label per atom.

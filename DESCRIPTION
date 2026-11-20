@@ -9,7 +9,8 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-2393-8056")),
     person("Amrita", "Goswami", role = "aut",
            comment = c(ORCID = "0000-0001-8706-2383")),
-    person("Ruhila", "S", role = "ctb"),
+    person("Ruhila", "Goswami", role = "ctb",
+           comment = c(ORCID = "0000-0002-5443-9356")),
     person("d-SEAMS core team", role = "cph",
            comment = "seams-core engine sources bundled in src/seams")
     )
