@@ -224,6 +224,7 @@ done
 find "$pkg/src/chemfiles" -depth \( \
   -name '.codecov.yml' -o -name '.github' -o -name '.gitignore' \
   -o -name '.travis.yml' -o -name '.clang-format' \
+  -o -name '*.orig' -o -name '*.rej' \
   \) -exec rm -rf {} +
 
 python3 "$pkg/tools/patch-lang-nframes.py" "$pkg/src/seams/seams_lang.cpp"
