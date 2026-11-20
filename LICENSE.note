@@ -1,0 +1,266 @@
+Licences of the code in the dseams source package
+
+dseams itself, meaning the R code, the C and C++ glue in src/*.c and
+src/*.cpp, configure, cleanup and tools/, is under the MIT licence; see
+LICENSE. The d-SEAMS engine copied into src/seams is also MIT, by the
+d-SEAMS core team.
+
+The source package also carries readcon-core, the Rust crates it builds
+with, and chemfiles with the libraries chemfiles bundles. Each keeps its
+own licence, listed below with the path of its licence text inside the
+source package. Every licence here allows redistribution in source form
+alongside MIT code. Where a part offers a choice ("A OR B"), dseams
+redistributes it under either. inst/AUTHORS names the authors of each
+part.
+
+
+readcon-core 0.16.2 (src/readcon-core)
+  License: MIT
+  Text: src/readcon-core/LICENSE
+
+
+Rust crates in src/readcon-core/vendor (paths relative to
+src/readcon-core), pinned by tools/readcon-Cargo.lock:
+
+adler2 2.0.1
+  License: 0BSD OR MIT OR Apache-2.0
+  Text:
+    vendor/adler2/LICENSE-0BSD
+    vendor/adler2/LICENSE-APACHE
+    vendor/adler2/LICENSE-MIT
+
+autocfg 1.5.1
+  License: Apache-2.0 OR MIT
+  Text: vendor/autocfg/LICENSE-APACHE, vendor/autocfg/LICENSE-MIT
+
+cfg-if 1.0.5
+  License: MIT OR Apache-2.0
+  Text: vendor/cfg-if/LICENSE-APACHE, vendor/cfg-if/LICENSE-MIT
+
+crc32fast 1.5.5
+  License: MIT OR Apache-2.0
+  Text: vendor/crc32fast/LICENSE-APACHE, vendor/crc32fast/LICENSE-MIT
+
+crunchy 0.2.4
+  License: MIT
+  Text: vendor/crunchy/LICENSE
+
+dlpk 0.1.5
+  License: MIT OR Apache-2.0
+  Text: vendor/dlpk/LICENSE-APACHE, vendor/dlpk/LICENSE-MIT
+
+fast-float2 0.2.4
+  License: MIT OR Apache-2.0
+  Text: vendor/fast-float2/LICENSE-APACHE, vendor/fast-float2/LICENSE-MIT
+
+flate2 1.1.11
+  License: MIT OR Apache-2.0
+  Text: vendor/flate2/LICENSE-APACHE, vendor/flate2/LICENSE-MIT
+
+half 2.4.1
+  License: MIT OR Apache-2.0
+  Text: vendor/half/LICENSES/Apache-2.0.txt, vendor/half/LICENSES/MIT.txt
+
+half 1.8.3
+  License: MIT OR Apache-2.0
+  Text:
+    vendor/half-1.8.3/LICENSES/Apache-2.0.txt
+    vendor/half-1.8.3/LICENSES/MIT.txt
+
+itoa 1.0.19
+  License: MIT OR Apache-2.0
+  Text: vendor/itoa/LICENSE-APACHE, vendor/itoa/LICENSE-MIT
+
+libc 0.2.191
+  License: MIT OR Apache-2.0
+  Text: vendor/libc/LICENSE-APACHE, vendor/libc/LICENSE-MIT
+
+matrixmultiply 0.3.11
+  License: MIT OR Apache-2.0
+  Text: vendor/matrixmultiply/LICENSE-APACHE, vendor/matrixmultiply/LICENSE-MIT
+
+memchr 2.8.3
+  License: Unlicense OR MIT
+  Text:
+    vendor/memchr/COPYING
+    vendor/memchr/LICENSE-MIT
+    vendor/memchr/UNLICENSE
+
+memmap2 0.9.12
+  License: MIT OR Apache-2.0
+  Text: vendor/memmap2/LICENSE-APACHE, vendor/memmap2/LICENSE-MIT
+
+miniz_oxide 0.9.1
+  License: MIT OR Zlib OR Apache-2.0
+  Text:
+    vendor/miniz_oxide/LICENSE
+    vendor/miniz_oxide/LICENSE-APACHE.md
+    vendor/miniz_oxide/LICENSE-MIT.md
+    vendor/miniz_oxide/LICENSE-ZLIB.md
+
+ndarray 0.17.2
+  License: MIT OR Apache-2.0
+  Text: vendor/ndarray/LICENSE-APACHE, vendor/ndarray/LICENSE-MIT
+
+num-complex 0.4.6
+  License: MIT OR Apache-2.0
+  Text: vendor/num-complex/LICENSE-APACHE, vendor/num-complex/LICENSE-MIT
+
+num-integer 0.1.47
+  License: MIT OR Apache-2.0
+  Text: vendor/num-integer/LICENSE-APACHE, vendor/num-integer/LICENSE-MIT
+
+num-traits 0.2.19
+  License: MIT OR Apache-2.0
+  Text: vendor/num-traits/LICENSE-APACHE, vendor/num-traits/LICENSE-MIT
+
+portable-atomic 1.15.0
+  License: Apache-2.0 OR MIT
+  Text:
+    vendor/portable-atomic/LICENSE-APACHE
+    vendor/portable-atomic/LICENSE-MIT
+
+portable-atomic-util 0.2.8
+  License: Apache-2.0 OR MIT
+  Text:
+    vendor/portable-atomic-util/LICENSE-APACHE
+    vendor/portable-atomic-util/LICENSE-MIT
+
+proc-macro2 1.0.107
+  License: MIT OR Apache-2.0
+  Text: vendor/proc-macro2/LICENSE-APACHE, vendor/proc-macro2/LICENSE-MIT
+
+quote 1.0.47
+  License: MIT OR Apache-2.0
+  Text: vendor/quote/LICENSE-APACHE, vendor/quote/LICENSE-MIT
+
+rawpointer 0.2.1
+  License: MIT OR Apache-2.0
+  Text: vendor/rawpointer/LICENSE-APACHE, vendor/rawpointer/LICENSE-MIT
+
+rustc-hash 2.1.3
+  License: Apache-2.0 OR MIT
+  Text: vendor/rustc-hash/LICENSE-APACHE, vendor/rustc-hash/LICENSE-MIT
+
+serde 1.0.229
+  License: MIT OR Apache-2.0
+  Text: vendor/serde/LICENSE-APACHE, vendor/serde/LICENSE-MIT
+
+serde_core 1.0.229
+  License: MIT OR Apache-2.0
+  Text: vendor/serde_core/LICENSE-APACHE, vendor/serde_core/LICENSE-MIT
+
+serde_derive 1.0.229
+  License: MIT OR Apache-2.0
+  Text: vendor/serde_derive/LICENSE-APACHE, vendor/serde_derive/LICENSE-MIT
+
+serde_json 1.0.154
+  License: MIT OR Apache-2.0
+  Text: vendor/serde_json/LICENSE-APACHE, vendor/serde_json/LICENSE-MIT
+
+simd-adler32 0.3.10
+  License: MIT
+  Text: vendor/simd-adler32/LICENSE.md
+
+syn 3.0.10
+  License: MIT OR Apache-2.0
+  Text: vendor/syn/LICENSE-APACHE, vendor/syn/LICENSE-MIT
+
+unicode-ident 1.0.27
+  License: (MIT OR Apache-2.0) AND Unicode-3.0
+  Text:
+    vendor/unicode-ident/LICENSE-APACHE
+    vendor/unicode-ident/LICENSE-MIT
+    vendor/unicode-ident/LICENSE-UNICODE
+
+zlib-rs 0.6.8
+  License: Zlib
+  Text: vendor/zlib-rs/LICENSE
+
+zmij 1.0.23
+  License: MIT
+  Text: vendor/zmij/LICENSE-MIT
+
+
+chemfiles 0.10.4 (src/chemfiles)
+  License: BSD-3-Clause
+  Text: src/chemfiles/LICENSE
+
+src/chemfiles/include/chemfiles/external/optional.hpp
+  License: BSL-1.0 (text at the end of this file)
+src/chemfiles/include/chemfiles/external/span.hpp
+  License: MIT (text in the file header)
+src/chemfiles/include/chemfiles/external/string_view.hpp
+  License: BSL-1.0 (text at the end of this file)
+src/chemfiles/cmake/FindPythonLibsNew.cmake
+  License: BSD-3-Clause (text in the file header)
+src/chemfiles/cmake/CheckCompilerFlags/*.cmake
+  License: BSD-3-Clause (CMake's licence, https://cmake.org/licensing)
+
+Libraries in src/chemfiles/external (paths inside each archive):
+
+bzip2.tar.gz
+  License: bzip2-1.0.6 (BSD-style)
+  Text: bzip2/LICENSE
+fmt.tar.gz
+  License: MIT
+  Text: fmt/LICENSE.rst
+gemmi.tar.gz
+  License: MPL-2.0, https://mozilla.org/MPL/2.0/
+  The archive holds gemmi's headers only. Its third-party headers:
+    gemmi/include/gemmi/third_party/tao: MIT,
+      text in gemmi/include/gemmi/third_party/tao/LICENSE
+    pocketfft_hdronly.h: BSD-3-Clause, text in the file header
+    sajson.h: MIT, text in the file header
+    stb_sprintf.h: MIT or public domain (Unlicense), text at the end
+      of the file
+    tinydir.h: BSD-2-Clause, text in the file header
+lzma.tar.gz
+  License: public domain (liblzma)
+  Text: lzma/COPYING
+mmtf-cpp.tar.gz
+  License: MIT
+  Text: mmtf-cpp/LICENSE
+  mmtf-cpp/msgpack-c: BSL-1.0 (text at the end of this file)
+molfiles.tar.gz
+  License: University of Illinois Open Source License (NCSA)
+  Text: molfiles/LICENSE
+pugixml.tar.gz
+  License: MIT
+  Text: pugixml/LICENSE.md
+tng.tar.gz
+  License: BSD-3-Clause
+  Text: tng/COPYING
+toml11.tar.gz
+  License: MIT
+  Text: toml11/LICENSE
+zlib.tar.gz
+  License: Zlib
+  Text: zlib/README
+
+
+The Boost Software License 1.0 text, for the BSL-1.0 parts above:
+
+Boost Software License - Version 1.0 - August 17th, 2003
+
+Permission is hereby granted, free of charge, to any person or organization
+obtaining a copy of the software and accompanying documentation covered by
+this license (the "Software") to use, reproduce, display, distribute,
+execute, and transmit the Software, and to prepare derivative works of the
+Software, and to permit third-parties to whom the Software is furnished to
+do so, all subject to the following:
+
+The copyright notices in the Software and this entire statement, including
+the above license grant, this restriction and the following disclaimer,
+must be included in all copies of the Software, in whole or in part, and
+all derivative works of the Software, unless such copies or derivative
+works are solely in the form of machine-executable object code generated by
+a source language processor.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

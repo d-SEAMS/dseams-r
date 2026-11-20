@@ -11,6 +11,10 @@
   reads, including PDB and GRO, and the source tarball builds those
   libraries without a network connection. Building the bundled copy
   needs Cargo, rustc >= 1.88, and cmake.
+* `inst/AUTHORS` names the authors of readcon-core, every vendored Rust
+  crate, chemfiles, and the libraries chemfiles bundles, and
+  `LICENSE.note` gives each one's licence. The `Copyright` field of
+  DESCRIPTION points to both.
 * Restore reader guidance for source and linked-engine installs, native
   object ownership, and the complete R language-task example.
 * Redirect the former standalone print and summary reference pages to their

@@ -227,6 +227,35 @@ find "$pkg/src/chemfiles" -depth \( \
   -o -name '*.orig' -o -name '*.rej' \
   \) -exec rm -rf {} +
 
+# CRAN asks that the authors and licences of vendored code be listed.
+# Refuse a crate or chemfiles library that inst/AUTHORS or LICENSE.note
+# does not name, so a moved pin cannot ship an unlisted part.
+python3 - "$dest/vendor" "$pkg/src/chemfiles/external" \
+  "$pkg/inst/AUTHORS" "$pkg/LICENSE.note" << 'PY'
+import re
+import sys
+from pathlib import Path
+
+vendor, external = Path(sys.argv[1]), Path(sys.argv[2])
+docs = {name: Path(name).read_text(encoding="utf-8") for name in sys.argv[3:]}
+wanted = []
+for manifest in sorted(vendor.glob("*/Cargo.toml")):
+    text = manifest.read_text(encoding="utf-8")
+    package = text.split("[package]", 1)[1]
+    name = re.search(r'^name = "([^"]+)"', package, re.M).group(1)
+    version = re.search(r'^version = "([^"]+)"', package, re.M).group(1)
+    wanted.append(name + " " + version)
+wanted += sorted(p.name for p in external.glob("*.tar.gz"))
+missing = [
+    "{} lacks {}".format(Path(doc).name, entry)
+    for doc, text in docs.items()
+    for entry in wanted
+    if not re.search(r"^" + re.escape(entry) + r"\b", text, re.M)
+]
+if missing:
+    sys.exit("vendor-readers.sh: " + "; ".join(missing))
+PY
+
 python3 "$pkg/tools/patch-lang-nframes.py" "$pkg/src/seams/seams_lang.cpp"
 
 extdata=$pkg/inst/extdata
