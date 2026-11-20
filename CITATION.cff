@@ -15,6 +15,10 @@ authors:
   - family-names: Goswami
     given-names: Amrita
     orcid: "https://orcid.org/0000-0001-8706-2383"
+  - family-names: Goswami
+    given-names: Ruhila
+    orcid: "https://orcid.org/0000-0002-5443-9356"
+abstract: "Structural analysis of water and ice in molecular dynamics trajectories, using the d-SEAMS engine. Reads LAMMPS dumps and XYZ files on every build. When chemfiles is found at build time, also reads the formats that library reads (PDB, GRO, DCD, and the rest of the chemfiles 0.10 set). When readcon-core is found, also reads readcon .con files. readcon-core also defines .convel; this engine routes .con. Returns data frames for CHILL+ ice labels, primitive rings, cages, Steinhardt q4 and q6, hydrogen bonds, radial distribution functions, prisms, domains, monolayers, topological fingerprints, coordination, density profiles, and jump_tau90."
 keywords:
   - molecular dynamics
   - ice

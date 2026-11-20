@@ -7,15 +7,23 @@
 \title{dseams: Ice Classification and Ring Statistics for Molecular Simulations}
 \description{
 Structural analysis of water and ice in one molecular-dynamics frame.
-Reads a LAMMPS dump or an XYZ file and returns data frames of CHILL+
-ice labels, primitive ring counts, hexagonal and double-diamond cages,
-and Steinhardt bond-orientational order parameters.
+LAMMPS dumps and XYZ files are always read. Chemfiles formats are
+read when chemfiles is compiled in, and readcon \code{.con} files are read
+when readcon-core is. readcon-core also defines \code{.convel}; this engine
+routes \code{.con} (\code{\link[=dseams_features]{dseams_features()}}). The analyses are CHILL+ ice labels,
+primitive rings, cages, Steinhardt q4 and q6, hydrogen bonds, radial
+distribution functions, prisms, domains, monolayers, topological
+fingerprints, coordination, density profiles, and jump_tau90.
 }
 \details{
 \code{\link[=dseams_example]{dseams_example()}} names the dumps shipped with the package.
-\code{\link[=read_frame]{read_frame()}} loads one frame. \code{\link[=chill_plus]{chill_plus()}}, \code{\link[=primitive_rings]{primitive_rings()}},
+\code{\link[=read_frame]{read_frame()}} loads one frame. \code{\link[=dseams_features]{dseams_features()}} reports which
+readers this build compiled. \code{\link[=chill_plus]{chill_plus()}}, \code{\link[=primitive_rings]{primitive_rings()}},
 \code{\link[=cages]{cages()}}, \code{\link[=signature_cages]{signature_cages()}}, \code{\link[=symmetry]{symmetry()}}, \code{\link[=steinhardt]{steinhardt()}},
-\code{\link[=q4_q6]{q4_q6()}}, and \code{\link[=jump_tau90]{jump_tau90()}} analyse that frame.
+\code{\link[=q4_q6]{q4_q6()}}, and \code{\link[=jump_tau90]{jump_tau90()}} analyse that frame. The \verb{seams_*}
+functions are the same analyses on a system handle, plus hydrogen
+bonds, radial distribution, coordination, density, prisms, domains,
+monolayers, and fingerprints.
 
 Cite Goswami, Goswami and Singh (2020), Journal of Chemical Information
 and Modeling. \code{citation("dseams")} prints the record.
@@ -69,7 +77,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Ruhila S [contributor]
+  \item Ruhila Goswami (\href{https://orcid.org/0000-0002-5443-9356}{ORCID}) [contributor]
   \item d-SEAMS core team (seams-core engine sources bundled in src/seams) [copyright holder]
 }
 

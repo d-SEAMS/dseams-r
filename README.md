@@ -1,9 +1,14 @@
 # dseams
 
 Ice classification and ring statistics for molecular simulations. `dseams`
-reads one frame of a LAMMPS dump or an XYZ file and returns data frames:
-CHILL+ labels, primitive rings, hexagonal and double-diamond cages, and
-Steinhardt order parameters. The calculations are the
+reads one frame and returns data frames: CHILL+ labels, primitive rings,
+cages, Steinhardt q4 and q6, hydrogen bonds, radial distribution
+functions, prisms, domains, monolayers, fingerprints, coordination,
+density profiles, and jump_tau90. LAMMPS dumps and XYZ files are read on
+every build. Chemfiles formats are read when chemfiles was present
+at compile time, and readcon `.con` files are read when readcon-core
+was. readcon-core also defines `.convel`; this engine routes `.con`
+(`dseams_features()`). The calculations are the
 [d-SEAMS](https://dseams.info) engine.
 
 ## Documentation
@@ -53,5 +58,14 @@ order parameters. The function reference is at
 Goswami, Goswami and Singh (2020), Journal of Chemical Information and
 Modeling. <https://doi.org/10.1021/acs.jcim.0c00031>. `citation("dseams")`
 prints the record.
+
+## Contributors
+
+- Rohit Goswami (author, maintainer; ORCID
+  [0000-0002-2393-8056](https://orcid.org/0000-0002-2393-8056))
+- Amrita Goswami (author; ORCID
+  [0000-0001-8706-2383](https://orcid.org/0000-0001-8706-2383))
+- Ruhila Goswami (contributor; ORCID
+  [0000-0002-5443-9356](https://orcid.org/0000-0002-5443-9356))
 
 Report bugs at <https://github.com/d-SEAMS/dseams-r/issues>.

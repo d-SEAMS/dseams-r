@@ -5,6 +5,7 @@
 #include <cpp11/data_frame.hpp>
 #include <cpp11/doubles.hpp>
 #include <cpp11/integers.hpp>
+#include <cpp11/logicals.hpp>
 #include <cpp11/strings.hpp>
 
 #include "seams_lang.h"
@@ -56,6 +57,30 @@ int nframes_(std::string path) {
     cpp11::stop("%s", seams_last_error());
   }
   return n;
+}
+
+[[cpp11::register]]
+cpp11::logicals readers_() {
+  cpp11::writable::logicals out(4);
+  out[0] = true;
+  out[1] = true;
+#ifdef SEAMS_HAS_CHEMFILES
+  out[2] = true;
+#else
+  out[2] = false;
+#endif
+#ifdef SEAMS_HAS_READCON
+  out[3] = true;
+#else
+  out[3] = false;
+#endif
+  cpp11::writable::strings names(4);
+  names[0] = "lammps";
+  names[1] = "xyz";
+  names[2] = "chemfiles";
+  names[3] = "readcon";
+  out.attr("names") = names;
+  return out;
 }
 
 [[cpp11::register]]

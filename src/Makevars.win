@@ -1,8 +1,12 @@
 CXX_STD = CXX20
 
-PKG_CPPFLAGS = -I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='"2.14.1"' -DSEAMS_HAS_OPENMP=1
+# Optional chemfiles and readcon-core flags. configure.win fills these
+# when the libraries are present. Empty is the CRAN build.
+READER_CPPFLAGS=
+READER_LIBS=
+PKG_CPPFLAGS = -I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='"2.14.1"' -DSEAMS_HAS_OPENMP=1 $(READER_CPPFLAGS)
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
-PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(READER_LIBS)
 
 # The same engine objects as src/Makevars.in; tools/vendor.sh checks that
 # the two lists agree.

@@ -30,6 +30,7 @@ if [ ! -x "${R_HOME}/bin/R" ]; then
 fi
 
 version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+SHLIB_EXT=$("${R_HOME}/bin/R" CMD config SHLIB_EXT)
 if [ ! -f src/seams/seams_lang.cpp ] || [ ! -f inst/extdata/ice1h.lammpstrj ]; then
   if [ ! -f tools/vendor.sh ]; then
     echo "configure: src/seams is missing and there is no tools/vendor.sh to make it" >&2
@@ -60,10 +61,14 @@ if [ "${link_mode}" = pkg-config ]; then
   libdir=$(${PKG_CONFIG} --variable=libdir seams)
   lang_libdir=$(${PKG_CONFIG} --variable=libdir seams-lang)
   echo "configure: linking the installed engine ${have} from ${libdir}"
-  SEAMS_CPPFLAGS=$(${PKG_CONFIG} --cflags seams-lang seams)
-  SEAMS_LIBS="$(${PKG_CONFIG} --libs seams-lang seams) -Wl,-rpath,${lang_libdir} -Wl,-rpath,${libdir}"
+  SEAMS_CPPFLAGS="$(${PKG_CONFIG} --cflags seams-lang) -DDSEAMS_SPLIT_CAPI=1"
+  SEAMS_LIBS="$(${PKG_CONFIG} --libs seams-lang) -Wl,-rpath,${lang_libdir}"
+  SEAMS_CAPI_CPPFLAGS=$(${PKG_CONFIG} --cflags seams)
+  SEAMS_CAPI_LIBS="$(${PKG_CONFIG} --libs seams) -Wl,-rpath,${libdir}"
   OPENMP_CXXFLAGS=""
+  MAIN_OBJECTS='cpp11.o dseams.o dseams_r_io.o'
   ENGINE_OBJECTS=""
+  CAPI_SHLIB="dseams_capi${SHLIB_EXT}"
 elif [ "${link_mode}" = libdir ]; then
   if [ -z "${SEAMS_INCLUDE:-}" ] && [ -n "${DSEAMS_ROOT:-}" ]; then
     SEAMS_INCLUDE="${DSEAMS_ROOT}/bindings/cxx"
@@ -97,14 +102,22 @@ elif [ "${link_mode}" = libdir ]; then
     exit 1
   fi
   echo "configure: linking libseams_lang from ${SEAMS_LIBDIR} and libseams from ${SEAMS_SO_DIR}"
-  SEAMS_CPPFLAGS="-I${SEAMS_INCLUDE} -I${SEAMS_H_DIR} -I${SEAMS_SO_DIR}"
-  SEAMS_LIBS="-L${SEAMS_LIBDIR} -lseams_lang -L${SEAMS_SO_DIR} -lseams -Wl,-rpath,${SEAMS_LIBDIR} -Wl,-rpath,${SEAMS_SO_DIR}"
+  SEAMS_CPPFLAGS="-I${SEAMS_INCLUDE} -DDSEAMS_SPLIT_CAPI=1"
+  SEAMS_LIBS="-L${SEAMS_LIBDIR} -lseams_lang -Wl,-rpath,${SEAMS_LIBDIR}"
+  SEAMS_CAPI_CPPFLAGS="-I${SEAMS_H_DIR} -I${SEAMS_SO_DIR}"
+  SEAMS_CAPI_LIBS="-L${SEAMS_SO_DIR} -lseams -Wl,-rpath,${SEAMS_SO_DIR}"
   OPENMP_CXXFLAGS=""
+  MAIN_OBJECTS='cpp11.o dseams.o dseams_r_io.o'
   ENGINE_OBJECTS=""
+  CAPI_SHLIB="dseams_capi${SHLIB_EXT}"
 else
   SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='\"${version}\"'"
   SEAMS_LIBS=""
+  SEAMS_CAPI_CPPFLAGS=""
+  SEAMS_CAPI_LIBS=""
+  MAIN_OBJECTS='cpp11.o dseams.o dseams_r_io.o seams_call.o'
   ENGINE_OBJECTS='$(SEAMS_OBJECTS)'
+  CAPI_SHLIB=""
   # An empty SHLIB_OPENMP_CXXFLAGS (Apple clang, for one) builds the
   # engine loops single-threaded.
   openmp=$(sed -n 's/^SHLIB_OPENMP_CXXFLAGS[[:space:]]*=[[:space:]]*//p' \
@@ -119,8 +132,35 @@ else
   fi
 fi
 
+# Optional readers. Neither library is required. A CRAN machine has
+# neither, and the engine then reads LAMMPS dumps and XYZ only.
+if [ -z "$link_mode" ]; then
+  reader_mode=bundled
+else
+  reader_mode=linked
+fi
+reader_eval=$(R_HOME="$R_HOME" \
+  SEAMS_SO_DIR="${SEAMS_SO_DIR:-}" \
+  SEAMS_LIBDIR="${SEAMS_LIBDIR:-}" \
+  SEAMS_SCAN_DIR="${libdir:-}" \
+  SEAMS_CPPFLAGS="$SEAMS_CPPFLAGS" \
+  sh tools/find-readers.sh "$reader_mode") || exit 1
+eval "$reader_eval"
+if [ -n "$dseams_reader_cppflags" ]; then
+  SEAMS_CPPFLAGS="$SEAMS_CPPFLAGS $dseams_reader_cppflags"
+fi
+if [ -n "$dseams_reader_libs" ]; then
+  SEAMS_LIBS="$SEAMS_LIBS $dseams_reader_libs"
+fi
+echo "configure: $dseams_reader_message"
+
 sed -e "s|@SEAMS_CPPFLAGS@|${SEAMS_CPPFLAGS}|" \
   -e "s|@SEAMS_LIBS@|${SEAMS_LIBS}|" \
+  -e "s|@SEAMS_CAPI_CPPFLAGS@|${SEAMS_CAPI_CPPFLAGS}|" \
+  -e "s|@SEAMS_CAPI_LIBS@|${SEAMS_CAPI_LIBS}|" \
   -e "s|@OPENMP_CXXFLAGS@|${OPENMP_CXXFLAGS}|g" \
+  -e "s|@MAIN_OBJECTS@|${MAIN_OBJECTS}|" \
   -e "s|@ENGINE_OBJECTS@|${ENGINE_OBJECTS}|" \
+  -e "s|@CAPI_SHLIB@|${CAPI_SHLIB}|" \
+  -e "s|@SHLIB_EXT@|${SHLIB_EXT}|" \
   src/Makevars.in > src/Makevars

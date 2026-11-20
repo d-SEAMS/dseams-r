@@ -1,12 +1,33 @@
 #!/bin/sh
-# src/Makevars.win is static. A source package carries src/seams. In a git
-# checkout tools/vendor.sh makes it from SEAMS_CORE_SRC (or DSEAMS_ROOT),
-# else from the revision pinned in tools/seams-core.ref, as for configure.
-if [ -f src/seams/seams_lang.cpp ] && [ -f inst/extdata/ice1h.lammpstrj ]; then
-  exit 0
+# A source package carries src/seams. In a git checkout tools/vendor.sh
+# makes it from SEAMS_CORE_SRC (or DSEAMS_ROOT), else from the revision
+# pinned in tools/seams-core.ref, as for configure.
+#
+# chemfiles and readcon-core are optional. When either is found,
+# READER_CPPFLAGS and READER_LIBS in src/Makevars.win name it. With
+# neither, those variables stay empty and the build reads LAMMPS dumps
+# and XYZ files.
+if [ ! -f src/seams/seams_lang.cpp ] || [ ! -f inst/extdata/ice1h.lammpstrj ]; then
+  if [ ! -f tools/vendor.sh ]; then
+    echo "configure.win: src/seams is missing and there is no tools/vendor.sh to make it" >&2
+    exit 1
+  fi
+  sh tools/vendor.sh || exit 1
 fi
-if [ ! -f tools/vendor.sh ]; then
-  echo "configure.win: src/seams is missing and there is no tools/vendor.sh to make it" >&2
-  exit 1
-fi
-sh tools/vendor.sh
+
+: "${R_HOME:=$(R RHOME)}"
+reader_eval=$(R_HOME="${R_HOME:-}" sh tools/find-readers.sh bundled) || exit 1
+eval "$reader_eval"
+READER_CPPFLAGS_VALUE=$dseams_reader_cppflags \
+READER_LIBS_VALUE=$dseams_reader_libs \
+awk '
+  BEGIN {
+    cpp = ENVIRON["READER_CPPFLAGS_VALUE"]
+    libs = ENVIRON["READER_LIBS_VALUE"]
+  }
+  /^READER_CPPFLAGS=/ { print "READER_CPPFLAGS=" cpp; next }
+  /^READER_LIBS=/ { print "READER_LIBS=" libs; next }
+  { print }
+' src/Makevars.win > src/Makevars.win.tmp
+mv src/Makevars.win.tmp src/Makevars.win
+echo "configure.win: $dseams_reader_message"

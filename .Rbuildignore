@@ -24,6 +24,7 @@
 ^pixi\.lock$
 ^\.pixi$
 ^AGENTS\.md$
+^UPSTREAM\.md$
 ^llms\.txt$
 ^\.lycheeignore$
 ^pkgdown$

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<cml xmlns="http://www.xml-cml.org/schema" xmlns:cml="http://www.xml-cml.org/dict/cml" xmlns:units="http://www.xml-cml.org/units/units" xmlns:convention="http://www.xml-cml.org/convention" convention="convention:molecular" xmlns:iupac="http://www.iupac.org">
+  <molecule id="m1">
+    <crystal>
+      <scalar units="units:angstrom" title="a">20</scalar>
+      <scalar units="units:angstrom" title="b">20</scalar>
+      <scalar units="units:angstrom" title="c">20</scalar>
+      <scalar units="units:degree" title="alpha">90</scalar>
+      <scalar units="units:degree" title="beta">90</scalar>
+      <scalar units="units:degree" title="gamma">90</scalar>
+    </crystal>
+    <atomArray>
+      <atom id="a1" elementType="O" title="O" x3="1" y3="2" z3="3" />
+      <atom id="a2" elementType="H" title="H1" isotopeNumber="0" x3="1.5" y3="2" z3="3" />
+      <atom id="a3" elementType="H" title="H2" isotopeNumber="0" x3="1" y3="2.7999999999999998" z3="3" />
+    </atomArray>
+    <bondArray>
+      <bond atomRefs2="a1 a2" />
+      <bond atomRefs2="a1 a3" />
+    </bondArray>
+  </molecule>
+</cml>

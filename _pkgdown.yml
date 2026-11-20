@@ -80,7 +80,7 @@ redirects:
 
 reference:
   - title: Read a frame
-    desc: One configuration from a LAMMPS dump or an XYZ file.
+    desc: One configuration. LAMMPS and XYZ on every build; chemfiles and readcon formats when those readers are compiled in.
     contents:
       - dseams
       - dseams_example
@@ -107,3 +107,4 @@ reference:
     contents:
       - dseams_threads
       - dseams_version
+      - dseams_features

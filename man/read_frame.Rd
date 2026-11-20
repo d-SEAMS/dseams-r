@@ -16,11 +16,14 @@ nframes(path)
 \method{summary}{dseams_frame}(object, ...)
 }
 \arguments{
-\item{path}{Path to a LAMMPS dump, or an XYZ file.}
+\item{path}{Trajectory path. LAMMPS dumps and XYZ files on every build.
+Chemfiles formats when chemfiles is compiled in. readcon \code{.con} and
+\code{.convel} files when readcon-core is compiled in and the engine
+accepts that extension. \code{\link[=dseams_features]{dseams_features()}} names the compiled readers.}
 
 \item{frame}{1-based frame index.}
 
-\item{type}{LAMMPS type filter.}
+\item{type}{Species filter. See the description.}
 
 \item{x}{A \code{dseams_frame}, for \code{print()}.}
 
@@ -30,14 +33,27 @@ nframes(path)
 }
 \value{
 \code{read_frame()} returns an object of class \code{dseams_frame}.
-\code{nframes()} returns the number of LAMMPS timesteps; an XYZ file counts
-as one. \code{print()} and \code{summary()} return the frame, invisibly.
+\code{nframes()} returns the frame count: LAMMPS timesteps, XYZ frames,
+chemfiles steps when that reader is compiled in, and readcon frames
+for a \code{.con} or \code{.convel} file when that reader is compiled in.
+\code{print()} and \code{summary()} return the frame, invisibly.
 }
 \description{
 \code{type = 0} guesses oxygen (LAMMPS type 2, otherwise type 1). A positive
-type keeps that species. A negative type keeps every atom.
+type keeps that species. A negative type keeps every atom. On a
+chemfiles or readcon frame the species number is the atomic number
+when the file names an element.
 }
 \details{
+LAMMPS dumps (\code{.lammpstrj}, \code{.dump}) and XYZ files are read on every
+build. When \code{\link[=dseams_features]{dseams_features()}} reports \code{chemfiles}, the path may be
+any format chemfiles 0.10 reads: PDB, GRO, DCD, XTC, TRR, TNG, NetCDF,
+SDF, CML, CSSR, MOL2, CIF, mmCIF, Tinker ARC, and MMTF.
+When it reports \code{readcon}, a readcon \code{.con} file is read. readcon-core
+also defines \code{.convel}. \code{nframes()} asks the engine for both extensions.
+\code{read_frame()} and \code{\link[=seams_system_read]{seams_system_read()}} pass a path to readcon when
+the extension is \code{.con}, which is the extension this engine routes.
+
 \code{print()} reports the frame index and the atom count. \code{summary()} also
 reports the file and the type filter. Both return the frame, invisibly.
 }
