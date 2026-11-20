@@ -214,19 +214,39 @@ fi
 # PKG_CONFIG_PATH is left unset throughout, so only PKG_CONFIG_LIBDIR
 # stands in for pkg-config's compiled-in default directories.
 #
-# This case pins PKG_CONFIG to a real pkgconf binary when one is on the
-# system outside any activated build environment. A pixi/conda-forge
-# environment's own "pkg-config" is a wrapper script that unconditionally
-# appends that environment's own default directories to whatever
-# PKG_CONFIG_LIBDIR the caller sets, which would make this case
-# non-deterministic (it would see that environment's own, correctly
-# versioned, readcon-core.pc instead of either fake one); see REPORT.md
-# for that caveat's effect on a pixi-environment build's own isolation. ---
+# pkgconf, and the pkg-config.bin that conda-forge's wrapper execs,
+# honor PKG_CONFIG_LIBDIR as a replacement for the compiled-in
+# defaults. The wrapper itself appends the environment's directories
+# to whatever PKG_CONFIG_LIBDIR the caller set, so running this case
+# through the wrapper finds that environment's own readcon-core.pc.
+# Use the binary beside a wrapper when the selected pkg-config is that
+# script, and otherwise use the selected pkg-config (PATH's pkg-config,
+# or /usr/bin/pkg-config when that is what PKG_CONFIG or PATH names).
+# Both then apply PKG_CONFIG_LIBDIR as given. ---
 
-case_d_pc=${PKG_CONFIG:-pkg-config}
-if [ -x /usr/bin/pkg-config ]; then
-  case_d_pc=/usr/bin/pkg-config
-fi
+resolve_pkg_config() {
+  cand=${PKG_CONFIG:-pkg-config}
+  resolved=$(command -v "$cand" 2>/dev/null) || resolved=""
+  if [ -z "$resolved" ]; then
+    printf '%s\n' "test-find-readers.sh: pkg-config ($cand) is not on PATH" >&2
+    return 1
+  fi
+  case "$resolved" in
+    /*) ;;
+    *) resolved=$(pwd)/$resolved ;;
+  esac
+  pc_dir=$(dirname -- "$resolved")
+  pc_bin=$pc_dir/pkg-config.bin
+  if [ "$(basename -- "$resolved")" != "pkg-config.bin" ] && [ -x "$pc_bin" ] &&
+    grep -q -F 'pkg-config.bin' "$resolved" 2>/dev/null; then
+    printf '%s\n' "$pc_bin"
+    return 0
+  fi
+  printf '%s\n' "$resolved"
+}
+
+case_d_pc=$(resolve_pkg_config) || exit 1
+echo "# case D pkg-config: $case_d_pc"
 
 case_d_defaults=$work/case-d-defaults
 case_d_explicit=$work/case-d-explicit
