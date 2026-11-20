@@ -212,9 +212,7 @@ Goswami's between the author markers above if she should be on the issue.
   series, unsupervised learning) do not apply, and the package does not
   carry `@srrstats` tags.
 
-  Two further pkgcheck/goodpractice items need explaining rather than
-  fixing (see the pkgcheck summary below for the full output they come
-  from):
+  Two further pkgcheck/goodpractice items are kept rather than changed:
 
   - Function names duplicated in other packages: `positions()` is also
     exported by `mixvlmc`, `splus2R` and `splusTimeSeries`, and
@@ -309,121 +307,45 @@ does not have yet. It is not requested by the checkboxes above.
 
 ## pkgcheck
 
-`pkgcheck::pkgcheck(".", use_cache = FALSE)` (pkgcheck 0.3.4.5, pkgstats
-0.2.5.4) and `R CMD check --as-cran --no-manual` were run on the
-submission branch, at package version 2.14.1 (the `Version` field in
-the DESCRIPTION pasted above), with R 4.5.3 and a vendored copy of the
-seams-core v2.14.1 engine (`sh tools/vendor.sh`). This cites the
-version rather than a commit, because each review round rewrites this
-submission as a fresh set of commits on top of the last accepted
-round, applied with `git format-patch`/`git am`; a local commit hash
-from the sandbox that produced these checks would not exist in that
-upstream history and so could never be looked up there. Full logs are
-in the handoff bundle (`logs/pkgcheck.log` for both pkgcheck and the
-goodpractice checks it runs, `logs/r-cmd-check-as-cran.log`,
-`logs/testthat.log`, `logs/covr.log`, `logs/pkgdown-build-site.log`).
+Continuous integration is the four workflows in `.github/workflows/`.
+The run history is the Actions page:
+<https://github.com/d-SEAMS/dseams-r/actions>.
 
-What the repository gives pkgcheck:
+- `r-cmd-check.yml` (`name: R-CMD-check`) runs on pushes and pull
+  requests to `main` and `release/**`, and on `workflow_dispatch`. The
+  bundled job copies the engine at the pin in `tools/seams-core.ref`
+  and runs `R CMD check --no-manual --as-cran` on Linux (R release and
+  devel), macOS, and Windows. The linked job builds seams-core at that
+  pin and runs `R CMD check --no-manual` with the package linked
+  against that build. Both jobs set `_R_CHECK_FORCE_SUGGESTS_=true`.
+- `test-coverage.yml` (`name: test-coverage`) runs on the same events.
+  It links the package to a seams-core build at the pin and runs covr
+  on the R code (`.github/coverage.R`). `.covrignore` lists `src` and
+  `.pixi`, so the engine copy and the C and C++ glue under `src/` are
+  outside that figure. The workflow writes the per-file table to the
+  job summary and uploads the coverage object as an artifact. It does
+  not upload the figure to a coverage service.
+- `pkgdown.yml` (`name: pkgdown`) runs on pushes and pull requests to
+  `main`, and on `workflow_dispatch`. It builds the pkgdown site,
+  checks the site and README links, and on a push to `main` publishes
+  the site to GitHub Pages (<https://r.dseams.info/>). A later job
+  checks the links on the published pages.
+- `release.yml` (`name: Release`) runs on a `v*` tag. It checks that
+  the tag names the `Version` field in DESCRIPTION and that
+  `tools/seams-core.ref` pins `d-SEAMS/seams-core` at that tag, runs
+  `R CMD check --as-cran --no-manual`, and publishes the source
+  tarball for `d-SEAMS/dseams-r`.
 
-- CI: `.github/workflows/r-cmd-check.yml` (`name: R-CMD-check`) checks
-  the source package on Linux, macOS and Windows and links a seams-core
-  build at the pin. `.github/workflows/test-coverage.yml`
-  (`name: test-coverage`) runs covr. pkgcheck keeps runs whose name
-  matches `cmd` or `coverage`, so both count once they have run on the
-  default branch. The most recent `main` runs of both (2026-11-19,
-  `d-SEAMS/dseams-r` run IDs 44552815028 and 44552815409) are green.
-- Coverage: covr on the R code is 100 percent (`R/capi.R`,
-  `R/dseams-package.R`, `R/dseams.R`, `R/s3.R`) with the package linked
-  against a seams-core build at the pin (`DSEAMS_ROOT`, `SEAMS_LIBDIR`,
-  `SEAMS_BIN` and `SEAMS_CPP_ORACLE` all set), as the test-coverage
-  workflow runs it; this review re-checked run 44552815409 directly
-  (`gh run view --job=135686626700 --log`), whose own log reads "dseams
-  Coverage: 100.00%". `.covrignore` leaves out `src/`, the engine copy
-  and the C and C++ glue, which seams-core and the oracle test check,
-  and `.pixi/`, the local toolchain. The workflow writes the figure to
-  the job summary; nothing uploads it to a coverage service. A bundled,
-  unlinked run of `covr::package_coverage()` in this review (no
-  `DSEAMS_ROOT`, `SEAMS_LIBDIR` or `SEAMS_CPP_ORACLE`) measured 62.8
-  percent overall, with `R/capi.R` at 19.75 percent: most of that file's
-  coverage comes from `tests/testthat/test-doc-examples.R`'s comparison
-  against `binding_oracle`, which needs the package itself linked
-  against a seams-core build (`SEAMS_LIBDIR`), not only `DSEAMS_ROOT` and
-  `SEAMS_CPP_ORACLE` (see the comment at
-  `tests/testthat/test-doc-examples.R:63-66`: the bundled copy omits the
-  optional CON reader the oracle test's fixtures need). That gap is
-  expected from AGENTS.md's own note that those tests skip without a
-  linked seams-core build, not a regression from the CI figure above.
-- `R CMD check --as-cran --no-manual` of the bundled tarball on R 4.5.3
-  (the version `pixi.toml:10`'s `r-base = ">=4.4,<4.6"` pin installs):
-  **0 errors, 0 warnings, 2 notes** (`New submission`; `unable to verify
-  current time` under "checking for future file timestamps"). The CI job
-  linked above reports a clean `Status: OK` for the same
-  `--as-cran --no-manual` invocation, on R 4.6.2 (its own log says so).
-  This repository's own workflow files set only
-  `_R_CHECK_FORCE_SUGGESTS_` directly (`.github/workflows/r-cmd-check.yml`
-  lines 44 and 94); both notes are instead explained by what the two
-  pinned actions the "bundled" job runs set on its behalf.
+Names shared with other packages stay. `positions()` is the frame
+coordinate matrix and `symmetry()` is the reclassified point-group
+label. `dseams` does not depend on the other packages that export
+those names, and neither name collides inside this package.
 
-  `r-lib/actions/setup-r` (`.github/workflows/r-cmd-check.yml:59`,
-  pinned to commit `f9a764fe`) unconditionally exports
-  `_R_CHECK_SYSTEM_CLOCK_=FALSE` for the rest of the job, and
-  `NOT_CRAN=true` if nothing has already set it
-  (`setREnvironmentVariables()` in its compiled source,
-  `setup-r/src/installer.ts:826-829`, called at line 94 of that same
-  file). `r-lib/actions/check-r-package`
-  (`.github/workflows/r-cmd-check.yml:80`), which runs later in the same
-  job, separately sets `_R_CHECK_CRAN_INCOMING_=false` when that is
-  otherwise unset (`check-r-package/action.yaml:47`).
+`expect_equal()` stays where the comparison carries a tolerance.
+`tests/testthat/test-ice.R` compares a mean Steinhardt q3 to 0.374897
+with `tolerance = 1e-4`. `tests/testthat/test-s3.R` compares two means
+with `tolerance = 0`. `goodpractice` prefers `expect_identical()` for
+exact values; these two are not exact integer comparisons.
 
-  R's own `tools:::check.R` reads `_R_CHECK_CRAN_INCOMING_` to decide
-  whether to run `check_CRAN_incoming()` at all (gated at lines
-  7729-7737 in R 4.5.3, 7958-7966 in R 4.6.2): when it is `false`, the
-  whole "checking CRAN incoming feasibility" step, and with it the
-  `New submission` NOTE, is skipped outright rather than just silenced.
-  That is why CI's log has no such step at all.
-
-  `_R_CHECK_SYSTEM_CLOCK_` governs a separate, nested block inside the
-  future-file-timestamp check. Verified directly against R 4.5.3's
-  `tools:::check.R` (the version `pixi.toml` pins, and this review's
-  local run used): that block spans lines 521-568. When the variable
-  is the default `TRUE` (nothing in `pixi.toml` or this review's local
-  setup changes it), the check queries `worldtimeapi.org` (https, then
-  http) and, failing both, `worldclockapi.com`, and NOTEs "unable to
-  verify current time" only if all three fail; when it is `FALSE`, that
-  whole online-lookup block is skipped, and only a separate, unrelated
-  check of the built tarball's own file modification times runs
-  afterwards. This review repeated R 4.5.3's exact three-endpoint lookup
-  live in its own sandbox and all three fail there, reproducing the
-  NOTE locally. On CI, `setup-r` has already set
-  `_R_CHECK_SYSTEM_CLOCK_=FALSE` by the time `check-r-package` runs
-  `R CMD check`, so the online lookup never runs on CI at all;
-  `checking for future file timestamps ... OK` in that job's log is the
-  separate, unrelated file-timestamp check passing (nothing in the
-  tarball has a future modification time), not a successful time query.
-  `NOT_CRAN=true` plays no part in either NOTE: the string `NOT_CRAN`
-  does not appear anywhere in `tools:::check.R`, and `dseams`'s own
-  tests do not call `skip_on_cran()` or otherwise read that variable.
-  `.github/workflows/release.yml` repeats `--as-cran --no-manual` on a
-  `v*` tag and publishes the source tarball only for d-SEAMS/dseams-r.
-
-Expected notes, not checklist failures:
-
-- `positions()` is also exported by `mixvlmc`, `splus2R` and
-  `splusTimeSeries`; `symmetry()` by `DecomposeR` and `xnet`. Both stay:
-  they are the plain names for the frame coordinate matrix and the
-  reclassified point-group label, `dseams` does not depend on those
-  packages, and the names are unambiguous inside this package.
-- `expect_equal()` stays in the ice tests where the comparison is a count
-  or a mean. `goodpractice` prefers `expect_identical()` for exact
-  values.
-- The goodpractice run also reports one `R CMD check` WARNING ("LaTeX
-  errors when creating PDF version") and the ERROR behind it (`pdflatex
-  is not available`). That comes from `pkgcheck`'s own internal
-  `rcmdcheck()` call, which does not pass `--no-manual` and so tries to
-  typeset the PDF manual; it is an artifact of a review sandbox without a
-  LaTeX toolchain, not of the package, and does not appear in the
-  `--no-manual` result above or in CI (which installs no LaTeX either,
-  and also does not build the manual).
-
-`srr-standards.md` is the srr assessment. The package
-is not statistical software, so it does not carry `@srrstats` tags.
+`srr-standards.md` is the srr assessment. The package is not
+statistical software, so it does not carry `@srrstats` tags.
