@@ -71,6 +71,8 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
+Copyright: See file inst/AUTHORS for the bundled readcon-core, Rust
+    crates, and chemfiles; LICENSE.note gives their licences.
 URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core
@@ -87,7 +89,8 @@ LinkingTo:
     cpp11 (>= 0.4.0),
     RcppEigen (>= 0.3.4.0.0)
 VignetteBuilder: knitr
-SystemRequirements: C++20
+SystemRequirements: C++20, GNU make, Cargo (Rust's package manager),
+    rustc (>= 1.88), cmake (>= 3.15), objcopy (GNU binutils or LLVM)
 NeedsCompilation: yes
 Config/testthat/edition: 3
 X-schema.org-keywords: molecular-dynamics, trajectory-analysis, ice,
