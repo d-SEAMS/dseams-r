@@ -81,6 +81,11 @@ jobs:
             echo "objcopy is not on PATH; the reader symbol tests would skip" >&2
             exit 1
           fi
+      - name: Submission notes are ASCII
+        shell: bash
+        working-directory: dseams
+        run: |
+          Rscript -e 'files <- c("cran-comments.md", "docs/ropensci-submission.md"); bad <- files[!vapply(files, function(f) { b <- readBin(f, "raw", file.info(f)[["size"]]); !any(b > as.raw(127)) }, logical(1))]; if (length(bad)) { message(paste(bad, collapse = "\n")); quit(status = 1) }'
       - name: Copy the engine into the package
         shell: bash
         working-directory: dseams
@@ -148,6 +153,10 @@ jobs:
           cache-key: pixi-dseams-
       - name: Install checkbashisms
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts
+      - name: Submission notes are ASCII
+        working-directory: dseams
+        run: |
+          pixi run Rscript -e 'files <- c("cran-comments.md", "docs/ropensci-submission.md"); bad <- files[!vapply(files, function(f) { b <- readBin(f, "raw", file.info(f)[["size"]]); !any(b > as.raw(127)) }, logical(1))]; if (length(bad)) { message(paste(bad, collapse = "\n")); quit(status = 1) }'
       - name: R CMD check
         working-directory: dseams
         run: |

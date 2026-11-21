@@ -83,6 +83,17 @@ ruhila_codemeta <- paste0(
 ruhila_readme <- "Ruhila Goswami (`ctb`), ORCID 0000-0002-5443-9356"
 ruhila_draft <- "Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION."
 
+# cran-comments.md and the rOpenSci draft are plain ASCII. A Unicode
+# quotation mark copied out of a check log fails this.
+ascii_text <- function(path) {
+  size <- file.info(path)$size
+  if (is.na(size)) {
+    return(FALSE)
+  }
+  raw <- if (size == 0L) raw(0L) else readBin(path, "raw", n = size)
+  !any(as.integer(raw) > 127L)
+}
+
 check_submission <- function(root) {
   root <- normalizePath(root, mustWork = TRUE)
   problems <- character()
@@ -90,6 +101,7 @@ check_submission <- function(root) {
     "DESCRIPTION",
     "codemeta.json",
     "README.md",
+    "cran-comments.md",
     file.path("docs", "ropensci-submission.md")
   )
   missing <- need[!file.exists(file.path(root, need))]
@@ -104,7 +116,14 @@ check_submission <- function(root) {
   meta <- read_text(file.path(root, "codemeta.json"))
   readme <- read_text(file.path(root, "README.md"))
   draft_path <- file.path(root, "docs", "ropensci-submission.md")
+  comments_path <- file.path(root, "cran-comments.md")
   draft <- read_text(draft_path)
+  if (!ascii_text(draft_path)) {
+    problems <- c(problems, "docs/ropensci-submission.md is not ASCII")
+  }
+  if (!ascii_text(comments_path)) {
+    problems <- c(problems, "cran-comments.md is not ASCII")
+  }
   block <- extract_description_block(draft)
   if (!identical(block, desc)) {
     problems <- c(problems, "fenced DESCRIPTION does not match DESCRIPTION")

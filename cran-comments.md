@@ -37,7 +37,7 @@ installed-package run both used the bundled engine.
 0 errors | 0 warnings | 2 notes
 
 * checking CRAN incoming feasibility ... NOTE
-  Maintainer: ‘Rohit Goswami <rgoswami@ieee.org>’
+  Maintainer: 'Rohit Goswami <rgoswami@ieee.org>'
 
   New submission
 
