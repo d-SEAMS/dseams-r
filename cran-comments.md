@@ -54,12 +54,12 @@ Status: 1 NOTE
 The note is:
 
 ```
-* checking CRAN incoming feasibility ... [3s/16s] NOTE
+* checking CRAN incoming feasibility ... [3s/12s] NOTE
 Maintainer: 'Rohit Goswami <rgoswami@ieee.org>'
 
 New submission
 
-Size of tarball: 7950141 bytes
+Size of tarball: 7951863 bytes
 ```
 
 Installed package size is reported as INFO, not as a note:
@@ -89,12 +89,16 @@ The install prints `rustc 1.100.0 (0ef1bc386 2026-11-09)`,
 testthat run inside that check prints:
 
 ```
-[ FAIL 0 | WARN 0 | SKIP 8 | PASS 215 ]
+[ FAIL 0 | WARN 0 | SKIP 8 | PASS 205 ]
 ```
 
-Seven skips are `DSEAMS_ROOT is not set` (`test-doc-examples.R` lines
-21, 27, 32, 37, 54, and 73, and `test-ice.R` line 89). One skip is
-`SEAMS_BIN is not set` (`test-ice.R` line 73).
+Six skips are `DSEAMS_ROOT is not set` (`test-doc-examples.R` lines
+21, 27, 32, 37, and 54, and `test-ice.R` line 96). One skip is
+`DSEAMS_ROOT is not set; SEAMS_CPP_ORACLE is not set`
+(`test-doc-examples.R` line 99). One skip is `SEAMS_BIN is not set`
+(`test-ice.R` line 77). The archive rewrite is not one of these
+tests. `tools/check-reader-symbols.sh` runs it and exits if objcopy,
+nm, ar, or the C compiler is missing.
 
 The examples print `nframes()` of `tiny_multi_cuh2.con` as 2 and
 `read_frame()` as `dseams frame 1 atoms 4`.
@@ -104,8 +108,11 @@ were not run.
 
 The R-CMD-check workflow runs on pushes and pull requests to `main`,
 `develop`, and `release/**`, on Ubuntu (R release and devel), macOS,
-and Windows, with `--no-manual` and `--as-cran`. The macOS job installs
-Homebrew llvm and puts `llvm-objcopy` on `PATH`. A `v*` tag on
+and Windows, with `--no-manual` and `--as-cran`. The Linux jobs
+install binutils. The macOS job installs Homebrew llvm and puts
+`llvm-objcopy` on `PATH`. Those jobs then run
+`tools/check-reader-symbols.sh`, which fails if objcopy, nm, ar, or
+the C compiler is missing. A `v*` tag on
 d-SEAMS/dseams-r runs `.github/workflows/release.yml`, which runs
 `R CMD check --as-cran --no-manual` and exits if the `Status:` line
 contains `ERROR` or `WARNING`. Those workflow runs are not results

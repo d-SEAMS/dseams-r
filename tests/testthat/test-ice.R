@@ -67,10 +67,17 @@ test_that("seeded cages under SEAMS_OFFLOAD match the host", {
     attr(host, "n_water")
   expect_identical(n, nrow(host))
   expect_gt(attr(host, "n_both"), 0L)
+})
 
-  # SEAMS_BIN is a seams CLI from the same engine version.
+test_that("seeded cages match the seams CLI", {
+  # SEAMS_BIN is a seams CLI from the same engine version. The bundled
+  # R CMD check does not build that binary; the linked job does.
   bin <- Sys.getenv("SEAMS_BIN", unset = "")
-  skip_if(bin == "" || !file.exists(bin), "SEAMS_BIN is not set")
+  if (bin == "" || !file.exists(bin)) {
+    skip("SEAMS_BIN is not set")
+  }
+  frame <- read_frame(nuc, type = 1L)
+  host <- cages(frame, graph = "seeded")
   line <- system2(bin, c("cages", nuc, "--graph", "seeded", "--cutoff", "3.5"),
                   stdout = TRUE)
   parts <- strsplit(line[[length(line)]], " +")[[1]]

@@ -62,7 +62,10 @@ jobs:
       # R CMD check --as-cran runs checkbashisms on configure and cleanup,
       # and qpdf on the built vignette PDFs.
       - name: Install checkbashisms and qpdf
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends devscripts qpdf
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts qpdf
+      - name: Rewrite a reader archive with objcopy
+        working-directory: dseams
+        run: sh tools/check-reader-symbols.sh
       - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           working-directory: dseams

@@ -73,12 +73,20 @@ jobs:
       - name: Install the Rust target for Rtools
         if: runner.os == 'Windows'
         run: rustup target add x86_64-pc-windows-gnu
-      - name: Require objcopy for the reader symbol tests
+      # The archive rewrite is not a testthat test and does not skip.
+      # Linux has binutils from the step above. macOS has Homebrew llvm
+      # on PATH. A missing objcopy, nm, ar, or compiler fails this step.
+      - name: Rewrite a reader archive with objcopy
+        if: runner.os != 'Windows'
+        shell: bash
+        working-directory: dseams
+        run: sh tools/check-reader-symbols.sh
+      - name: Require objcopy for the reader symbol rewrite
         if: runner.os == 'Windows'
         shell: bash
         run: |
           if ! command -v objcopy >/dev/null 2>&1 && ! command -v llvm-objcopy >/dev/null 2>&1; then
-            echo "objcopy is not on PATH; the reader symbol tests would skip" >&2
+            echo "objcopy is not on PATH" >&2
             exit 1
           fi
       - name: Submission notes are ASCII
@@ -153,6 +161,9 @@ jobs:
           cache-key: pixi-dseams-
       - name: Install checkbashisms
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts
+      - name: Rewrite a reader archive with objcopy
+        working-directory: dseams
+        run: pixi run sh tools/check-reader-symbols.sh
       - name: Submission notes are ASCII
         working-directory: dseams
         run: |

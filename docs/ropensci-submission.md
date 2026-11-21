@@ -319,13 +319,16 @@ The run history is the Actions page:
   requests to `main`, `develop`, and `release/**`, and on
   `workflow_dispatch`. The bundled job copies the engine at the pin in
   `tools/seams-core.ref` and runs `R CMD check --no-manual --as-cran`
-  on Linux (R release and devel), macOS, and Windows. The macOS job
-  installs Homebrew llvm and puts its `bin` directory on `PATH`,
-  because rewriting the bundled readers needs llvm-objcopy. On the
+  on Linux (R release and devel), macOS, and Windows. Linux installs
+  binutils. The macOS job installs Homebrew llvm and puts its `bin`
+  directory on `PATH`, because rewriting the bundled readers needs
+  llvm-objcopy. Linux and macOS then run `tools/check-reader-symbols.sh`
+  and fail if objcopy, nm, ar, or the C compiler is missing. On the
   Linux release cell that job also checks that `cpp11::cpp_register()`
   leaves `R/cpp11.R` and `src/cpp11.cpp` unchanged. The linked job
-  builds seams-core at that pin and runs `R CMD check --no-manual` with
-  the package linked against that build. Both jobs set
+  builds seams-core at that pin, runs `tools/check-reader-symbols.sh`,
+  and runs `R CMD check --no-manual` with the package linked against
+  that build. Both jobs set
   `_R_CHECK_FORCE_SUGGESTS_=true`.
 - `test-coverage.yml` (`name: test-coverage`) runs on pushes and pull
   requests to `main` and `release/**`, and on `workflow_dispatch`.
@@ -373,12 +376,12 @@ Status: 1 NOTE
 The note is:
 
 ```
-* checking CRAN incoming feasibility ... [3s/16s] NOTE
+* checking CRAN incoming feasibility ... [3s/12s] NOTE
 Maintainer: 'Rohit Goswami <rgoswami@ieee.org>'
 
 New submission
 
-Size of tarball: 7950141 bytes
+Size of tarball: 7951863 bytes
 ```
 
 Installed package size is reported as INFO, not as a note:
@@ -399,12 +402,16 @@ Installed package size is reported as INFO, not as a note:
 The testthat run inside that check prints:
 
 ```
-[ FAIL 0 | WARN 0 | SKIP 8 | PASS 215 ]
+[ FAIL 0 | WARN 0 | SKIP 8 | PASS 205 ]
 ```
 
-Seven skips are `DSEAMS_ROOT is not set` (`test-doc-examples.R` lines
-21, 27, 32, 37, 54, and 73, and `test-ice.R` line 89). One skip is
-`SEAMS_BIN is not set` (`test-ice.R` line 73).
+Six skips are `DSEAMS_ROOT is not set` (`test-doc-examples.R` lines
+21, 27, 32, 37, and 54, and `test-ice.R` line 96). One skip is
+`DSEAMS_ROOT is not set; SEAMS_CPP_ORACLE is not set`
+(`test-doc-examples.R` line 99). One skip is `SEAMS_BIN is not set`
+(`test-ice.R` line 77). The archive rewrite is not one of these
+tests. `tools/check-reader-symbols.sh` runs it and exits if objcopy,
+nm, ar, or the C compiler is missing.
 
 The examples print `nframes()` of `tiny_multi_cuh2.con` as 2 and
 `read_frame()` as `dseams frame 1 atoms 4`. `con` there is

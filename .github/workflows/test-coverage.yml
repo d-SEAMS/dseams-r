@@ -60,6 +60,9 @@ jobs:
           cache-key: pixi-dseams-
       - name: Install objcopy
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils
+      - name: Rewrite a reader archive with objcopy
+        working-directory: dseams
+        run: pixi run sh tools/check-reader-symbols.sh
       - name: Coverage
         working-directory: dseams
         env:
