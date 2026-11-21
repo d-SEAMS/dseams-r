@@ -4,6 +4,13 @@
   objcopy does not rewrite Mach-O archives, and configure rejects it
   there. A Homebrew llvm install is used when its `llvm-objcopy` is
   not on `PATH`.
+* Rewrite the bundled readers' console symbols under the names each
+  object format uses. On macOS the names carry the Mach-O underscore,
+  and `stdout` and `stderr` are the `FILE` objects `___stdoutp` and
+  `___stderrp`. `printf`, `vprintf`, and the checked printf wrappers
+  write to the R console and return 0. On Windows the UCRT
+  `__acrt_iob_func` and its dllimport slot are rewritten too; stdin
+  still comes from the C runtime.
 * Register the C `.Call()` entry points under their `seams_r_*` symbol
   names so `cpp11::cpp_register()`, `pkgload::load_all()`, and
   `testthat::test_local()` regenerate `src/cpp11.cpp` without symbol

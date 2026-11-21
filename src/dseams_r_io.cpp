@@ -5,6 +5,7 @@
 #include "dseams_r_io.h"
 
 #include <cstdarg>
+#include <climits>
 #include <cstdio>
 #include <stdexcept>
 #include <streambuf>
@@ -65,14 +66,22 @@ ConsoleBuf reader_cerr_buf(true);
 
 } // namespace
 
+// On Mach-O the asm string is the linker symbol, including the leading
+// underscore. reader-symbols.sh targets that string.
+#if defined(__APPLE__)
+#define DSEAMS_R_ASM_NAME(name) "_" name
+#else
+#define DSEAMS_R_ASM_NAME(name) name
+#endif
+
 // The bundled chemfiles archive refers to std::cout and std::cerr.
 // tools/reader-symbols.sh renames those symbols onto these objects, which
 // write to the R console. They are real iostreams, so the call sites keep
 // the libstdc++ layout they were compiled against.
-std::ostream dseams_r_cout_obj __asm__("dseams_r_cout")(&reader_cout_buf);
-std::ostream dseams_r_cerr_obj __asm__("dseams_r_cerr")(&reader_cerr_buf);
-std::ostream dseams_r_cout_libcxx __asm__("dseams_r_cout_libcxx")(&reader_cout_buf);
-std::ostream dseams_r_cerr_libcxx __asm__("dseams_r_cerr_libcxx")(&reader_cerr_buf);
+std::ostream dseams_r_cout_obj __asm__(DSEAMS_R_ASM_NAME("dseams_r_cout"))(&reader_cout_buf);
+std::ostream dseams_r_cerr_obj __asm__(DSEAMS_R_ASM_NAME("dseams_r_cerr"))(&reader_cerr_buf);
+std::ostream dseams_r_cout_libcxx __asm__(DSEAMS_R_ASM_NAME("dseams_r_cout_libcxx"))(&reader_cout_buf);
+std::ostream dseams_r_cerr_libcxx __asm__(DSEAMS_R_ASM_NAME("dseams_r_cerr_libcxx"))(&reader_cerr_buf);
 
 std::ostream &out() {
   thread_local ConsoleBuf buf(false);
@@ -189,12 +198,31 @@ __attribute__((noreturn)) void dseams_r__Exit(int status) {
   Rf_error("bundled reader exited with status %d", status);
 }
 
+// The printf-family wrappers below return 0. They report that the text
+// was handed to R, not how many characters R printed.
 int dseams_r_printf(const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
   Rvprintf(fmt, args);
   va_end(args);
   return 0;
+}
+
+int dseams_r_vprintf(const char *fmt, va_list args) {
+  Rvprintf(fmt, args);
+  return 0;
+}
+
+int dseams_r___printf_chk(int, const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  Rvprintf(fmt, args);
+  va_end(args);
+  return 0;
+}
+
+int dseams_r___vprintf_chk(int, const char *fmt, va_list args) {
+  return dseams_r_vprintf(fmt, args);
 }
 
 int dseams_r_puts(const char *text) {
@@ -222,5 +250,46 @@ int dseams_r_vsprintf(char *buf, const char *fmt, va_list args) {
   // caller-sized buffer. Cap the write; vsnprintf is not a checked symbol.
   return std::vsnprintf(buf, 4096, fmt, args);
 }
+
+// Darwin's __sprintf_chk passes (size_t)-1 when the object size is
+// unknown. vsnprintf fails with EOVERFLOW and writes nothing for a size
+// above INT_MAX, so clamp before the call.
+static size_t sprintf_object_size(size_t n) {
+  if (n > static_cast<size_t>(INT_MAX)) {
+    return static_cast<size_t>(INT_MAX);
+  }
+  return n;
+}
+
+int dseams_r___sprintf_chk(char *buf, int, size_t n, const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  const int out = std::vsnprintf(buf, sprintf_object_size(n), fmt, args);
+  va_end(args);
+  return out;
+}
+
+int dseams_r___vsprintf_chk(char *buf, int, size_t n, const char *fmt, va_list args) {
+  return std::vsnprintf(buf, sprintf_object_size(n), fmt, args);
+}
+
+#if defined(_WIN32)
+// idx 1 and 2 are the UCRT stdout and stderr. idx 0 is stdin, and any
+// other index is another CRT stream. Those go to the real
+// __acrt_iob_func. This call sits in an object reader-symbols.sh does
+// not rewrite, so it still resolves to the CRT import.
+FILE *dseams_r___acrt_iob_func(unsigned idx) {
+  if (idx == 1U) {
+    return dseams_r_stdout;
+  }
+  if (idx == 2U) {
+    return dseams_r_stderr;
+  }
+  return __acrt_iob_func(idx);
+}
+
+// mingw-w64 dllimport references the import slot, not the function.
+FILE *(*dseams_r___imp___acrt_iob_func)(unsigned) = dseams_r___acrt_iob_func;
+#endif
 
 } // extern "C"
