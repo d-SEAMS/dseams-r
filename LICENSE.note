@@ -27,6 +27,15 @@ redistributed alongside MIT code, on these conditions:
 - molfiles/src/ply.c and molfiles/src/ply.h: permission is given on
   condition "that you do not sell the software". They ship in the
   archive but are not compiled.
+- molfiles/src/hoomdplugin.c and molfiles/src/plyplugin.cxx carry a
+  copyright header but no licence statement: hoomdplugin.c Copyright
+  2009 Axel Kohlmeyer; plyplugin.cxx Copyright 1995-2016 The Board of
+  Trustees of the University of Illinois. Both come from the VMD
+  molfile plugins as vendored by chemfiles
+  (https://github.com/chemfiles/molfiles) and are distributed under
+  molfiles/LICENSE (UIUC Open Source License). plyplugin.cxx includes
+  ply.c, so the ply.c "not sold" condition applies if plyplugin is
+  ever compiled. It is not in the compiled list today.
 - molfiles/src/ReadPARM.h and molfiles/src/ReadPARM7.h: their notice is
   kept unmodified and any change to the rest of the file is noted in
   comments. The bundled build compiles them (parm and parm7 plugins).
@@ -309,9 +318,15 @@ molfiles.tar.gz
       Regents of the University of California (Bill Ross, UCSF). They
       may be distributed if the notice is kept unmodified and changes
       to the rest of the file are noted in comments.
-    molfiles/src/hoomdplugin.c: Copyright 2009 Axel Kohlmeyer, with no
-      licence statement of its own; it is distributed as part of the
-      plugins under molfiles/LICENSE.
+    molfiles/src/hoomdplugin.c, molfiles/src/plyplugin.cxx: carry a
+      copyright header but no licence statement. hoomdplugin.c is
+      Copyright 2009 Axel Kohlmeyer. plyplugin.cxx is Copyright
+      1995-2016 The Board of Trustees of the University of Illinois.
+      Both come from the VMD molfile plugins as vendored by chemfiles
+      (https://github.com/chemfiles/molfiles) and are distributed under
+      molfiles/LICENSE (UIUC Open Source License). plyplugin.cxx
+      includes ply.c, so the ply.c "not sold" condition applies if
+      plyplugin is ever compiled. It is not in the compiled list today.
   Compiled by the bundled build (src/chemfiles/external/CMakeLists.txt,
   set by tools/chemfiles-molfiles.py): abinitplugin, bgfplugin,
   binposplugin, carplugin, corplugin, cpmdplugin, cubeplugin,

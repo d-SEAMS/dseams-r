@@ -1,5 +1,11 @@
 # dseams (development version)
 
+* `LICENSE.note` and `inst/AUTHORS` record the copyright headers on
+  `hoomdplugin.c` (Axel Kohlmeyer, 2009) and `plyplugin.cxx` (the
+  University of Illinois, 1995-2016). Both are distributed under the
+  UIUC licence that chemfiles vendors with the VMD molfile plugins.
+  `plyplugin.cxx` includes `ply.c` and is not compiled; the "not sold"
+  condition on `ply.c` would apply if it were.
 * The bundled readers' symbol rewrite also covers `vprintf` and
   `__vprintf_chk`, which write to the R console and return 0. On
   Windows the UCRT `__acrt_iob_func` and its dllimport slot are
