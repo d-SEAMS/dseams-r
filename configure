@@ -81,7 +81,10 @@ find_tool() {
 CARGO=$(find_tool cargo)
 CMAKE=$(find_tool cmake)
 case "$(uname -s)" in
-  Darwin) OBJCOPY=$(find_tool llvm-objcopy objcopy) ;;
+  Darwin)
+    # GNU objcopy cannot rewrite Mach-O. Homebrew's llvm keg is not on PATH.
+    OBJCOPY=$(PATH="${PATH}:/opt/homebrew/opt/llvm/bin:/usr/local/opt/llvm/bin"; find_tool llvm-objcopy objcopy)
+    ;;
   *) OBJCOPY=$(find_tool objcopy llvm-objcopy) ;;
 esac
 CHEMFILES_BUILD=""
