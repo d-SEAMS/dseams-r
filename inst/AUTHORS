@@ -324,7 +324,16 @@ molfiles.tar.gz (VMD molfile plugins)
     ReadPARM.h, ReadPARM7.h: Regents of the University of California,
       code by Bill Ross (UCSF); distributable with the notice kept
       unmodified and changes noted
-    hoomdplugin.c: Axel Kohlmeyer; no licence statement of its own
+    hoomdplugin.c, plyplugin.cxx: carry a copyright header but no
+      licence statement. hoomdplugin.c is Copyright 2009 Axel
+      Kohlmeyer. plyplugin.cxx is Copyright 1995-2016 The Board of
+      Trustees of the University of Illinois. Both come from the VMD
+      molfile plugins as vendored by chemfiles
+      (https://github.com/chemfiles/molfiles) and are distributed
+      under molfiles/LICENSE (UIUC Open Source License). plyplugin.cxx
+      includes ply.c, so the ply.c "not sold" condition applies if
+      plyplugin is ever compiled. It is not in the compiled list
+      today.
 pugixml.tar.gz (pugixml)
   Authors: Arseny Kapoulkine
   License: MIT

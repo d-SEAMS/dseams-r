@@ -4,6 +4,12 @@
   objcopy does not rewrite Mach-O archives, and configure rejects it
   there. A Homebrew llvm install is used when its `llvm-objcopy` is
   not on `PATH`.
+* `LICENSE.note` and `inst/AUTHORS` record the copyright headers on
+  `hoomdplugin.c` (Axel Kohlmeyer, 2009) and `plyplugin.cxx` (the
+  University of Illinois, 1995-2016). Both are distributed under the
+  UIUC licence that chemfiles vendors with the VMD molfile plugins.
+  `plyplugin.cxx` includes `ply.c` and is not compiled; the "not sold"
+  condition on `ply.c` would apply if it were.
 * Rewrite the bundled readers' console symbols under the names each
   object format uses. On macOS the names carry the Mach-O underscore,
   and `stdout` and `stderr` are the `FILE` objects `___stdoutp` and
