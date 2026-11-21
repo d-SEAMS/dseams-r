@@ -1,5 +1,16 @@
 # dseams (development version)
 
+* Rewrite the symbols of the bundled readers according to the object format
+  of each archive: ELF and COFF names as written, Mach-O names with their
+  leading underscore, and the Windows UCRT `__acrt_iob_func`, with matching
+  console shims in `src/dseams_r_io.cpp`. On macOS `configure` prefers
+  `llvm-objcopy`, also from Homebrew's llvm prefix, over GNU `objcopy`.
+  The check workflow also runs for pull requests to `develop`.
+* `LICENSE.note` quotes the terms of `abinitplugin.c` (Rob Lahaye) and of
+  `ply.c` and `ply.h` (Greg Turk, Georgia Institute of Technology) as their
+  headers give them, `inst/AUTHORS` names their authors, and DESCRIPTION
+  lists the holders of the molfile files that carry their own terms in
+  `Authors@R` and `Copyright`.
 * Register the C `.Call()` entry points under their `seams_r_*` symbol
   names so `cpp11::cpp_register()`, `pkgload::load_all()`, and
   `testthat::test_local()` regenerate `src/cpp11.cpp` without symbol
