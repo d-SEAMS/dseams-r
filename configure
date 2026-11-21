@@ -80,7 +80,10 @@ find_tool() {
 }
 CARGO=$(find_tool cargo)
 CMAKE=$(find_tool cmake)
-OBJCOPY=$(find_tool objcopy llvm-objcopy)
+case "$(uname -s)" in
+  Darwin) OBJCOPY=$(find_tool llvm-objcopy objcopy) ;;
+  *) OBJCOPY=$(find_tool objcopy llvm-objcopy) ;;
+esac
 CHEMFILES_BUILD=""
 READER_DEPS=""
 
