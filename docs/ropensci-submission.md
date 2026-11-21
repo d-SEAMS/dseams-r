@@ -362,7 +362,7 @@ The two notes in that log are:
 
 ```
 * checking CRAN incoming feasibility ... [2s/13s] NOTE
-Maintainer: ‘Rohit Goswami <rgoswami@ieee.org>’
+Maintainer: 'Rohit Goswami <rgoswami@ieee.org>'
 
 New submission
 
