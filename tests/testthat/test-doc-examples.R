@@ -61,10 +61,14 @@ test_that("science_tutorials.R reproduces the tutorial counts", {
   ) %in% out))
 })
 
+test_that("readers.R reads the shipped CON, PDB, GRO, and XYZ files", {
+  expect_identical(run_example("readers.R"), "r readers ok")
+})
+
 # binding_oracle reports what the seams-core build it belongs to computes,
 # so SEAMS_CPP_ORACLE is set only when the package links that build
-# (SEAMS_LIBDIR or DSEAMS_SYSTEM_ENGINE). The bundled copy is compiled
-# without the optional readers, CON among them.
+# (SEAMS_LIBDIR or DSEAMS_SYSTEM_ENGINE). The bundled copy includes
+# readcon-core and chemfiles, so this comparison covers CON as well.
 test_that("r_capi.R matches the C++ oracle", {
   seams_root()
   oracle <- Sys.getenv("SEAMS_CPP_ORACLE", unset = "")

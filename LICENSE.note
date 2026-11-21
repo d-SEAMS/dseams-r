@@ -1,0 +1,348 @@
+Licences of the code in the dseams source package
+
+dseams itself, meaning the R code, the C and C++ glue in src/*.c and
+src/*.cpp, configure, cleanup and tools/, is under the MIT licence; see
+LICENSE. The d-SEAMS engine copied into src/seams is also MIT, by the
+d-SEAMS core team.
+
+The source package also carries readcon-core, the Rust crates it builds
+with, and chemfiles with the libraries chemfiles bundles. Each keeps its
+own licence, listed below with the path of its licence text inside the
+source package. Where a part offers a choice ("A OR B"), dseams
+redistributes it under either. inst/AUTHORS names the authors of each
+part.
+
+Every licence here allows the source package to be copied and
+redistributed alongside MIT code, on these conditions:
+
+- All parts: keep the copyright notices and licence texts. The BSD,
+  NCSA and similar licences also forbid using a holder's name to
+  endorse a derived product.
+- gemmi (MPL-2.0): its files stay under MPL-2.0, and whoever ships
+  them, also inside a binary, makes their source available under
+  MPL-2.0.
+- molfiles/src/abinitplugin.c: its author allows the code "for as long
+  as it is part of an open source project" and does "not allow" it "to
+  be part of any closed source project". The bundled build compiles it.
+- molfiles/src/ply.c and molfiles/src/ply.h: permission is given on
+  condition "that you do not sell the software". They ship in the
+  archive but are not compiled.
+- molfiles/src/ReadPARM.h and molfiles/src/ReadPARM7.h: their notice is
+  kept unmodified and any change to the rest of the file is noted in
+  comments. The bundled build compiles them (parm and parm7 plugins).
+
+dseams is open source (MIT) and is not sold, which meets the ABINIT and
+Georgia Tech conditions. They bind anyone who redistributes dseams too:
+the source package, and any build of it that contains the ABINIT
+plugin, may not become part of closed-source software, and the source
+package, which contains ply.c, may not be sold.
+
+
+readcon-core 0.16.2 (src/readcon-core)
+  License: MIT
+  Text: src/readcon-core/LICENSE
+
+
+Rust crates in src/readcon-core/vendor (paths relative to
+src/readcon-core), pinned by tools/readcon-Cargo.lock:
+
+adler2 2.0.1
+  License: 0BSD OR MIT OR Apache-2.0
+  Text:
+    vendor/adler2/LICENSE-0BSD
+    vendor/adler2/LICENSE-APACHE
+    vendor/adler2/LICENSE-MIT
+
+autocfg 1.5.1
+  License: Apache-2.0 OR MIT
+  Text: vendor/autocfg/LICENSE-APACHE, vendor/autocfg/LICENSE-MIT
+
+cfg-if 1.0.5
+  License: MIT OR Apache-2.0
+  Text: vendor/cfg-if/LICENSE-APACHE, vendor/cfg-if/LICENSE-MIT
+
+crc32fast 1.5.5
+  License: MIT OR Apache-2.0
+  Text: vendor/crc32fast/LICENSE-APACHE, vendor/crc32fast/LICENSE-MIT
+
+crunchy 0.2.4
+  License: MIT
+  Text: vendor/crunchy/LICENSE
+
+dlpk 0.1.5
+  License: MIT OR Apache-2.0
+  Text: vendor/dlpk/LICENSE-APACHE, vendor/dlpk/LICENSE-MIT
+
+fast-float2 0.2.4
+  License: MIT OR Apache-2.0
+  Text: vendor/fast-float2/LICENSE-APACHE, vendor/fast-float2/LICENSE-MIT
+
+flate2 1.1.11
+  License: MIT OR Apache-2.0
+  Text: vendor/flate2/LICENSE-APACHE, vendor/flate2/LICENSE-MIT
+
+half 2.4.1
+  License: MIT OR Apache-2.0
+  Text: vendor/half/LICENSES/Apache-2.0.txt, vendor/half/LICENSES/MIT.txt
+
+half 1.8.3
+  License: MIT OR Apache-2.0
+  Text:
+    vendor/half-1.8.3/LICENSES/Apache-2.0.txt
+    vendor/half-1.8.3/LICENSES/MIT.txt
+
+itoa 1.0.19
+  License: MIT OR Apache-2.0
+  Text: vendor/itoa/LICENSE-APACHE, vendor/itoa/LICENSE-MIT
+
+libc 0.2.191
+  License: MIT OR Apache-2.0
+  Text: vendor/libc/LICENSE-APACHE, vendor/libc/LICENSE-MIT
+
+matrixmultiply 0.3.11
+  License: MIT OR Apache-2.0
+  Text: vendor/matrixmultiply/LICENSE-APACHE, vendor/matrixmultiply/LICENSE-MIT
+
+memchr 2.8.3
+  License: Unlicense OR MIT
+  Text:
+    vendor/memchr/COPYING
+    vendor/memchr/LICENSE-MIT
+    vendor/memchr/UNLICENSE
+
+memmap2 0.9.12
+  License: MIT OR Apache-2.0
+  Text: vendor/memmap2/LICENSE-APACHE, vendor/memmap2/LICENSE-MIT
+
+miniz_oxide 0.9.1
+  License: MIT OR Zlib OR Apache-2.0
+  Text:
+    vendor/miniz_oxide/LICENSE
+    vendor/miniz_oxide/LICENSE-APACHE.md
+    vendor/miniz_oxide/LICENSE-MIT.md
+    vendor/miniz_oxide/LICENSE-ZLIB.md
+
+ndarray 0.17.2
+  License: MIT OR Apache-2.0
+  Text: vendor/ndarray/LICENSE-APACHE, vendor/ndarray/LICENSE-MIT
+  vendor/ndarray/src/doc/ndarray_for_numpy_users/rk_step.rs quotes
+    SciPy code under SciPy's BSD-3-Clause licence, text in the file
+
+num-complex 0.4.6
+  License: MIT OR Apache-2.0
+  Text: vendor/num-complex/LICENSE-APACHE, vendor/num-complex/LICENSE-MIT
+
+num-integer 0.1.47
+  License: MIT OR Apache-2.0
+  Text: vendor/num-integer/LICENSE-APACHE, vendor/num-integer/LICENSE-MIT
+
+num-traits 0.2.19
+  License: MIT OR Apache-2.0
+  Text: vendor/num-traits/LICENSE-APACHE, vendor/num-traits/LICENSE-MIT
+
+portable-atomic 1.15.0
+  License: Apache-2.0 OR MIT
+  Text:
+    vendor/portable-atomic/LICENSE-APACHE
+    vendor/portable-atomic/LICENSE-MIT
+
+portable-atomic-util 0.2.8
+  License: Apache-2.0 OR MIT
+  Text:
+    vendor/portable-atomic-util/LICENSE-APACHE
+    vendor/portable-atomic-util/LICENSE-MIT
+
+proc-macro2 1.0.107
+  License: MIT OR Apache-2.0
+  Text: vendor/proc-macro2/LICENSE-APACHE, vendor/proc-macro2/LICENSE-MIT
+
+quote 1.0.47
+  License: MIT OR Apache-2.0
+  Text: vendor/quote/LICENSE-APACHE, vendor/quote/LICENSE-MIT
+
+rawpointer 0.2.1
+  License: MIT OR Apache-2.0
+  Text: vendor/rawpointer/LICENSE-APACHE, vendor/rawpointer/LICENSE-MIT
+
+rustc-hash 2.1.3
+  License: Apache-2.0 OR MIT
+  Text: vendor/rustc-hash/LICENSE-APACHE, vendor/rustc-hash/LICENSE-MIT
+
+serde 1.0.229
+  License: MIT OR Apache-2.0
+  Text: vendor/serde/LICENSE-APACHE, vendor/serde/LICENSE-MIT
+
+serde_core 1.0.229
+  License: MIT OR Apache-2.0
+  Text: vendor/serde_core/LICENSE-APACHE, vendor/serde_core/LICENSE-MIT
+
+serde_derive 1.0.229
+  License: MIT OR Apache-2.0
+  Text: vendor/serde_derive/LICENSE-APACHE, vendor/serde_derive/LICENSE-MIT
+
+serde_json 1.0.154
+  License: MIT OR Apache-2.0
+  Text: vendor/serde_json/LICENSE-APACHE, vendor/serde_json/LICENSE-MIT
+  vendor/serde_json/src/lexical is derived from the lexical crate,
+    also MIT OR Apache-2.0
+
+simd-adler32 0.3.10
+  License: MIT
+  Text: vendor/simd-adler32/LICENSE.md
+
+syn 3.0.10
+  License: MIT OR Apache-2.0
+  Text: vendor/syn/LICENSE-APACHE, vendor/syn/LICENSE-MIT
+
+unicode-ident 1.0.27
+  License: (MIT OR Apache-2.0) AND Unicode-3.0
+  Text:
+    vendor/unicode-ident/LICENSE-APACHE
+    vendor/unicode-ident/LICENSE-MIT
+    vendor/unicode-ident/LICENSE-UNICODE
+
+zlib-rs 0.6.8
+  License: Zlib
+  Text: vendor/zlib-rs/LICENSE
+
+zmij 1.0.23
+  License: MIT
+  Text: vendor/zmij/LICENSE-MIT
+
+
+chemfiles 0.10.4 (src/chemfiles)
+  License: BSD-3-Clause
+  Text: src/chemfiles/LICENSE
+
+src/chemfiles/include/chemfiles/external/optional.hpp
+  License: BSL-1.0 (text at the end of this file)
+src/chemfiles/include/chemfiles/external/span.hpp
+  License: MIT (text in the file header)
+src/chemfiles/include/chemfiles/external/string_view.hpp
+  License: BSL-1.0 (text at the end of this file)
+src/chemfiles/cmake/FindPythonLibsNew.cmake
+  License: BSD-3-Clause (text in the file header)
+src/chemfiles/cmake/CheckCompilerFlags/*.cmake
+  License: BSD-3-Clause (CMake's licence, https://cmake.org/licensing)
+src/chemfiles/examples/c/*.c, src/chemfiles/examples/cpp/*.cpp,
+src/chemfiles/doc/src/c-tutorials.rst,
+src/chemfiles/doc/src/cxx-tutorials.rst
+  License: public domain (CC0-1.0 dedication in each example)
+
+Libraries in src/chemfiles/external (paths inside each archive):
+
+bzip2.tar.gz
+  License: bzip2-1.0.6 (BSD-style), except the file below
+  Text: bzip2/LICENSE
+  bzip2/dlltest.c: public domain, by its author's statement in the file
+fmt.tar.gz
+  License: MIT, except the files below
+  Text: fmt/LICENSE.rst
+  Files under other terms, none of them compiled:
+    fmt/test/gtest, fmt/test/gmock, fmt/test/gmock-gtest-all.cc
+      (Google Test and Google Mock): BSD-3-Clause, text in the headers
+    fmt/support/docopt.py: MIT, text in the file
+    fmt/doc/python-license.txt: Python Software Foundation License, for
+      the parts of fmt's documentation taken from Python's; the file is
+      the text
+    fmt/doc/_static/bootstrap.min.js, fmt/doc/bootstrap,
+      fmt/doc/_static/fonts (Bootstrap 3.3.4 with its Glyphicons
+      Halflings fonts): MIT,
+      https://github.com/twbs/bootstrap/blob/v3.3.4/LICENSE
+    fmt/doc/basic-bootstrap/layout.html, fmt/doc/_templates/search.html
+      (Sphinx templates): BSD, https://github.com/sphinx-doc/sphinx
+gemmi.tar.gz
+  License: MPL-2.0, https://mozilla.org/MPL/2.0/
+  The archive holds gemmi's headers only. Its third-party headers:
+    gemmi/include/gemmi/third_party/tao: MIT,
+      text in gemmi/include/gemmi/third_party/tao/LICENSE
+    pocketfft_hdronly.h: BSD-3-Clause, text in the file header
+    sajson.h: MIT, text in the file header
+    stb_sprintf.h: MIT or public domain (Unlicense), text at the end
+      of the file
+    tinydir.h: BSD-2-Clause, text in the file header
+lzma.tar.gz
+  License: public domain (liblzma)
+  Text: lzma/COPYING
+mmtf-cpp.tar.gz
+  License: MIT
+  Text: mmtf-cpp/LICENSE
+  mmtf-cpp/msgpack-c: BSL-1.0 (text at the end of this file), with its
+    copies of Boost.Preprocessor and Boost.Predef, also BSL-1.0
+molfiles.tar.gz
+  License: University of Illinois Open Source License (NCSA) for every
+    file not listed below
+  Text: molfiles/LICENSE
+  Most files carry "(C) Copyright ... The Board of Trustees of the
+  University of Illinois". Files with no notice of their own, such as
+  molfiles/src/unit_conversion.h and molfiles/src/periodic_table.h, are
+  covered by molfiles/LICENSE as part of the plugin distribution.
+  Files under other terms, each with its text in its own header:
+    molfiles/src/abinitplugin.c: Rob Lahaye's terms. The code may be
+      included only while it is part of an open-source project, never
+      in a closed-source one. There is no other licence text.
+    molfiles/src/dmsplugin.cxx, molfiles/src/dtrplugin.cxx,
+    molfiles/src/dtrplugin.hxx, molfiles/src/maeffplugin.cxx:
+      BSD-3-Clause, Copyright 2009 D. E. Shaw Research, LLC.
+    molfiles/src/ply.c, molfiles/src/ply.h: Copyright 1998 Georgia
+      Institute of Technology. Use, copying, modification and
+      distribution are permitted without fee with the notice kept, on
+      condition that the software is not sold.
+    molfiles/src/ReadPARM.h, molfiles/src/ReadPARM7.h: Copyright 1992
+      Regents of the University of California (Bill Ross, UCSF). They
+      may be distributed if the notice is kept unmodified and changes
+      to the rest of the file are noted in comments.
+    molfiles/src/hoomdplugin.c: Copyright 2009 Axel Kohlmeyer, with no
+      licence statement of its own; it is distributed as part of the
+      plugins under molfiles/LICENSE.
+  Compiled by the bundled build (src/chemfiles/external/CMakeLists.txt,
+  set by tools/chemfiles-molfiles.py): abinitplugin, bgfplugin,
+  binposplugin, carplugin, corplugin, cpmdplugin, cubeplugin,
+  dlpolyplugin, dtrplugin, gamessplugin, gromacsplugin, jsplugin,
+  maeffplugin, mdfplugin, moldenplugin, namdbinplugin, parm7plugin,
+  parmplugin, pqrplugin, psfplugin, rst7plugin, tinkerplugin,
+  vasp5xdatcarplugin, vaspoutcarplugin, vaspposcarplugin,
+  vaspxdatcarplugin, vaspxmlplugin, vtfplugin, xbgfplugin and xsfplugin,
+  with the headers they include. The other files ship in the archive
+  and are not compiled.
+pugixml.tar.gz
+  License: MIT
+  Text: pugixml/LICENSE.md
+tng.tar.gz
+  License: BSD-3-Clause, except the files below
+  Text: tng/COPYING
+  tng/include/tng/md5.h, tng/src/lib/md5.c: the zlib-style licence of
+    Aladdin Enterprises, text in each file header
+toml11.tar.gz
+  License: MIT
+  Text: toml11/LICENSE
+zlib.tar.gz
+  License: Zlib
+  Text: zlib/README
+
+
+The Boost Software License 1.0 text, for the BSL-1.0 parts above:
+
+Boost Software License - Version 1.0 - August 17th, 2003
+
+Permission is hereby granted, free of charge, to any person or organization
+obtaining a copy of the software and accompanying documentation covered by
+this license (the "Software") to use, reproduce, display, distribute,
+execute, and transmit the Software, and to prepare derivative works of the
+Software, and to permit third-parties to whom the Software is furnished to
+do so, all subject to the following:
+
+The copyright notices in the Software and this entire statement, including
+the above license grant, this restriction and the following disclaimer,
+must be included in all copies of the Software, in whole or in part, and
+all derivative works of the Software, unless such copies or derivative
+works are solely in the form of machine-executable object code generated by
+a source language processor.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

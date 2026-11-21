@@ -2,7 +2,10 @@
 # src/Makevars.win is static. A source package carries src/seams. In a git
 # checkout tools/vendor.sh makes it from SEAMS_CORE_SRC (or DSEAMS_ROOT),
 # else from the revision pinned in tools/seams-core.ref, as for configure.
-if [ -f src/seams/seams_lang.cpp ] && [ -f inst/extdata/ice1h.lammpstrj ]; then
+if [ -f src/seams/seams_lang.cpp ] && [ -f inst/extdata/ice1h.lammpstrj ] \
+  && [ -f src/readcon-core/Cargo.lock ] && [ -d src/readcon-core/vendor ] \
+  && [ -f src/chemfiles/CMakeLists.txt ] \
+  && [ -f inst/extdata/tiny_multi_cuh2.con ]; then
   exit 0
 fi
 if [ ! -f tools/vendor.sh ]; then

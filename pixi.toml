@@ -25,6 +25,10 @@ ca-certificates = "*"
 # SEAMS_CORE_SRC, when set, is copied instead of downloading the pin.
 vendor = "sh tools/vendor.sh"
 build = "R CMD build ."
+# R CMD check --as-cran reports a WARNING when checkbashisms is not on
+# PATH (Debian/Ubuntu devscripts, Homebrew checkbashisms); conda-forge has
+# no package for it. This task fails first instead.
+require-checkbashisms = "checkbashisms --version"
 # conda-forge's R adds -march=nocona to every compile; that flag is the
 # toolchain's, not the package's.
-check = { cmd = "R CMD check --as-cran --no-manual dseams_2.14.1.tar.gz", env = { _R_CHECK_COMPILATION_FLAGS_KNOWN_ = "-march=nocona" } }
+check = { cmd = "R CMD check --as-cran --no-manual dseams_2.14.1.tar.gz", env = { _R_CHECK_COMPILATION_FLAGS_KNOWN_ = "-march=nocona" }, depends-on = ["require-checkbashisms"] }

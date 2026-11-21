@@ -1,7 +1,8 @@
 # R
 
 `dseams` is the R package for one trajectory frame. It reads a LAMMPS
-dump or an XYZ file and returns data frames. The function reference,
+dump, an XYZ file, a CON file, or a chemfiles trajectory and returns
+data frames. The function reference,
 with a runnable example on every page, is
 <https://r.dseams.info/reference/>.
 
@@ -10,13 +11,15 @@ install.packages("remotes")
 remotes::install_github("d-SEAMS/dseams-r")
 ```
 
-A C++20 compiler is required. The package compiles the engine as it
-installs.
+A C++20 compiler, GNU make, Cargo, rustc >= 1.88, cmake >= 3.15, and
+objcopy (from GNU binutils, or llvm-objcopy) are required. The package
+compiles the engine, readcon-core, and chemfiles as it installs.
 
 ## Installing from source
 
-A source tarball made by `R CMD build` carries the engine sources and installs
-without a seams-core checkout or a network connection. In a git checkout,
+A source tarball made by `R CMD build` carries the engine sources, vendored
+readcon-core crates, and patched chemfiles, and installs without a
+seams-core checkout or a network connection. In a git checkout,
 `configure` copies them from `SEAMS_CORE_SRC` (or `DSEAMS_ROOT`), or downloads
 the revision in `tools/seams-core.ref`. Set `DSEAMS_NO_DOWNLOAD=1` when the
 build must use a local source tree.

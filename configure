@@ -30,9 +30,29 @@ if [ ! -x "${R_HOME}/bin/R" ]; then
 fi
 
 version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+# The bundled engine, readcon-core, chemfiles, and the shipped frames are
+# one set. A tarball already holds them. A git checkout fills in whichever
+# piece is missing; tools/vendor.sh refuses to download when
+# DSEAMS_NO_DOWNLOAD is set.
+need_vendor=
 if [ ! -f src/seams/seams_lang.cpp ] || [ ! -f inst/extdata/ice1h.lammpstrj ]; then
+  need_vendor=1
+fi
+if [ ! -f src/readcon-core/Cargo.toml ] || [ ! -f src/readcon-core/Cargo.lock ]; then
+  need_vendor=1
+fi
+if [ ! -d src/readcon-core/vendor ]; then
+  need_vendor=1
+fi
+if [ ! -f src/chemfiles/CMakeLists.txt ] || [ ! -f src/chemfiles/src/Trajectory.cpp ]; then
+  need_vendor=1
+fi
+if [ ! -f inst/extdata/tiny_multi_cuh2.con ] || [ ! -f inst/extdata/tiny.pdb ]; then
+  need_vendor=1
+fi
+if [ -n "${need_vendor}" ]; then
   if [ ! -f tools/vendor.sh ]; then
-    echo "configure: src/seams is missing and there is no tools/vendor.sh to make it" >&2
+    echo "configure: engine sources are missing and there is no tools/vendor.sh to make them" >&2
     exit 1
   fi
   R_HOME=${R_HOME} sh tools/vendor.sh || exit 1
@@ -45,6 +65,24 @@ esac
 if [ -n "${SEAMS_LIBDIR:-}" ]; then
   link_mode=libdir
 fi
+
+# cargo, cmake and objcopy are required for the bundled readers. A linked
+# engine already carries them, so those builds do not compile the copies.
+# find_tool prints the path of the first named program on PATH, or nothing.
+find_tool() {
+  for tool in "$@"; do
+    if command -v "${tool}" >/dev/null 2>&1; then
+      command -v "${tool}"
+      return 0
+    fi
+  done
+  return 0
+}
+CARGO=$(find_tool cargo)
+CMAKE=$(find_tool cmake)
+OBJCOPY=$(find_tool objcopy llvm-objcopy)
+CHEMFILES_BUILD=""
+READER_DEPS=""
 
 if [ "${link_mode}" = pkg-config ]; then
   PKG_CONFIG=${PKG_CONFIG:-pkg-config}
@@ -102,8 +140,54 @@ elif [ "${link_mode}" = libdir ]; then
   OPENMP_CXXFLAGS=""
   ENGINE_OBJECTS=""
 else
-  SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='\"${version}\"'"
-  SEAMS_LIBS=""
+  if [ -z "${CARGO}" ] || [ -z "${CMAKE}" ] || ! command -v rustc >/dev/null 2>&1; then
+    echo "configure: the bundled build needs rustc >= 1.88, cargo, and cmake >= 3.15 on PATH" >&2
+    exit 1
+  fi
+  # cmake --install, which the chemfiles rule runs, is new in 3.15.
+  cmake_ok=$("${CMAKE}" --version | awk '
+    $1 == "cmake" && $2 == "version" {
+      split($3, a, ".")
+      if (a[1] > 3 || (a[1] == 3 && a[2] >= 15)) ok = 1
+    }
+    END { print ok + 0 }
+  ')
+  if [ "${cmake_ok}" != 1 ]; then
+    echo "configure: cmake >= 3.15 is required to build chemfiles (found $("${CMAKE}" --version | sed -n 1p))" >&2
+    exit 1
+  fi
+  rustc_ok=$(rustc --version | awk '
+    $1 == "rustc" {
+      split($2, a, ".")
+      if (a[1] > 1 || (a[1] == 1 && a[2] >= 88)) ok = 1
+    }
+    END { print ok + 0 }
+  ')
+  if [ "${rustc_ok}" != 1 ]; then
+    echo "configure: rustc >= 1.88 is required to build readcon-core (found $(rustc --version))" >&2
+    exit 1
+  fi
+  if [ -z "${OBJCOPY}" ]; then
+    echo "configure: objcopy (GNU binutils) or llvm-objcopy is required to build the bundled readers" >&2
+    exit 1
+  fi
+  # The tarball stores cargo's checksum under a name that is not hidden.
+  # The Makevars rule restores the name cargo looks up, before the build.
+  if [ ! -f src/readcon-core/vendor/dlpk/cargo-checksum.json ] \
+    && [ ! -f src/readcon-core/vendor/dlpk/.cargo-checksum.json ]; then
+    echo "configure: src/readcon-core/vendor is missing; the source package has no vendored crates" >&2
+    exit 1
+  fi
+  CHEMFILES_BUILD=$(mktemp -d "${TMPDIR:-/tmp}/dseams-chemfiles.XXXXXX")
+  # Linux and other ELF hosts need libdl and libm beside the Rust staticlib.
+  # macOS exports those from libSystem. Windows is src/Makevars.win.
+  reader_syslibs="-lpthread -ldl -lm"
+  case "$(uname -s)" in
+    Darwin) reader_syslibs="-lpthread" ;;
+  esac
+  SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -Ireadcon-core/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1 -DSEAMS_LANG_VERSION='\"${version}\"'"
+  SEAMS_LIBS="readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a ${reader_syslibs}"
+  READER_DEPS="readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a"
   ENGINE_OBJECTS='$(SEAMS_OBJECTS)'
   # An empty SHLIB_OPENMP_CXXFLAGS (Apple clang, for one) builds the
   # engine loops single-threaded.
@@ -123,4 +207,9 @@ sed -e "s|@SEAMS_CPPFLAGS@|${SEAMS_CPPFLAGS}|" \
   -e "s|@SEAMS_LIBS@|${SEAMS_LIBS}|" \
   -e "s|@OPENMP_CXXFLAGS@|${OPENMP_CXXFLAGS}|g" \
   -e "s|@ENGINE_OBJECTS@|${ENGINE_OBJECTS}|" \
+  -e "s|@CARGO@|${CARGO}|" \
+  -e "s|@CMAKE@|${CMAKE}|" \
+  -e "s|@OBJCOPY@|${OBJCOPY}|" \
+  -e "s|@CHEMFILES_BUILD@|${CHEMFILES_BUILD}|" \
+  -e "s|@READER_DEPS@|${READER_DEPS}|" \
   src/Makevars.in > src/Makevars

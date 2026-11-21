@@ -1,0 +1,347 @@
+Authors and copyright holders of the code in the dseams source package
+
+The R glue, configure scripts and tools are by the package authors in
+DESCRIPTION. The rest of src/ is copied from other projects by
+tools/vendor.sh and tools/vendor-readers.sh. Each part keeps its licence;
+LICENSE.note gives the licence of every part and where its text is in
+the source package.
+
+
+1. d-SEAMS engine (src/seams), seams-core 2.14.1
+
+  Authors: the d-SEAMS core team
+  License: MIT
+  Source: https://github.com/d-SEAMS/seams-core
+
+
+2. readcon-core 0.16.2 (src/readcon-core)
+
+  Authors: Rohit Goswami
+  License: MIT
+  Source: https://github.com/lode-org/readcon-core
+
+
+3. Rust crates vendored in src/readcon-core/vendor
+
+The crate set is pinned by tools/readcon-Cargo.lock. Authors are the
+`authors` field of each crate's Cargo.toml; where that field is absent,
+the entry says where the name comes from.
+
+adler2 2.0.1
+  Authors: Jonas Schievink, oyvindln
+  License: 0BSD OR MIT OR Apache-2.0
+  Source: https://github.com/oyvindln/adler2
+
+autocfg 1.5.1
+  Authors: Josh Stone
+  License: Apache-2.0 OR MIT
+  Source: https://github.com/cuviper/autocfg
+
+cfg-if 1.0.5
+  Authors: Alex Crichton
+  License: MIT OR Apache-2.0
+  Source: https://github.com/rust-lang/cfg-if
+
+crc32fast 1.5.5
+  Authors: Sam Rijs, Alex Crichton
+  License: MIT OR Apache-2.0
+  Source: https://github.com/srijs/rust-crc32fast
+
+crunchy 0.2.4
+  Authors: Eira Fransham
+  License: MIT
+  Source: https://github.com/eira-fransham/crunchy
+
+dlpk 0.1.5
+  Authors: Guillaume Fraux, Rohit Goswami
+  License: MIT OR Apache-2.0
+  Source: https://github.com/metatensor/dlpk
+
+fast-float2 0.2.4
+  Authors: Ivan Smirnov, Alex Huszagh
+  License: MIT OR Apache-2.0
+  Source: https://github.com/Alexhuszagh/fast-float-rust
+
+flate2 1.1.11
+  Authors: Alex Crichton, Josh Triplett
+  License: MIT OR Apache-2.0
+  Source: https://github.com/rust-lang/flate2-rs
+
+half 2.4.1
+  Authors: Kathryn Long
+  License: MIT OR Apache-2.0
+  Source: https://github.com/starkat99/half-rs
+
+half 1.8.3
+  Authors: Kathryn Long
+  License: MIT OR Apache-2.0
+  Source: https://github.com/starkat99/half-rs
+
+itoa 1.0.19
+  Authors: David Tolnay
+  License: MIT OR Apache-2.0
+  Source: https://github.com/dtolnay/itoa
+
+libc 0.2.191
+  Authors: The Rust Project Developers (Cargo.toml lists no authors;
+    holder named in LICENSE-MIT)
+  License: MIT OR Apache-2.0
+  Source: https://github.com/rust-lang/libc
+
+matrixmultiply 0.3.11
+  Authors: bluss, R. Janis Goldschmidt
+  License: MIT OR Apache-2.0
+  Source: https://github.com/bluss/matrixmultiply/
+
+memchr 2.8.3
+  Authors: Andrew Gallant, bluss
+  License: Unlicense OR MIT
+  Source: https://github.com/BurntSushi/memchr
+
+memmap2 0.9.12
+  Authors: Dan Burkert, Yevhenii Reizner, The Contributors
+  License: MIT OR Apache-2.0
+  Source: https://github.com/RazrFalcon/memmap2-rs
+
+miniz_oxide 0.9.1
+  Authors: Frommi, oyvindln, Rich Geldreich
+  License: MIT OR Zlib OR Apache-2.0
+  Source: https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide
+
+ndarray 0.17.2
+  Authors: Ulrik Sverdrup bluss, Jim Turner
+  License: MIT OR Apache-2.0
+  Source: https://github.com/rust-ndarray/ndarray
+  src/doc/ndarray_for_numpy_users/rk_step.rs quotes SciPy code:
+    Enthought, Inc. and the SciPy Developers; BSD-3-Clause
+
+num-complex 0.4.6
+  Authors: The Rust Project Developers
+  License: MIT OR Apache-2.0
+  Source: https://github.com/rust-num/num-complex
+
+num-integer 0.1.47
+  Authors: The Rust Project Developers
+  License: MIT OR Apache-2.0
+  Source: https://github.com/rust-num/num-integer
+
+num-traits 0.2.19
+  Authors: The Rust Project Developers
+  License: MIT OR Apache-2.0
+  Source: https://github.com/rust-num/num-traits
+
+portable-atomic 1.15.0
+  Authors: The portable-atomic developers (Cargo.toml lists no authors;
+    repository of Taiki Endo)
+  License: Apache-2.0 OR MIT
+  Source: https://github.com/taiki-e/portable-atomic
+
+portable-atomic-util 0.2.8
+  Authors: The portable-atomic-util developers (Cargo.toml lists no
+    authors; repository of Taiki Endo)
+  License: Apache-2.0 OR MIT
+  Source: https://github.com/taiki-e/portable-atomic-util
+
+proc-macro2 1.0.107
+  Authors: David Tolnay, Alex Crichton
+  License: MIT OR Apache-2.0
+  Source: https://github.com/dtolnay/proc-macro2
+
+quote 1.0.47
+  Authors: David Tolnay
+  License: MIT OR Apache-2.0
+  Source: https://github.com/dtolnay/quote
+
+rawpointer 0.2.1
+  Authors: bluss
+  License: MIT OR Apache-2.0
+  Source: https://github.com/bluss/rawpointer/
+
+rustc-hash 2.1.3
+  Authors: The Rust Project Developers
+  License: Apache-2.0 OR MIT
+  Source: https://github.com/rust-lang/rustc-hash
+
+serde 1.0.229
+  Authors: Erick Tryzelaar, David Tolnay
+  License: MIT OR Apache-2.0
+  Source: https://github.com/serde-rs/serde
+
+serde_core 1.0.229
+  Authors: Erick Tryzelaar, David Tolnay
+  License: MIT OR Apache-2.0
+  Source: https://github.com/serde-rs/serde
+
+serde_derive 1.0.229
+  Authors: Erick Tryzelaar, David Tolnay
+  License: MIT OR Apache-2.0
+  Source: https://github.com/serde-rs/serde
+
+serde_json 1.0.154
+  Authors: The serde_json developers (Cargo.toml lists no authors)
+  License: MIT OR Apache-2.0
+  Source: https://github.com/serde-rs/json
+  src/lexical is derived from the lexical crate: Alexander Huszagh;
+    MIT OR Apache-2.0
+
+simd-adler32 0.3.10
+  Authors: Marvin Countryman
+  License: MIT
+  Source: https://github.com/mcountryman/simd-adler32
+
+syn 3.0.10
+  Authors: David Tolnay
+  License: MIT OR Apache-2.0
+  Source: https://github.com/dtolnay/syn
+
+unicode-ident 1.0.27
+  Authors: David Tolnay
+  License: (MIT OR Apache-2.0) AND Unicode-3.0
+  Source: https://github.com/dtolnay/unicode-ident
+
+zlib-rs 0.6.8
+  Authors: Trifecta Tech Foundation (Cargo.toml lists no authors;
+    holder named in LICENSE)
+  License: Zlib
+  Source: https://github.com/trifectatechfoundation/zlib-rs
+
+zmij 1.0.23
+  Authors: David Tolnay
+  License: MIT
+  Source: https://github.com/dtolnay/zmij
+
+4. chemfiles 0.10.4 (src/chemfiles), with the seams-core patches
+
+  Authors: Guillaume Fraux and contributors: Elsa Perrin,
+    François-Xavier Coudert, Guillaume Fraux, Jonathan Fine,
+    Laura Scalfi, Len Kimms, Maximilien Levesque, Patricio Barletta
+    (src/chemfiles/AUTHORS)
+  License: BSD-3-Clause
+  Source: https://github.com/chemfiles/chemfiles
+  The C and C++ examples and tutorials (src/chemfiles/examples,
+    src/chemfiles/doc/src/*-tutorials.rst) are dedicated to the public
+    domain (CC0-1.0).
+
+Header-only code in src/chemfiles/include/chemfiles/external:
+
+optional.hpp
+  Authors: Andrzej Krzemienski
+  License: BSL-1.0
+span.hpp
+  Authors: Guillaume Fraux, Martin Moene, Microsoft Corporation
+  License: MIT
+string_view.hpp
+  Authors: Martin Moene
+  License: BSL-1.0
+
+CMake modules in src/chemfiles/cmake:
+
+FindPythonLibsNew.cmake
+  Authors: Kitware, Inc., Continuum Analytics, Inc.
+  License: BSD-3-Clause
+CheckCompilerFlags/*.cmake
+  Authors: Kitware, Inc. and contributors (CMake)
+  License: BSD-3-Clause
+
+
+5. Libraries bundled by chemfiles in src/chemfiles/external
+
+bzip2.tar.gz (bzip2 and libbzip2)
+  Authors: Julian R Seward
+  License: bzip2-1.0.6 (BSD-style)
+  dlltest.c: Yoshioka Tsuneo; public domain
+fmt.tar.gz (fmt)
+  Authors: Victor Zverovich and contributors
+  License: MIT
+  Contributors named in file headers, under fmt's MIT licence: Paul
+    Dreik (part of include/fmt/chrono.h, test/fuzzing), Remotion (Igor
+    Schulz) (include/fmt/ranges.h, test/ranges-test.cc)
+  Copied code and documentation under their own terms:
+    test/gtest, test/gmock, test/gmock-gtest-all.cc (Google Test and
+      Google Mock): Google Inc.; BSD-3-Clause
+    support/docopt.py: Vladimir Keleshev; MIT
+    doc/python-license.txt, for the documentation taken from Python's:
+      Python Software Foundation, BeOpen.com, Corporation for National
+      Research Initiatives (CNRI), Stichting Mathematisch Centrum
+      Amsterdam; Python Software Foundation License
+    doc/_static/bootstrap.min.js, doc/bootstrap, doc/_static/fonts
+      (Bootstrap 3.3.4, Glyphicons Halflings): Twitter, Inc.; MIT
+    doc/basic-bootstrap/layout.html, doc/_templates/search.html: the
+      Sphinx team (Sphinx AUTHORS); BSD
+gemmi.tar.gz (gemmi headers)
+  Authors: Global Phasing Ltd.
+  License: MPL-2.0 (gemmi's licence; the archive holds the headers only)
+  Third-party headers in gemmi/include/gemmi/third_party:
+    tao/pegtl: Dr. Colin Hirsch and Daniel Frey; MIT
+    pocketfft_hdronly.h: authors Martin Reinecke and Peter Bell;
+      copyright Max-Planck-Society, Peter Bell, Matteo Frigo,
+      Massachusetts Institute of Technology; BSD-3-Clause
+    sajson.h: Chad Austin; MIT
+    stb_sprintf.h: Jeff Roberts (RAD Game Tools), Sean Barrett and
+      contributors;
+      public domain, or MIT
+    tinydir.h: Cong Xu, Lautis Sun, Baudouin Feildel, Andargor;
+      BSD-2-Clause
+lzma.tar.gz (liblzma from XZ Utils)
+  Authors: Lasse Collin, Igor Pavlov and the XZ Utils contributors
+  License: public domain (liblzma); see lzma/COPYING in the archive
+mmtf-cpp.tar.gz (mmtf-cpp)
+  Authors: University of California San Diego
+  License: MIT
+  Includes msgpack-c (mmtf-cpp/msgpack-c):
+    FURUHASHI Sadayuki, KONDO Takatoshi, Vladimir Volodko, MIZUKI
+      Hirata and the msgpack-c contributors; BSL-1.0
+    Its copy of Boost.Preprocessor (msgpack-c/include/msgpack/preprocessor
+      and preprocessor.hpp): Paul Mensonides, Edward Diener; BSL-1.0
+    Its copy of Boost.Predef (msgpack-c/include/msgpack/predef and
+      predef.h): Rene
+      Rivera, Charly Chevalier, Joel Falcou, Franz Detro, Jessica
+      Hamilton, Microsoft Corporation; BSL-1.0
+molfiles.tar.gz (VMD molfile plugins)
+  Copyright: The Board of Trustees of the University of Illinois, for
+    the Theoretical and Computational Biophysics Group, University of
+    Illinois at Urbana-Champaign
+  License: University of Illinois Open Source License (NCSA), except the
+    files below
+  Plugin authors (the `author` field of each plugin): John Stone, Justin
+    Gullingsrud, Axel Kohlmeyer, Eamon Caddigan, Jan Saam, Markus
+    Dittrich, Johan Strumpfer, Alexey Titov, Peter Freddolino, Brian
+    Bennion, Brendan McMorrow, Leonardo Trabuco, David Norris, Magnus
+    Lundborg, Marco Kalweit, Lutz Maibaum, James Phillips, Konrad
+    Hinsen, Francois-Xavier Coudert, Alexander Spaar, Alin M Elena, Sung
+    Sakong, Olaf Lenz, Mauricio Carrillo Tripp, Rob Lahaye, and D. E.
+    Shaw Research
+  molfiles/src/Gromacs.h implements the 3dfcoord algorithm by Frans van
+    Hoesel (Europort project, 1995).
+  Files with their own copyright holders and terms:
+    abinitplugin.c: Rob Lahaye, Sungkyunkwan University; may be used
+      only as part of an open-source project
+    dmsplugin.cxx, dtrplugin.cxx, dtrplugin.hxx, maeffplugin.cxx:
+      D. E. Shaw Research, LLC; BSD-3-Clause
+    ply.c, ply.h: Georgia Institute of Technology; free use, copying,
+      modification and distribution with the notice kept, provided the
+      software is not sold
+    ReadPARM.h, ReadPARM7.h: Regents of the University of California,
+      code by Bill Ross (UCSF); distributable with the notice kept
+      unmodified and changes noted
+    hoomdplugin.c: Axel Kohlmeyer; no licence statement of its own
+pugixml.tar.gz (pugixml)
+  Authors: Arseny Kapoulkine
+  License: MIT
+  pugixml is based on pugxml by Kristen Wegner, credited in its headers.
+tng.tar.gz (TNG trajectory library)
+  Authors: The GROMACS development team (Magnus Lundborg, Daniel
+    Spångberg, Rossen Apostolov, Anders Gärdenäs, Hugo
+    MacDermott-Opeskin and contributors)
+  License: BSD-3-Clause
+  src/compression/xtc2.c and xtc3.c, by Daniel Spångberg, are based on
+    the xtc compression of Frans van Hoesel and of GROMACS (Erik
+    Lindahl, David van der Spoel), under tng's BSD-3-Clause licence.
+  include/tng/md5.h, src/lib/md5.c: Aladdin Enterprises (L. Peter
+    Deutsch); zlib-style licence
+toml11.tar.gz (toml11)
+  Authors: Toru Niina
+  License: MIT
+zlib.tar.gz (zlib)
+  Authors: Jean-loup Gailly and Mark Adler
+  License: Zlib

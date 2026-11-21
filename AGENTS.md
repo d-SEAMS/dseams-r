@@ -52,11 +52,18 @@ and the C++ reference `binding_oracle` live in
    modules; their version must equal `Version` in `DESCRIPTION`.
 3. Otherwise compile the bundled copy in `src/seams`.
 
-In every mode `src/seams` and `inst/extdata` must exist. When they do not,
-`tools/vendor.sh` writes them from `SEAMS_CORE_SRC` or `DSEAMS_ROOT`, else
-from the revision in `tools/seams-core.ref`, which it downloads unless
-`DSEAMS_NO_DOWNLOAD=1`. A tarball from `R CMD build` carries the copy and
-installs with no network.
+In every mode `src/seams`, `src/readcon-core`, `src/chemfiles`, and
+`inst/extdata` must exist. When they do not, `tools/vendor.sh` writes them
+from `SEAMS_CORE_SRC` or `DSEAMS_ROOT`, else from the revision in
+`tools/seams-core.ref`, which it downloads unless `DSEAMS_NO_DOWNLOAD=1`.
+The same step vendors readcon-core (the wrap revision in that seams-core
+tree, crates included) and patched chemfiles 0.10.4. A tarball from
+`R CMD build` carries those copies and installs with no network. The
+bundled compile needs GNU make, Cargo, rustc >= 1.88, cmake >= 3.15,
+and objcopy (or llvm-objcopy), and it always builds the CON reader and
+chemfiles. Cargo and CMake run at most two jobs, and Cargo's home is
+`src/readcon-core/cargo-home`, which the build removes. A linked engine is expected to have
+been built with those readers as well.
 
 ## Build and test
 
@@ -102,6 +109,11 @@ CI sets them, and so should a local run that touches an analysis.
 3. Wrap new C API symbols in `src/seams_call.c` and `R/capi.R`, document
    them with roxygen2, regenerate `man/` and `NAMESPACE`, and extend the
    tests.
+4. If the chemfiles pin changes the molfile plugins it lists as
+   compilable, `tools/chemfiles-molfiles.py` stops the vendor. Run
+   `sh tools/probe-molfiles.sh src/chemfiles/external/molfiles.tar.gz
+   PLUGIN...` and update its `READERS` or `EXCLUDED` table, then the
+   molfiles entries in `inst/AUTHORS` and `LICENSE.note`.
 
 ## Commits and changelog
 

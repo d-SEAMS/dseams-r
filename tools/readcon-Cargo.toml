@@ -1,0 +1,41 @@
+# Slim manifest for the static library the R package links. Optional
+# features are declared so rustc's check-cfg stays quiet, and none of
+# them is enabled: the CON reader does not need Python, CUDA, or chemfiles.
+[package]
+name = "readcon-core"
+version = "0.16.2"
+edition = "2024"
+rust-version = "1.88"
+license = "MIT"
+publish = false
+description = "CON file reader static library bundled with the dseams package"
+
+[lib]
+name = "readcon_core"
+crate-type = ["staticlib"]
+
+[features]
+default = []
+chemfiles = []
+cuda = []
+grammar = []
+metatensor = []
+parallel = []
+python = []
+rpc = []
+zstd = []
+
+[dependencies]
+dlpk = { version = "0.1.5", features = ["ndarray", "half"] }
+half = "1.8"
+ndarray = "0.17"
+fast-float2 = "0.2"
+flate2 = "1"
+serde_json = { version = "1", features = ["float_roundtrip"] }
+memchr = "2"
+memmap2 = "0.9"
+rustc-hash = "2"
+
+[profile.release]
+lto = false
+codegen-units = 16

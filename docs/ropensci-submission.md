@@ -61,8 +61,9 @@ Authors@R: c(
     )
 Description: Structural analysis of water and ice in molecular dynamics
     trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh
-    (2020) <doi:10.1021/acs.jcim.0c00031>). Reads 'LAMMPS' dumps and
-    'XYZ' files and returns data frames of 'CHILL+' ice labels
+    (2020) <doi:10.1021/acs.jcim.0c00031>). Reads 'LAMMPS' dumps, 'XYZ'
+    files, 'CON' files, and the trajectory formats from 'chemfiles',
+    and returns data frames of 'CHILL+' ice labels
     (Nguyen and Molinero (2015) <doi:10.1021/jp510289t>), primitive
     ring counts (Franzblau (1991) <doi:10.1103/PhysRevB.44.4925>),
     hexagonal and double-diamond cages, and Steinhardt bond-orientational
@@ -70,6 +71,8 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
+Copyright: See file inst/AUTHORS for the bundled readcon-core, Rust
+    crates, and chemfiles; LICENSE.note gives their licences.
 URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core
@@ -86,7 +89,8 @@ LinkingTo:
     cpp11 (>= 0.4.0),
     RcppEigen (>= 0.3.4.0.0)
 VignetteBuilder: knitr
-SystemRequirements: C++20
+SystemRequirements: C++20, GNU make, Cargo (Rust's package manager),
+    rustc (>= 1.88), cmake (>= 3.15), objcopy (GNU binutils or LLVM)
 NeedsCompilation: yes
 Config/testthat/edition: 3
 X-schema.org-keywords: molecular-dynamics, trajectory-analysis, ice,
@@ -202,8 +206,9 @@ author (`aut`) and Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION.
 
 -   Explain reasons for any [`pkgcheck` items](https://docs.ropensci.org/pkgcheck/) which your package is unable to pass.
 
-  The pkgcheck section quotes the run and says why each remaining
-  item stays. Standards from the
+  This revision does not quote a pkgcheck run. The check section below
+  records `R CMD check --as-cran` and the testthat summaries from this
+  tree. Standards from the
   statistical-software track are assessed in
   `srr-standards.md`. `dseams` is not statistical
   software, so the category standards (Bayesian, regression, machine
@@ -338,101 +343,103 @@ The run history is the Actions page:
   `R CMD check --as-cran --no-manual`, and publishes the source
   tarball for `d-SEAMS/dseams-r`.
 
-`pkgcheck::pkgcheck(".", goodpractice = TRUE, use_cache = FALSE)`
-was run with R 4.5.3, pkgcheck 0.3.4.5, pkgstats 0.2.5 and
-goodpractice 1.2.0. CRAN pkgcheck 0.3.4 does not finish on this
-DESCRIPTION. It stops in `pkginfo_url_from_desc`:
+`pkgcheck` was not run for this revision. The check that was run is
+`R CMD check --as-cran` of the bundled tarball `dseams_2.14.1.tar.gz`,
+on R 4.5.3 (2026-03-11), platform `x86_64-conda-linux-gnu`, on Ubuntu
+24.04.5 LTS. The log says R was compiled by
+`x86_64-conda-linux-gnu-cc (conda-forge gcc 14.4.0-7) 14.4.0` and
+`GNU Fortran (conda-forge gcc 14.4.0-7) 14.4.0`.
+`_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona` was set, because this
+R adds `-march=nocona`. `DSEAMS_ROOT`, `SEAMS_BIN`, and
+`SEAMS_CPP_ORACLE` were unset. The log is `logs/check-ascran-00check.log`.
+It ends:
 
 ```
-Error in type == "URL" && grepl("github\\.io", u, ignore.case = TRUE) :
-  'length = 2' in coercion to 'logical(1)'
-Calls: <Anonymous> -> pkgstats_info -> pkginfo_url_from_desc
+Status: 2 NOTEs
 ```
 
-The URL field has four URLs (DESCRIPTION lines 28-30). pkgcheck 0.3.4
-splits that field and, when more than one entry contains "git", keeps
-those. The two that remain are the GitHub repository URLs, and the
-`&&` comparison then fails with length 2. pkgcheck 0.3.4.5 is revision
-4569a193 of ropensci-review-tools/pkgcheck, which uses the first URL
-before that comparison. The URLs in DESCRIPTION were not edited to
-satisfy 0.3.4.
-
-The 0.3.4.5 run printed:
+The two notes in that log are:
 
 ```
-✖ Package has no continuous integration checks.
-✔ Package coverage is 100%.
-✔ All goodpractice linters passed.
-✔ All authors have ORCID IDs
-✖ R CMD check found 1 error.
-✖ R CMD check found 1 warning.
+* checking CRAN incoming feasibility ... [2s/13s] NOTE
+Maintainer: ‘Rohit Goswami <rgoswami@ieee.org>’
+
+New submission
+
+Size of tarball: 7946434 bytes
 ```
 
-`pct_by_line` is 100. The CI sentence is pkgcheck reading GitHub
-Actions conclusions for workflows whose names match cmd or coverage.
-The four workflow files above are what the repository contains, and
-the Actions page is where their runs are listed. Coverage is this
-bundled run. `pdflatex` is not installed, and the log says `pdflatex
-not found! Not building PDF manual.` That is the error and the
-warning. `R CMD check --as-cran --no-manual` of the bundled tarball
-finished `Status: 1 NOTE`. The NOTE is `New submission`.
-
-`goodpractice::failed_checks` from that pkgcheck, and from a separate
-`goodpractice::gp(".", quiet = TRUE)`, is:
-
 ```
-[1] "no_description_date"               "rcmdcheck_can_convert_rd_to_pdf_2"
-[3] "roxygen2_duplicate_params"
+* checking HTML version of manual ... NOTE
+Skipping checking HTML validation: no command 'tidy' found.
+Please obtain a recent version of HTML Tidy by downloading a binary
+release or compiling the source code from <https://www.html-tidy.org/>.
 ```
 
-`spelling` is TRUE. The same three names are what
-`goodpractice::gp(".", quiet = FALSE)` printed. `quiet = TRUE`
-suppresses the progress bars; the checks still run.
+The same log has `checking PDF version of manual ... OK` and
+`checking tests ... OK`. `R CMD build` (`logs/build.log`) does not
+build the PDF manual. The built DESCRIPTION (`logs/built-description.txt`) keeps
+`Date: 2026-11-17` and adds `Packaged: 2026-11-20 19:10:54 UTC; ubuntu`.
 
-`Date: 2026-11-17` stays. It is the release date, the same day as
-`datePublished` in `codemeta.json` and `date-released` in
-`CITATION.cff`. `R CMD build` records the build date separately.
+The install log (`logs/check-ascran-00install.out`) prints
+`rustc 1.100.0 (0ef1bc386 2026-11-09)`,
+`cargo 1.100.0 (3acc79c0c 2026-11-05)`, and
+`Running CMake version 3.28.3`. The C++ compile line defines
+`-DSEAMS_HAS_READCON=1`.
 
-The LaTeX item is the missing `pdflatex`. The `--no-manual` check did
-not report an Rd problem.
+`logs/check-ascran-testthat.Rout` prints:
 
-The repeated `@param` lines are the same argument stated on each help
-page (`cutoff`, `frame`, `...`). Each page stands on its own, so the
-text is not folded into `@inheritParams`.
+```
+[ FAIL 0 | WARN 0 | SKIP 8 | PASS 167 ]
+```
 
-The same tarball, linked against a seams-core develop build (meson
-`version: '2.14.0'`, commit 2c5d0fce), fails one test.
-`dseams_version()` returns `"2.14.0"` and the package version is
-`2.14.1`. `R CMD check --as-cran --no-manual` of that link finished
-`Status: 1 ERROR, 1 NOTE`. The NOTE is `New submission`. The test is
-unchanged: the package version is the engine version it binds, and
-the pin in `tools/seams-core.ref` is v2.14.1. The bundled check, which
-compiles that pin, passes the test.
+Seven skips are `DSEAMS_ROOT is not set`
+(`test-doc-examples.R` lines 21, 27, 32, 37, 54, and 73, and
+`test-ice.R` line 89). One skip is `SEAMS_BIN is not set`
+(`test-ice.R` line 73). The CON reader tests are not in that list.
+The examples (`logs/check-ascran-examples.Rout`) print:
 
-`testthat::test_local()` and `testthat::test_check()` both load and
-pass on the bundled build, and `cpp11::cpp_register()` leaves
-`R/cpp11.R` and `src/cpp11.cpp` unchanged. With `DSEAMS_ROOT` and
-`SEAMS_BIN` unset, `test_local()` skips 8 tests. Six are the example
-scripts in `tests/testthat/test-doc-examples.R`, and one is the
-cubic-ice test in `tests/testthat/test-ice.R`: each stops because
-`DSEAMS_ROOT` is unset. The eighth is the seeded-cage comparison in
-`test-ice.R`, which stops because `SEAMS_BIN` is unset. That
-`test_local()` run does not skip the submission-file test. That test
-skips only on an installed tree, where `tools/check-submission.R` is
-not beside the test, and that is the ninth skip in `test_check()` of
-an install. `R CMD check` of the source tarball runs the submission
-test from `00_pkg_src` and reports `checking tests ... OK`. On the
-linked install, `test_check()` reports the version failure above.
+```
+> nframes(con)
+[1] 2
+> read_frame(con, type = -1L)
+dseams frame 1 atoms 4
+```
+
+`con` there is `dseams_example("tiny_multi_cuh2.con")`. A separate read
+(`logs/test-suite.log`) prints `CON_READ nframes=2 nrow=4 class=dseams_frame`
+and `CON_MESSAGE_ABSENT TRUE`. The string
+`readcon-core is not in this build; CON input needs it` is not in the
+check logs. In seams-core that string is thrown only when
+`SEAMS_HAS_READCON` is unset, and this build sets it.
+
+`testthat::test_local(".", load_package = "installed")` from this
+checkout prints `[ FAIL 0 | WARN 0 | SKIP 8 | PASS 168 ]` with the same
+eight skips (`logs/test-local.log`). The submission
+test is not skipped: the checkout contains `tools/check-submission.R`.
+
+`testthat::test_check("dseams")`, run with the working directory set
+to the `tests/` directory of an installed copy that is not this
+checkout, prints `[ FAIL 0 | WARN 0 | SKIP 9 | PASS 166 ]`
+(`logs/test-check-call.log`). The ninth skip is
+`tools/check-submission.R is not beside this test run`
+(`test-submission.R` line 44). `R CMD check` runs the same
+`test_check("dseams")` from `tests/testthat.R` inside the unpacked
+source, where `00_pkg_src` still has `tools/check-submission.R`, so
+that run does not skip the submission test. `docs/` and
+`codemeta.json` are listed in `.Rbuildignore` and are not in
+`00_pkg_src`.
+
+A check linked against a built seams-core, a check in a network
+namespace with no network, and `pkgcheck` were not run.
 
 Names shared with other packages stay. `positions()` is the frame
 coordinate matrix and `symmetry()` is the shell-symmetry code. `dseams` does not depend on the other packages that export
 those names, and neither name collides inside this package.
 
-`expect_equal()` stays where the comparison carries a tolerance.
 `tests/testthat/test-ice.R` compares a mean Steinhardt q3 to 0.374897
-with `tolerance = 1e-4`. `tests/testthat/test-s3.R` compares two means
-with `tolerance = 0`. `goodpractice` prefers `expect_identical()` for
-exact values; these two are not exact integer comparisons.
+with `expect_equal(..., tolerance = 1e-4)`. `tests/testthat/test-s3.R`
+compares two means with `expect_equal(..., tolerance = 0)`.
 
 `srr-standards.md` is the srr assessment. The package is not
 statistical software, so it does not carry `@srrstats` tags.

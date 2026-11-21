@@ -1,4 +1,7 @@
 // Copyright (c) d-SEAMS developers
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include "dseams_r_io.h"
 
 #include <cstdarg>
@@ -9,6 +12,7 @@
 #include <thread>
 #include <vector>
 
+#include <R_ext/Error.h>
 #include <R_ext/Print.h>
 
 namespace dseams_r {
@@ -56,7 +60,19 @@ private:
   bool to_err_;
 };
 
+ConsoleBuf reader_cout_buf(false);
+ConsoleBuf reader_cerr_buf(true);
+
 } // namespace
+
+// The bundled chemfiles archive refers to std::cout and std::cerr.
+// tools/reader-symbols.sh renames those symbols onto these objects, which
+// write to the R console. They are real iostreams, so the call sites keep
+// the libstdc++ layout they were compiled against.
+std::ostream dseams_r_cout_obj __asm__("dseams_r_cout")(&reader_cout_buf);
+std::ostream dseams_r_cerr_obj __asm__("dseams_r_cerr")(&reader_cerr_buf);
+std::ostream dseams_r_cout_libcxx __asm__("dseams_r_cout_libcxx")(&reader_cout_buf);
+std::ostream dseams_r_cerr_libcxx __asm__("dseams_r_cerr_libcxx")(&reader_cerr_buf);
 
 std::ostream &out() {
   thread_local ConsoleBuf buf(false);
@@ -92,3 +108,119 @@ void fail(int status) {
 }
 
 } // namespace dseams_r
+
+// Symbols Writing R Extensions rejects. reader-symbols.sh points the
+// readcon-core and chemfiles archives here, so the shared library does
+// not call abort, exit, or the C stdio console, and does not refer to
+// stdout or stderr. None of these wrappers call the replaced symbol.
+namespace {
+
+ssize_t console_write(void *cookie, const char *buf, size_t n) {
+  if (n == 0 || buf == nullptr) {
+    return 0;
+  }
+  const int len = static_cast<int>(n);
+  if (cookie != nullptr) {
+    REprintf("%.*s", len, buf);
+  } else {
+    Rprintf("%.*s", len, buf);
+  }
+  return static_cast<ssize_t>(n);
+}
+
+FILE *open_console(bool to_err) {
+#if defined(__GLIBC__)
+  cookie_io_functions_t fns = {};
+  fns.write = console_write;
+  FILE *file = fopencookie(to_err ? reinterpret_cast<void *>(1) : nullptr, "w", fns);
+  if (file != nullptr) {
+    setvbuf(file, nullptr, _IONBF, 0);
+  }
+  return file;
+#elif defined(__APPLE__)
+  return funopen(
+      to_err ? reinterpret_cast<void *>(1) : nullptr, nullptr,
+      [](void *cookie, const char *buf, int n) -> int {
+        return static_cast<int>(
+            console_write(cookie, buf, static_cast<std::size_t>(n)));
+      },
+      nullptr, nullptr);
+#else
+  (void)to_err;
+#if defined(_WIN32)
+  return std::fopen("NUL", "w");
+#else
+  return std::fopen("/dev/null", "w");
+#endif
+#endif
+}
+
+} // namespace
+
+extern "C" {
+FILE *dseams_r_stdout;
+FILE *dseams_r_stderr;
+}
+
+namespace {
+
+__attribute__((constructor(101))) void init_reader_consoles() {
+  dseams_r_stdout = open_console(false);
+  dseams_r_stderr = open_console(true);
+}
+
+} // namespace
+
+extern "C" {
+
+__attribute__((noreturn)) void dseams_r_abort(void) {
+  Rf_error("bundled reader aborted");
+}
+
+__attribute__((noreturn)) void dseams_r_exit(int status) {
+  Rf_error("bundled reader exited with status %d", status);
+}
+
+__attribute__((noreturn)) void dseams_r__exit(int status) {
+  Rf_error("bundled reader exited with status %d", status);
+}
+
+__attribute__((noreturn)) void dseams_r__Exit(int status) {
+  Rf_error("bundled reader exited with status %d", status);
+}
+
+int dseams_r_printf(const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  Rvprintf(fmt, args);
+  va_end(args);
+  return 0;
+}
+
+int dseams_r_puts(const char *text) {
+  if (text != nullptr) {
+    Rprintf("%s\n", text);
+  }
+  return 0;
+}
+
+int dseams_r_putchar(int ch) {
+  Rprintf("%c", ch);
+  return ch;
+}
+
+int dseams_r_sprintf(char *buf, const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  const int n = std::vsnprintf(buf, 4096, fmt, args);
+  va_end(args);
+  return n;
+}
+
+int dseams_r_vsprintf(char *buf, const char *fmt, va_list args) {
+  // The only caller is zlib's gzprintf fallback, which already has a
+  // caller-sized buffer. Cap the write; vsnprintf is not a checked symbol.
+  return std::vsnprintf(buf, 4096, fmt, args);
+}
+
+} // extern "C"
