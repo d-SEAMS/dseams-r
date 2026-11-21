@@ -28,9 +28,11 @@ redistributed alongside MIT code, on these conditions:
 - molfiles/src/abinitplugin.c: its author allows the code "for as long
   as it is part of an open source project" and does "not allow" it "to
   be part of any closed source project". The bundled build compiles it.
+  The text is quoted at the end of this file.
 - molfiles/src/ply.c and molfiles/src/ply.h: permission is given on
   condition "that you do not sell the software". They ship in the
-  archive but are not compiled.
+  archive but are not compiled. The text is quoted at the end of this
+  file.
 - molfiles/src/hoomdplugin.c and molfiles/src/plyplugin.cxx carry a
   copyright header but no licence statement: hoomdplugin.c Copyright
   2009 Axel Kohlmeyer; plyplugin.cxx Copyright 1995-2016 The Board of
@@ -381,16 +383,18 @@ molfiles.tar.gz
   molfiles/src/unit_conversion.h and molfiles/src/periodic_table.h, are
   covered by molfiles/LICENSE as part of the plugin distribution.
   Files under other terms, each with its text in its own header:
-    molfiles/src/abinitplugin.c: Rob Lahaye's terms. The code may be
-      included only while it is part of an open-source project, never
-      in a closed-source one. There is no other licence text.
+    molfiles/src/abinitplugin.c: Rob Lahaye, Sungkyunkwan University
+      (August 2010). The code may be included only while it is part of
+      an open-source project, never in a closed-source one. There is no
+      other licence text. Quoted at the end of this file.
     molfiles/src/dmsplugin.cxx, molfiles/src/dtrplugin.cxx,
     molfiles/src/dtrplugin.hxx, molfiles/src/maeffplugin.cxx:
       BSD-3-Clause, Copyright 2009 D. E. Shaw Research, LLC.
-    molfiles/src/ply.c, molfiles/src/ply.h: Copyright 1998 Georgia
-      Institute of Technology. Use, copying, modification and
+    molfiles/src/ply.c, molfiles/src/ply.h: by Greg Turk, Copyright 1998
+      Georgia Institute of Technology. Use, copying, modification and
       distribution are permitted without fee with the notice kept, on
-      condition that the software is not sold.
+      condition that the software is not sold. Quoted at the end of
+      this file.
     molfiles/src/ReadPARM.h, molfiles/src/ReadPARM7.h: Copyright 1992
       Regents of the University of California (Bill Ross, UCSF). They
       may be distributed if the notice is kept unmodified and changes
@@ -457,3 +461,38 @@ SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
 FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
+
+
+The terms of the two molfile plugin sources that carry their own text,
+copied unchanged from their file headers (trailing blanks removed), for
+the parts above that name them:
+
+molfiles/src/abinitplugin.c, by Rob Lahaye, Sungkyunkwan University,
+Korea. This is the start of the file's header comment, which holds all of
+its licence text (the comment goes on with build notes):
+
+    /*
+     *  ABINIT plugin for VMD
+     *  Rob Lahaye, Sungkyunkwan University, Korea
+     *  August 2010
+     *
+     *  LICENSE:
+     *    You can include my code for as long as it is part of an
+     *  open source project. Hence: I do not allow my code to be
+     *  part of any closed source project.
+     *
+
+molfiles/src/ply.c and molfiles/src/ply.h, by Greg Turk, Copyright 1998
+Georgia Institute of Technology. The two files carry the same notice,
+here as in ply.c (ply.h differs only in trailing blanks):
+
+    Copyright (c) 1998 Georgia Institute of Technology.  All rights reserved.
+
+    Permission to use, copy, modify and distribute this software and its
+    documentation for any purpose is hereby granted without fee, provided
+    that the above copyright notice and this permission notice appear in
+    all copies of this software and that you do not sell the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+    WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
