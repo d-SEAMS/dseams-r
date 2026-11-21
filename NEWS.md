@@ -49,6 +49,11 @@
   or a different digest fails the test. Only with no local source does the
   test skip, on CRAN and when huggingface.co is unreachable, and it says
   why; `DSEAMS_REQUIRE_DATA=1` turns that skip into an error.
+* `LICENSE.note` quotes the terms of `abinitplugin.c` (Rob Lahaye) and of
+  `ply.c` and `ply.h` (Greg Turk, Georgia Institute of Technology) as their
+  headers give them, `inst/AUTHORS` names their authors, and DESCRIPTION
+  lists the holders of the molfile files that carry their own terms in
+  `Authors@R` and `Copyright`.
 * The vendored `linkcell` and `minimage` crates no longer ship their
   `CITATION.cff`, which R CMD check reports as a CITATION file outside
   `inst/`. Their author, Rohit Goswami, is listed for both crates in
