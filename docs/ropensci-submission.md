@@ -316,16 +316,19 @@ The run history is the Actions page:
 <https://github.com/d-SEAMS/dseams-r/actions>.
 
 - `r-cmd-check.yml` (`name: R-CMD-check`) runs on pushes and pull
-  requests to `main` and `release/**`, and on `workflow_dispatch`. The
-  bundled job copies the engine at the pin in `tools/seams-core.ref`
-  and runs `R CMD check --no-manual --as-cran` on Linux (R release and
-  devel), macOS, and Windows. On the Linux release cell that job also
-  checks that `cpp11::cpp_register()` leaves `R/cpp11.R` and
-  `src/cpp11.cpp` unchanged. The linked job
+  requests to `main`, `develop`, and `release/**`, and on
+  `workflow_dispatch`. The bundled job copies the engine at the pin in
+  `tools/seams-core.ref` and runs `R CMD check --no-manual --as-cran`
+  on Linux (R release and devel), macOS, and Windows. The macOS job
+  installs Homebrew llvm and puts its `bin` directory on `PATH`,
+  because rewriting the bundled readers needs llvm-objcopy. On the
+  Linux release cell that job also checks that `cpp11::cpp_register()`
+  leaves `R/cpp11.R` and `src/cpp11.cpp` unchanged. The linked job
   builds seams-core at that pin and runs `R CMD check --no-manual` with
   the package linked against that build. Both jobs set
   `_R_CHECK_FORCE_SUGGESTS_=true`.
-- `test-coverage.yml` (`name: test-coverage`) runs on the same events.
+- `test-coverage.yml` (`name: test-coverage`) runs on pushes and pull
+  requests to `main` and `release/**`, and on `workflow_dispatch`.
   It links the package to a seams-core build at the pin and runs covr
   on the R code (`.github/coverage.R`). `.covrignore` lists `src` and
   `.pixi`, so the engine copy and the C and C++ glue under `src/` are
@@ -343,90 +346,74 @@ The run history is the Actions page:
   `R CMD check --as-cran --no-manual`, and publishes the source
   tarball for `d-SEAMS/dseams-r`.
 
+`molfiles/src/ply.c` and `molfiles/src/ply.h` (Georgia Institute of
+Technology, 1998) permit use, copying, modification, and distribution
+on condition that the software is not sold. They are shipped and are
+not compiled. `molfiles/src/plyplugin.cxx` includes `ply.c`, so that
+condition would apply if plyplugin were compiled. plyplugin is not in
+the compiled list. `LICENSE.note` states this.
+
 `pkgcheck` was not run for this revision. The check that was run is
-`R CMD check --as-cran` of the bundled tarball `dseams_2.14.1.tar.gz`,
-on R 4.5.3 (2026-03-11), platform `x86_64-conda-linux-gnu`, on Ubuntu
-24.04.5 LTS. The log says R was compiled by
-`x86_64-conda-linux-gnu-cc (conda-forge gcc 14.4.0-7) 14.4.0` and
+`pixi run check`, which runs `R CMD check --as-cran --no-manual` on the
+bundled tarball `dseams_2.14.1.tar.gz`, on R 4.5.3 (2026-03-11),
+platform `x86_64-conda-linux-gnu`, on Ubuntu 24.04.5 LTS. R was compiled
+by `x86_64-conda-linux-gnu-cc (conda-forge gcc 14.4.0-7) 14.4.0` and
 `GNU Fortran (conda-forge gcc 14.4.0-7) 14.4.0`.
 `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona` was set, because this
 R adds `-march=nocona`. `DSEAMS_ROOT`, `SEAMS_BIN`, and
-`SEAMS_CPP_ORACLE` were unset. The log is `logs/check-ascran-00check.log`.
-It ends:
+`SEAMS_CPP_ORACLE` were unset. The check used `--no-manual`, so it does
+not check the PDF or HTML manual. It finished:
 
 ```
-Status: 2 NOTEs
+Status: 1 NOTE
 ```
 
-The two notes in that log are:
+0 errors | 0 warnings | 1 note
+
+The note is:
 
 ```
-* checking CRAN incoming feasibility ... [2s/13s] NOTE
+* checking CRAN incoming feasibility ... [3s/16s] NOTE
 Maintainer: 'Rohit Goswami <rgoswami@ieee.org>'
 
 New submission
 
-Size of tarball: 7946434 bytes
+Size of tarball: 7950141 bytes
 ```
 
+Installed package size is reported as INFO, not as a note:
+
 ```
-* checking HTML version of manual ... NOTE
-Skipping checking HTML validation: no command 'tidy' found.
-Please obtain a recent version of HTML Tidy by downloading a binary
-release or compiling the source code from <https://www.html-tidy.org/>.
+* checking installed package size ... INFO
+  installed size is 15.0Mb
+  sub-directories of 1Mb or more:
+    libs  14.4Mb
 ```
 
-The same log has `checking PDF version of manual ... OK` and
-`checking tests ... OK`. `R CMD build` (`logs/build.log`) does not
-build the PDF manual. The built DESCRIPTION (`logs/built-description.txt`) keeps
-`Date: 2026-11-17` and adds `Packaged: 2026-11-20 19:10:54 UTC; ubuntu`.
-
-The install log (`logs/check-ascran-00install.out`) prints
+`checking compilation flags used ... OK`. The install prints
 `rustc 1.100.0 (0ef1bc386 2026-11-09)`,
 `cargo 1.100.0 (3acc79c0c 2026-11-05)`, and
 `Running CMake version 3.28.3`. The C++ compile line defines
 `-DSEAMS_HAS_READCON=1`.
 
-`logs/check-ascran-testthat.Rout` prints:
+The testthat run inside that check prints:
 
 ```
-[ FAIL 0 | WARN 0 | SKIP 8 | PASS 167 ]
+[ FAIL 0 | WARN 0 | SKIP 8 | PASS 215 ]
 ```
 
-Seven skips are `DSEAMS_ROOT is not set`
-(`test-doc-examples.R` lines 21, 27, 32, 37, 54, and 73, and
-`test-ice.R` line 89). One skip is `SEAMS_BIN is not set`
-(`test-ice.R` line 73). The CON reader tests are not in that list.
-The examples (`logs/check-ascran-examples.Rout`) print:
+Seven skips are `DSEAMS_ROOT is not set` (`test-doc-examples.R` lines
+21, 27, 32, 37, 54, and 73, and `test-ice.R` line 89). One skip is
+`SEAMS_BIN is not set` (`test-ice.R` line 73).
 
-```
-> nframes(con)
-[1] 2
-> read_frame(con, type = -1L)
-dseams frame 1 atoms 4
-```
+The examples print `nframes()` of `tiny_multi_cuh2.con` as 2 and
+`read_frame()` as `dseams frame 1 atoms 4`. `con` there is
+`dseams_example("tiny_multi_cuh2.con")`.
 
-`con` there is `dseams_example("tiny_multi_cuh2.con")`. A separate read
-(`logs/test-suite.log`) prints `CON_READ nframes=2 nrow=4 class=dseams_frame`
-and `CON_MESSAGE_ABSENT TRUE`. The string
-`readcon-core is not in this build; CON input needs it` is not in the
-check logs. In seams-core that string is thrown only when
-`SEAMS_HAS_READCON` is unset, and this build sets it.
-
-`testthat::test_local(".", load_package = "installed")` from this
-checkout prints `[ FAIL 0 | WARN 0 | SKIP 8 | PASS 168 ]` with the same
-eight skips (`logs/test-local.log`). The submission
-test is not skipped: the checkout contains `tools/check-submission.R`.
-
-`testthat::test_check("dseams")`, run with the working directory set
-to the `tests/` directory of an installed copy that is not this
-checkout, prints `[ FAIL 0 | WARN 0 | SKIP 9 | PASS 166 ]`
-(`logs/test-check-call.log`). The ninth skip is
-`tools/check-submission.R is not beside this test run`
-(`test-submission.R` line 44). `R CMD check` runs the same
-`test_check("dseams")` from `tests/testthat.R` inside the unpacked
-source, where `00_pkg_src` still has `tools/check-submission.R`, so
-that run does not skip the submission test. `docs/` and
+`R CMD check` runs `test_check("dseams")` from `tests/testthat.R`
+inside the unpacked source, where `00_pkg_src` still has
+`tools/check-submission.R` and `tools/reader-symbols.sh`, so that run
+does not skip the submission test or the symbol-map tests. `docs/` and
 `codemeta.json` are listed in `.Rbuildignore` and are not in
 `00_pkg_src`.
 
