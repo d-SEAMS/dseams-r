@@ -78,9 +78,37 @@ find_tool() {
   done
   return 0
 }
+objcopy_is_llvm() {
+  "$1" --version 2>/dev/null | awk 'NR==1 { print tolower($0) }' | grep -q llvm
+}
+# Homebrew llvm is keg-only, so llvm-objcopy is often absent from PATH.
+brew_llvm_objcopy() {
+  if ! command -v brew >/dev/null 2>&1; then
+    return 0
+  fi
+  prefix=$(brew --prefix llvm 2>/dev/null) || return 0
+  if [ -n "${prefix}" ] && [ -x "${prefix}/bin/llvm-objcopy" ]; then
+    printf '%s\n' "${prefix}/bin/llvm-objcopy"
+  fi
+  return 0
+}
 CARGO=$(find_tool cargo)
 CMAKE=$(find_tool cmake)
-OBJCOPY=$(find_tool objcopy llvm-objcopy)
+UNAME_S=$(uname -s 2>/dev/null || echo unknown)
+case "${UNAME_S}" in
+  Darwin)
+    OBJCOPY=$(find_tool llvm-objcopy)
+    if [ -z "${OBJCOPY}" ]; then
+      OBJCOPY=$(brew_llvm_objcopy)
+    fi
+    if [ -z "${OBJCOPY}" ]; then
+      OBJCOPY=$(find_tool objcopy)
+    fi
+    ;;
+  *)
+    OBJCOPY=$(find_tool objcopy llvm-objcopy)
+    ;;
+esac
 CHEMFILES_BUILD=""
 READER_DEPS=""
 
@@ -169,6 +197,10 @@ else
   fi
   if [ -z "${OBJCOPY}" ]; then
     echo "configure: objcopy (GNU binutils) or llvm-objcopy is required to build the bundled readers" >&2
+    exit 1
+  fi
+  if [ "${UNAME_S}" = Darwin ] && ! objcopy_is_llvm "${OBJCOPY}"; then
+    echo "configure: on Darwin, llvm-objcopy is required for Mach-O symbol rewriting (found ${OBJCOPY})" >&2
     exit 1
   fi
   # The tarball stores cargo's checksum under a name that is not hidden.

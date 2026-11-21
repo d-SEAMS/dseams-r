@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* On macOS, rewriting the bundled readers requires llvm-objcopy. GNU
+  objcopy does not rewrite Mach-O archives, and configure rejects it
+  there. A Homebrew llvm install is used when its `llvm-objcopy` is
+  not on `PATH`.
 * Register the C `.Call()` entry points under their `seams_r_*` symbol
   names so `cpp11::cpp_register()`, `pkgload::load_all()`, and
   `testthat::test_local()` regenerate `src/cpp11.cpp` without symbol
