@@ -57,7 +57,21 @@ Authors@R: c(
     person("Ruhila", "Goswami", role = "ctb",
            comment = c(ORCID = "0000-0002-5443-9356")),
     person("d-SEAMS core team", role = "cph",
-           comment = "seams-core engine sources bundled in src/seams")
+           comment = "seams-core engine sources bundled in src/seams"),
+    person("The Board of Trustees of the University of Illinois", role = "cph",
+           comment = "VMD molfile plugins bundled with chemfiles"),
+    person("Rob", "Lahaye", role = c("ctb", "cph"),
+           comment = "abinitplugin.c in the bundled VMD molfile plugins"),
+    person("Greg", "Turk", role = "ctb",
+           comment = "ply.c and ply.h in the bundled VMD molfile plugins"),
+    person("Georgia Institute of Technology", role = "cph",
+           comment = "ply.c and ply.h in the bundled VMD molfile plugins"),
+    person("D. E. Shaw Research, LLC", role = "cph",
+           comment = "dms, dtr and maeff plugins in the bundled VMD molfile plugins"),
+    person("The Regents of the University of California", role = "cph",
+           comment = "ReadPARM.h and ReadPARM7.h in the bundled VMD molfile plugins"),
+    person("Axel", "Kohlmeyer", role = c("ctb", "cph"),
+           comment = "hoomdplugin.c in the bundled VMD molfile plugins")
     )
 Description: Structural analysis of water and ice in molecular dynamics
     trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh
@@ -71,8 +85,12 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
-Copyright: See file inst/AUTHORS for the bundled readcon-core, Rust
-    crates, and chemfiles; LICENSE.note gives their licences.
+Copyright: See file inst/AUTHORS for the copyright holders of the
+    bundled engine, readcon-core, Rust crates, chemfiles, and the
+    libraries chemfiles bundles, including the VMD molfile plugins and
+    their ABINIT (Rob Lahaye) and PLY (Greg Turk, Georgia Institute of
+    Technology) sources. LICENSE.note gives their licences and quotes
+    the ABINIT and PLY terms.
 URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core

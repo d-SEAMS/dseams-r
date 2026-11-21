@@ -68,11 +68,15 @@ ConsoleBuf reader_cerr_buf(true);
 // The bundled chemfiles archive refers to std::cout and std::cerr.
 // tools/reader-symbols.sh renames those symbols onto these objects, which
 // write to the R console. They are real iostreams, so the call sites keep
-// the libstdc++ layout they were compiled against.
-std::ostream dseams_r_cout_obj __asm__("dseams_r_cout")(&reader_cout_buf);
-std::ostream dseams_r_cerr_obj __asm__("dseams_r_cerr")(&reader_cerr_buf);
-std::ostream dseams_r_cout_libcxx __asm__("dseams_r_cout_libcxx")(&reader_cout_buf);
-std::ostream dseams_r_cerr_libcxx __asm__("dseams_r_cerr_libcxx")(&reader_cerr_buf);
+// the standard library layout they were compiled against. C linkage gives
+// each object the plain name the script uses, plus the leading underscore
+// on Mach-O.
+extern "C" {
+std::ostream dseams_r_cout{&reader_cout_buf};
+std::ostream dseams_r_cerr{&reader_cerr_buf};
+std::ostream dseams_r_cout_libcxx{&reader_cout_buf};
+std::ostream dseams_r_cerr_libcxx{&reader_cerr_buf};
+}
 
 std::ostream &out() {
   thread_local ConsoleBuf buf(false);
@@ -160,6 +164,28 @@ FILE *open_console(bool to_err) {
 extern "C" {
 FILE *dseams_r_stdout;
 FILE *dseams_r_stderr;
+
+// The Windows UCRT defines stdout and stderr as __acrt_iob_func(1) and
+// __acrt_iob_func(2). reader-symbols.sh points those calls at this function.
+FILE *dseams_r_acrt_iob_func(unsigned index) {
+  if (index == 1) {
+    return dseams_r_stdout;
+  }
+  if (index == 2) {
+    return dseams_r_stderr;
+  }
+#if defined(_WIN32)
+  return stdin;
+#else
+  return nullptr;
+#endif
+}
+
+#if defined(_WIN32)
+// Call sites compiled against the UCRT import library reach the function
+// through this pointer.
+FILE *(*__imp_dseams_r_acrt_iob_func)(unsigned) = dseams_r_acrt_iob_func;
+#endif
 }
 
 namespace {
