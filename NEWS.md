@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* `inst/AUTHORS` and `LICENSE.note` name the Rust standard library,
+  compiler-rt, libm, and the other crates rustc archives into
+  `libreadcon_core.a` that the vendor tree does not already list.
+  Their licence texts are in `inst/licenses/readcon-sysroot`.
 * The bundled chemfiles and readcon-core static libraries are built with
   `-DNDEBUG`. The CMake Release flags had replaced CMake's default, so
   `assert` stayed in `libchemfiles.a`. readcon-core's release profile

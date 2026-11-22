@@ -393,6 +393,60 @@ test_that("bundled readers are compiled with NDEBUG", {
   expect_false(grepl("readcon-apple-builtins.sh", cargo, fixed = TRUE))
 })
 
+test_that("rustc's staticlib licences are listed", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  authors <- paste(
+    readLines(file.path(root, "inst/AUTHORS"), warn = FALSE),
+    collapse = "\n"
+  )
+  note <- paste(
+    readLines(file.path(root, "LICENSE.note"), warn = FALSE),
+    collapse = "\n"
+  )
+  names <- c(
+    "Rust standard library",
+    "compiler_builtins 0.1.160",
+    "compiler-rt",
+    "addr2line 0.27.1",
+    "gimli 0.34.0",
+    "hashbrown 0.17.1",
+    "object 0.39.1",
+    "rustc-demangle 0.1.28",
+    "libm",
+    "Crossbeam Project Developers",
+    "Unicode, Inc",
+    "windows-link"
+  )
+  for (name in names) {
+    expect_true(grepl(name, authors, fixed = TRUE), info = paste("AUTHORS", name))
+    expect_true(grepl(name, note, fixed = TRUE), info = paste("LICENSE.note", name))
+  }
+  texts <- c(
+    "inst/licenses/readcon-sysroot/rust-LICENSE-MIT",
+    "inst/licenses/readcon-sysroot/rust-LICENSE-APACHE",
+    "inst/licenses/readcon-sysroot/Unicode-3.0.txt",
+    "inst/licenses/readcon-sysroot/compiler-builtins-LICENSE.txt",
+    "inst/licenses/readcon-sysroot/compiler-rt-LICENSE.TXT",
+    "inst/licenses/readcon-sysroot/compiler-rt-CREDITS.TXT",
+    "inst/licenses/readcon-sysroot/libm-LICENSE.txt",
+    "inst/licenses/readcon-sysroot/addr2line-LICENSE-MIT",
+    "inst/licenses/readcon-sysroot/addr2line-LICENSE-APACHE",
+    "inst/licenses/readcon-sysroot/gimli-LICENSE-MIT",
+    "inst/licenses/readcon-sysroot/gimli-LICENSE-APACHE",
+    "inst/licenses/readcon-sysroot/hashbrown-LICENSE-MIT",
+    "inst/licenses/readcon-sysroot/hashbrown-LICENSE-APACHE",
+    "inst/licenses/readcon-sysroot/object-LICENSE-MIT",
+    "inst/licenses/readcon-sysroot/object-LICENSE-APACHE",
+    "inst/licenses/readcon-sysroot/rustc-demangle-LICENSE-MIT",
+    "inst/licenses/readcon-sysroot/rustc-demangle-LICENSE-APACHE"
+  )
+  for (path in texts) {
+    expect_true(file.exists(file.path(root, path)), info = path)
+    expect_true(grepl(path, note, fixed = TRUE), info = path)
+  }
+})
+
 test_that("the CMake floor check rejects the minimums chemfiles shipped", {
   for (call in c(
     "cmake_minimum_required(VERSION 2.8.12)",

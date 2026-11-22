@@ -6,11 +6,15 @@ LICENSE. The d-SEAMS engine copied into src/seams is also MIT, by the
 d-SEAMS core team.
 
 The source package also carries readcon-core, the Rust crates it builds
-with, and chemfiles with the libraries chemfiles bundles. Each keeps its
-own licence, listed below with the path of its licence text inside the
-source package. Where a part offers a choice ("A OR B"), dseams
-redistributes it under either. inst/AUTHORS names the authors of each
-part.
+with, and chemfiles with the libraries chemfiles bundles. rustc also
+links its standard library, compiler-rt, and the crates listed after the
+vendor set into libreadcon_core.a. Those sources ship with the compiler.
+Their licence texts are in inst/licenses/readcon-sysroot. Each part keeps
+its own licence, listed below with the path of its licence text inside
+the source package. Where a part offers a choice ("A OR B"), dseams
+redistributes it under either. Where a part requires every licence
+("A AND B"), dseams redistributes it under all of them. inst/AUTHORS
+names the authors of each part.
 
 Every licence here allows the source package to be copied and
 redistributed alongside MIT code, on these conditions:
@@ -217,6 +221,79 @@ zlib-rs 0.6.8
 zmij 1.0.23
   License: MIT
   Text: vendor/zmij/LICENSE-MIT
+
+
+Code rustc links into libreadcon_core.a from its standard library
+(versions are those of rustc 1.100.0; texts are under
+inst/licenses/readcon-sysroot):
+
+Rust standard library (std, core, alloc, panic_unwind, unwind,
+std_detect, rustc_std_workspace_core, rustc_std_workspace_alloc), and
+windows-link on Windows
+  License: MIT OR Apache-2.0
+  Text:
+    inst/licenses/readcon-sysroot/rust-LICENSE-MIT
+    inst/licenses/readcon-sysroot/rust-LICENSE-APACHE
+  The copy of backtrace compiled into std is also Apache-2.0 OR MIT,
+    Copyright 2014 Alex Crichton and The Rust Project Developers.
+  std/src/sync/mpmc, which the Linux static library links, is also
+    Apache-2.0 OR MIT, Copyright 2019 The Crossbeam Project Developers
+    and The Rust Project Developers.
+  core's Unicode tables are Unicode-3.0, Copyright 1991-2024
+    Unicode, Inc.
+    Text: inst/licenses/readcon-sysroot/Unicode-3.0.txt
+
+compiler_builtins 0.1.160, including its libm
+  License: MIT AND Apache-2.0 WITH LLVM-exception AND (MIT OR Apache-2.0).
+    libm is MIT, and its text names the further copyright holders.
+  Text:
+    inst/licenses/readcon-sysroot/compiler-builtins-LICENSE.txt
+    inst/licenses/readcon-sysroot/libm-LICENSE.txt
+
+compiler-rt (LLVM, rust-lang/llvm-project tag rustc/23.1-2026-07-22)
+  License: Apache-2.0 WITH LLVM-exception, and the legacy University of
+    Illinois/NCSA licence and legacy MIT licence carried in the same text
+  Text:
+    inst/licenses/readcon-sysroot/compiler-rt-LICENSE.TXT
+    inst/licenses/readcon-sysroot/compiler-rt-CREDITS.TXT
+
+addr2line 0.27.1
+  License: Apache-2.0 OR MIT
+  Text:
+    inst/licenses/readcon-sysroot/addr2line-LICENSE-MIT
+    inst/licenses/readcon-sysroot/addr2line-LICENSE-APACHE
+
+gimli 0.34.0
+  License: MIT OR Apache-2.0
+  src/constants.rs is from rust-dwarf, Copyright 2016 The rust-dwarf
+    Developers, MIT OR Apache-2.0
+  Text:
+    inst/licenses/readcon-sysroot/gimli-LICENSE-MIT
+    inst/licenses/readcon-sysroot/gimli-LICENSE-APACHE
+
+hashbrown 0.17.1
+  License: MIT OR Apache-2.0
+  Text:
+    inst/licenses/readcon-sysroot/hashbrown-LICENSE-MIT
+    inst/licenses/readcon-sysroot/hashbrown-LICENSE-APACHE
+
+object 0.39.1
+  License: Apache-2.0 OR MIT
+  Text:
+    inst/licenses/readcon-sysroot/object-LICENSE-MIT
+    inst/licenses/readcon-sysroot/object-LICENSE-APACHE
+
+rustc-demangle 0.1.28
+  License: MIT OR Apache-2.0
+  Text:
+    inst/licenses/readcon-sysroot/rustc-demangle-LICENSE-MIT
+    inst/licenses/readcon-sysroot/rustc-demangle-LICENSE-APACHE
+
+rustc also links its own copies of crates already listed above:
+adler2 2.0.1, cfg-if 1.0.4 (the vendor tree has 1.0.5), libc 0.2.189
+(the vendor tree has 0.2.191), memchr 2.8.3, and miniz_oxide 0.9.1.
+Their licences are the ones named for those crates. cfg-if 1.0.4 and
+libc 0.2.189 use the same MIT copyright lines as the vendored texts.
 
 
 chemfiles 0.10.4 (src/chemfiles)

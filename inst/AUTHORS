@@ -210,7 +210,85 @@ zmij 1.0.23
   License: MIT
   Source: https://github.com/dtolnay/zmij
 
-4. chemfiles 0.10.4 (src/chemfiles), with the seams-core patches; each
+4. Code rustc links into libreadcon_core.a from its standard library
+
+rustc copies these into the static library when it builds readcon-core.
+They are not in src/readcon-core/vendor. The versions are the ones rustc
+1.100.0 links. A newer rustc links the versions it ships, under the same
+licences. inst/licenses/readcon-sysroot holds the texts. A crate section
+3 already names is not repeated, except for the version rustc links.
+
+Rust standard library (std, core, alloc, panic_unwind, unwind,
+std_detect, rustc_std_workspace_core, rustc_std_workspace_alloc), and
+windows-link on Windows
+  Authors: The Rust Project Contributors
+  License: MIT OR Apache-2.0
+  Source: https://github.com/rust-lang/rust
+  The copy of backtrace compiled into std is also Apache-2.0 OR MIT,
+    Copyright 2014 Alex Crichton and The Rust Project Developers.
+  std/src/sync/mpmc, which the Linux static library links, is also
+    Apache-2.0 OR MIT, Copyright 2019 The Crossbeam Project Developers
+    and The Rust Project Developers.
+  core's Unicode tables (library/core/src/unicode) are Unicode-3.0,
+    Copyright 1991-2024 Unicode, Inc.
+
+compiler_builtins 0.1.160, including its libm
+  Authors: Alex Crichton, Amanieu d'Antras, Jorge Aparicio, Trevor Gross
+  License: MIT AND Apache-2.0 WITH LLVM-exception AND (MIT OR Apache-2.0).
+    libm, which the static library links, is MIT. Its notices also name
+    Jorge Aparicio (2018); musl (Rich Felker and others, 2005-2020); and
+    math code from Sun Microsystems (1993, 2004), David Schultz
+    (2003-2011), Steven G. Kargl (2003-2009), Bruce D. Evans (2003-2009),
+    Stephen L. Moshier (2008), and Arm Limited (2017-2018).
+  Source: https://github.com/rust-lang/compiler-builtins
+
+compiler-rt, the LLVM copy rustc 1.100.0 compiles into compiler_builtins
+(rust-lang/llvm-project tag rustc/23.1-2026-07-22)
+  Authors: the contributors listed in compiler-rt CREDITS.TXT. That file
+    names Howard Hinnant as architect and primary author.
+  License: Apache-2.0 WITH LLVM-exception. The same text also carries the
+    legacy University of Illinois/NCSA licence and the legacy MIT licence
+    (Copyright 2009-2019 by those contributors; developed by the LLVM
+    Team, University of Illinois at Urbana-Champaign).
+  Source: https://github.com/llvm/llvm-project/tree/main/compiler-rt
+
+addr2line 0.27.1
+  Authors: The gimli Developers
+  License: Apache-2.0 OR MIT
+  Source: https://github.com/gimli-rs/addr2line
+
+gimli 0.34.0
+  Authors: The Rust Project Developers (named in LICENSE-MIT)
+  License: MIT OR Apache-2.0
+  Source: https://github.com/gimli-rs/gimli
+  src/constants.rs is from rust-dwarf, Copyright 2016 The rust-dwarf
+    Developers, MIT OR Apache-2.0
+
+hashbrown 0.17.1
+  Authors: Amanieu d'Antras
+  License: MIT OR Apache-2.0
+  Source: https://github.com/rust-lang/hashbrown
+
+object 0.39.1
+  Authors: The Gimli Developers
+  License: Apache-2.0 OR MIT
+  Source: https://github.com/gimli-rs/object
+
+rustc-demangle 0.1.28
+  Authors: Alex Crichton
+  License: MIT OR Apache-2.0
+  Source: https://github.com/rust-lang/rustc-demangle
+
+rustc also links its own copies of crates section 3 already names.
+The licence and the authors are the ones in that section. The versions
+in rustc 1.100.0 are adler2 2.0.1, cfg-if 1.0.4 (the vendor tree has
+1.0.5), libc 0.2.189 (the vendor tree has 0.2.191), memchr 2.8.3, and
+miniz_oxide 0.9.1. cfg-if 1.0.4's MIT notice is Copyright 2014 Alex
+Crichton, the same notice as the vendored 1.0.5 text. libc 0.2.189's
+MIT notice names The Rust Project Developers, as the vendored text does.
+
+
+5. chemfiles 0.10.4 (src/chemfiles), with the seams-core patches; each
    cmake_minimum_required() in it and in external/*.tar.gz below 3.5 reads
    VERSION 3.5...3.10 (tools/chemfiles-cmake-floor.py)
 
@@ -246,7 +324,7 @@ CheckCompilerFlags/*.cmake
   License: BSD-3-Clause
 
 
-5. Libraries bundled by chemfiles in src/chemfiles/external
+6. Libraries bundled by chemfiles in src/chemfiles/external
 
 bzip2.tar.gz (bzip2 and libbzip2)
   Authors: Julian R Seward
