@@ -239,9 +239,10 @@ tar_member_text <- function(tarball, member) {
 }
 
 # src/chemfiles/external is not installed. When the source tree is
-# present these two tests still check the archives.
-# tools/chemfiles-msgpack-type-traits.py --check and
-# tools/chemfiles-molfiles-win32.py --check require the same bytes at
+# present these tests still check the archives.
+# tools/chemfiles-msgpack-type-traits.py --check,
+# tools/chemfiles-molfiles-win32.py --check, and
+# tools/chemfiles-lzma-mingw.py --check require the same bytes at
 # vendor time. An installed package is checked by reading the water
 # those readers decode. tools/readers holds tiny.mae and tiny.mmtf;
 # vendor-readers.sh copies them into inst/extdata, and the same files
@@ -329,6 +330,36 @@ test_that("vendored DESRES plugins take the Windows path on MinGW", {
     expect_true(grepl("read(fd, mapping, framesize)", cxx, fixed = TRUE))
   }
   expect_one_water(reader_water("tiny.mae"))
+})
+
+test_that("vendored lzma uses the GCC bit scan under MinGW", {
+  root <- portability_root()
+  if (!is.null(root)) {
+    tarball <- file.path(root, "src", "chemfiles", "external", "lzma.tar.gz")
+    expect_true(file.exists(tarball))
+    text <- tar_member_text(tarball, "lzma/liblzma/common/memcmplen.h")
+    old <- "#\tif defined(_M_X64) // MSVC or Intel C compiler on Windows"
+    new <- paste0(
+      "#\tif (defined(_MSC_VER) || defined(__INTEL_COMPILER)) ",
+      "&& defined(_M_X64)"
+    )
+    expect_false(grepl(old, text, fixed = TRUE))
+    expect_true(grepl(new, text, fixed = TRUE))
+    guard <- paste0(
+      "#if defined(TUKLIB_FAST_UNALIGNED_ACCESS) \\\n",
+      "\t\t&& defined(_MSC_VER) \\\n",
+      "\t\t&& defined(_M_X64) \\\n",
+      "\t\t&& !defined(__INTEL_COMPILER)\n",
+      "#\tinclude <intrin.h>"
+    )
+    expect_true(grepl(guard, text, fixed = TRUE))
+    expect_true(grepl("__builtin_ctzll", text, fixed = TRUE))
+    expect_true(grepl("_BitScanForward64", text, fixed = TRUE))
+    intrin <- regexpr("#\tinclude <intrin.h>", text, fixed = TRUE)
+    scan <- regexpr("_BitScanForward64(&tmp, x)", text, fixed = TRUE)
+    expect_gt(intrin, 0L)
+    expect_gt(scan, intrin)
+  }
 })
 
 test_that("the CMake floor check rejects the minimums chemfiles shipped", {

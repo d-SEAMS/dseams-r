@@ -1,5 +1,13 @@
 # dseams (development version)
 
+* The bundled lzma, inside `external/lzma.tar.gz`, calls
+  `_BitScanForward64` whenever `_M_X64` is defined. MinGW-w64 defines
+  `_M_X64` from `<stddef.h>`, which is included after the generated
+  config, and Rtools GCC 14 rejects the undeclared intrinsic.
+  `tools/chemfiles-lzma-mingw.py` keeps that intrinsic for MSVC and the
+  Intel compiler, which is where `<intrin.h>` provides it, and uses
+  `__builtin_ctzll` for GCC and Clang. That is the condition xz 5.4.4
+  uses. lzma stays in the build.
 * `tiny.mae` and `tiny.mmtf` are one water molecule shipped with the
   package. The Maestro plugin and the MMTF reader return that water.
   The portability tests read these files, so they run from an installed
