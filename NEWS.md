@@ -9,6 +9,15 @@
   which is the upstream msgpack-c fix in commit
   `9b801f087ab7434f2ab1ab3c0f48a966c19d3b70` (pull 1162, released in
   8.0.0). The vendored header is the older copy shipped in mmtf-cpp.
+* The bundled DESRES molfile plugins build with the Rtools MinGW
+  toolchain. dtrplugin and maeffplugin take their Windows paths only
+  when `DESRES_WIN32` is set, and they set it only for `_MSC_VER`.
+  MinGW defines `_WIN32` and not `_MSC_VER`, so dtrplugin includes
+  `<sys/mman.h>` and maeffplugin has no `M_PI`. dtrplugin already reads
+  each frame with `read()`; that path is the `DESRES_WIN32` branch.
+  `tools/chemfiles-molfiles-win32.py` selects the branch for every
+  `_WIN32`. The Unix branch, including `<sys/mman.h>`, is unchanged,
+  and both plugins stay in the compiled set.
 * A linked engine needs the readers the bundled copy has for `nframes()`
   to count CON frames and for `read_frame()` to read the VMD molfile
   formats; seams-core 2.14.1 as tagged has neither.

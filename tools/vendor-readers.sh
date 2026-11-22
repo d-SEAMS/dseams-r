@@ -165,9 +165,10 @@ PY
 # chemfiles 0.10.4 with the seams-core patches (mmCIF, MOL2, frame visit,
 # Apple zlib, fmt/libc++), the VMD molfile readers from
 # tools/chemfiles-molfiles.py, the CMake policy floor from
-# tools/chemfiles-cmake-floor.py, and the msgpack-c <type_traits>
-# include from tools/chemfiles-msgpack-type-traits.py. cmake builds this
-# tree at install time.
+# tools/chemfiles-cmake-floor.py, the msgpack-c <type_traits> include
+# from tools/chemfiles-msgpack-type-traits.py, and the MinGW DESRES
+# guards from tools/chemfiles-molfiles-win32.py. cmake builds this tree
+# at install time.
 case "${DSEAMS_NO_DOWNLOAD:-}" in
   1|yes|true|TRUE)
     if [ -z "${CHEMFILES_TARBALL:-}" ]; then
@@ -223,8 +224,9 @@ python3 "$pkg/tools/chemfiles-molfiles.py" "$pkg/src/chemfiles"
 # VERSION 3.5...3.10, then refuse a tree that still has one below.
 python3 "$pkg/tools/chemfiles-cmake-floor.py" "$pkg/src/chemfiles"
 # libc++ no longer declares std::remove_volatile through the headers
-# msgpack-c includes.
+# msgpack-c includes, and MinGW does not take the DESRES Windows paths.
 python3 "$pkg/tools/chemfiles-msgpack-type-traits.py" "$pkg/src/chemfiles"
+python3 "$pkg/tools/chemfiles-molfiles-win32.py" "$pkg/src/chemfiles"
 # Tests and diagnostic pragmas are not part of the library the package
 # compiles, and R CMD check rejects both the pragmas and the hidden files.
 rm -rf "$pkg/src/chemfiles/tests"

@@ -265,6 +265,41 @@ test_that("vendored msgpack-c includes type_traits before remove_volatile", {
   expect_true(grepl("using v1::remove_volatile;", v2, fixed = TRUE))
 })
 
+test_that("vendored DESRES plugins take the Windows path on MinGW", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  tarball <- file.path(root, "src", "chemfiles", "external", "molfiles.tar.gz")
+  expect_true(file.exists(tarball))
+  old <- paste(
+    "#if defined(_MSC_VER)",
+    "#ifndef DESRES_WIN32",
+    "#define DESRES_WIN32",
+    sep = "\n"
+  )
+  win <- paste(
+    "#if defined(_WIN32)",
+    "#ifndef DESRES_WIN32",
+    "#define DESRES_WIN32",
+    sep = "\n"
+  )
+  for (member in c(
+    "molfiles/src/dtrplugin.hxx",
+    "molfiles/src/maeffplugin.cxx"
+  )) {
+    text <- tar_member_text(tarball, member)
+    expect_true(grepl(win, text, fixed = TRUE), info = member)
+    expect_false(grepl(old, text, fixed = TRUE), info = member)
+  }
+  cxx <- tar_member_text(tarball, "molfiles/src/dtrplugin.cxx")
+  guard <- regexpr("#ifndef DESRES_WIN32", cxx, fixed = TRUE)
+  include <- regexpr("#include <sys/mman.h>", cxx, fixed = TRUE)
+  windows <- regexpr("windows version", cxx, fixed = TRUE)
+  expect_gt(guard, 0L)
+  expect_gt(include, guard)
+  expect_gt(windows, include)
+  expect_true(grepl("read(fd, mapping, framesize)", cxx, fixed = TRUE))
+})
+
 test_that("the CMake floor check rejects the minimums chemfiles shipped", {
   for (call in c(
     "cmake_minimum_required(VERSION 2.8.12)",
