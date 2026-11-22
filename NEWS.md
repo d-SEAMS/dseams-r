@@ -1,5 +1,14 @@
 # dseams (development version)
 
+* The bundled chemfiles builds with CMake 4. CMake 4 refuses a
+  `cmake_minimum_required()` below 3.5, and chemfiles 0.10.4 and the
+  libraries it unpacks from `external/*.tar.gz` (zlib, lzma, bzip2, fmt,
+  toml11, tng, molfiles, pugixml, mmtf-cpp) asked for 2.8 to 3.5.
+  `tools/chemfiles-cmake-floor.py` rewrites each of those 15 calls to
+  `VERSION 3.5...3.10` when the readers are vendored and refuses a tree
+  that still has one below; a test checks the shipped tree. The policy
+  version stays below 3.22, so every chemfiles target compiles with the
+  same flags as before. All formats and molfile plugins are kept.
 * On macOS, rewriting the bundled readers requires llvm-objcopy. GNU
   objcopy does not rewrite Mach-O archives, and configure rejects it
   there. A Homebrew llvm install is used when its `llvm-objcopy` is

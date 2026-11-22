@@ -210,7 +210,9 @@ zmij 1.0.23
   License: MIT
   Source: https://github.com/dtolnay/zmij
 
-4. chemfiles 0.10.4 (src/chemfiles), with the seams-core patches
+4. chemfiles 0.10.4 (src/chemfiles), with the seams-core patches; each
+   cmake_minimum_required() in it and in external/*.tar.gz below 3.5 reads
+   VERSION 3.5...3.10 (tools/chemfiles-cmake-floor.py)
 
   Authors: Guillaume Fraux and contributors: Elsa Perrin,
     François-Xavier Coudert, Guillaume Fraux, Jonathan Fine,

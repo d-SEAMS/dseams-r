@@ -152,3 +152,97 @@ test_that("Darwin targets are the Mach-O names of the wrappers", {
   expect_true("dseams_r___imp___acrt_iob_func" %in% found$vars)
   expect_true("dseams_r___acrt_iob_func" %in% found$funs)
 })
+
+# The floor tools/chemfiles-cmake-floor.py writes: CMake 4 refuses a
+# minimum below 3.5, and CMake 3.31 warns below a policy version of 3.10.
+cmake_floor_problems <- function(text, where) {
+  calls <- regmatches(
+    text,
+    gregexpr("cmake_minimum_required\\s*\\([^)]*\\)", text,
+      ignore.case = TRUE, perl = TRUE
+    )
+  )[[1L]]
+  bad <- character()
+  pattern <- paste0(
+    "^cmake_minimum_required\\s*\\(\\s*VERSION\\s+([0-9]+(?:\\.[0-9]+)*)",
+    "(?:\\.\\.\\.([0-9]+(?:\\.[0-9]+)*))?(?:\\s+FATAL_ERROR)?\\s*\\)$"
+  )
+  for (call in calls) {
+    m <- regmatches(call, regexec(pattern, call, ignore.case = TRUE, perl = TRUE))[[1L]]
+    if (length(m) != 3L) {
+      bad <- c(bad, paste0(where, ": cannot parse ", call))
+      next
+    }
+    low <- numeric_version(m[[2L]])
+    policy <- if (nzchar(m[[3L]])) numeric_version(m[[3L]]) else low
+    if (low < "3.5" || policy < "3.10") {
+      bad <- c(bad, paste0(where, ": ", call))
+    }
+  }
+  list(n = length(calls), bad = bad)
+}
+
+is_cmake_file <- function(path) {
+  base <- basename(path)
+  base == "CMakeLists.txt" | endsWith(base, ".cmake")
+}
+
+test_that("every vendored chemfiles CMake file meets the CMake 4 floor", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  chem <- file.path(root, "src", "chemfiles")
+  expect_true(file.exists(file.path(chem, "CMakeLists.txt")))
+
+  seen <- 0L
+  bad <- character()
+  files <- list.files(chem, recursive = TRUE, full.names = TRUE, all.files = TRUE)
+  for (path in files[is_cmake_file(files)]) {
+    got <- cmake_floor_problems(
+      paste(readLines(path, warn = FALSE), collapse = "\n"),
+      substring(path, nchar(chem) + 2L)
+    )
+    seen <- seen + got$n
+    bad <- c(bad, got$bad)
+  }
+  tarballs <- list.files(file.path(chem, "external"), "\\.tar\\.gz$", full.names = TRUE)
+  expect_gt(length(tarballs), 0L)
+  for (tarball in tarballs) {
+    members <- utils::untar(tarball, list = TRUE)
+    members <- members[is_cmake_file(members)]
+    if (length(members) == 0L) {
+      next
+    }
+    dir <- tempfile("cmake-floor-")
+    utils::untar(tarball, files = members, exdir = dir)
+    for (member in members) {
+      got <- cmake_floor_problems(
+        paste(readLines(file.path(dir, member), warn = FALSE), collapse = "\n"),
+        paste0(basename(tarball), ":", member)
+      )
+      seen <- seen + got$n
+      bad <- c(bad, got$bad)
+    }
+    unlink(dir, recursive = TRUE)
+  }
+  expect_gt(seen, 0L)
+  expect_identical(bad, character(), info = paste(bad, collapse = "\n"))
+})
+
+test_that("the CMake floor check rejects the minimums chemfiles shipped", {
+  for (call in c(
+    "cmake_minimum_required(VERSION 2.8.12)",
+    "cmake_minimum_required(VERSION 3.4)",
+    "cmake_minimum_required(VERSION 3.5 FATAL_ERROR)",
+    "cmake_minimum_required(VERSION 3.5...3.9)",
+    "cmake_minimum_required(${MIN})"
+  )) {
+    expect_length(cmake_floor_problems(call, "x")$bad, 1L)
+  }
+  for (call in c(
+    "cmake_minimum_required(VERSION 3.5...3.10)",
+    "cmake_minimum_required(VERSION 3.5...3.10 FATAL_ERROR)",
+    "cmake_minimum_required(VERSION 3.15)"
+  )) {
+    expect_length(cmake_floor_problems(call, "x")$bad, 0L)
+  }
+})
