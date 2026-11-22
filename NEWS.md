@@ -1,5 +1,15 @@
 # dseams (development version)
 
+* On Windows, readcon-core is built for the Rust GNU target of the
+  Rtools compiler (`x86_64-pc-windows-gnu`, or
+  `aarch64-pc-windows-gnullvm` on ARM). Cargo's MSVC default names the
+  static library `readcon_core.lib`, so `libreadcon_core.a` was never
+  written and the install stopped.
+  `configure.win` stops with the `rustup target add` command to run when
+  that target is missing. The link adds `-ldbghelp` and
+  `-lsynchronization`, which the Rust standard library needs, and CMake
+  is run with the "Unix Makefiles" generator so it uses the MinGW
+  compilers instead of Visual Studio.
 * The bundled chemfiles builds with CMake 4. CMake 4 refuses a
   `cmake_minimum_required()` below 3.5, and chemfiles 0.10.4 and the
   libraries it unpacks from `external/*.tar.gz` (zlib, lzma, bzip2, fmt,

@@ -83,6 +83,12 @@ jobs:
         shell: bash
         working-directory: dseams
         run: sh tools/check-reader-symbols.sh
+      # R links with the Rtools MinGW toolchain, so readcon-core is built
+      # for the GNU target. The runner's rustup defaults to MSVC.
+      - name: Install the Rust GNU target
+        if: runner.os == 'Windows'
+        shell: bash
+        run: rustup target add x86_64-pc-windows-gnu
       - name: Require objcopy for the reader symbol rewrite
         if: runner.os == 'Windows'
         shell: bash
