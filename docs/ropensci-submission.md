@@ -72,7 +72,8 @@ Description: Structural analysis of water and ice in molecular dynamics
     C++ sources.
 License: MIT + file LICENSE
 Copyright: See file inst/AUTHORS for the bundled readcon-core, Rust
-    crates, and chemfiles; LICENSE.note gives their licences.
+    crates, the Rust standard library and compiler-rt rustc links into
+    that library, and chemfiles; LICENSE.note gives their licences.
 URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core
