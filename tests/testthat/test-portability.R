@@ -348,7 +348,13 @@ test_that("bundled readers are compiled with NDEBUG", {
 test_that("compiler-rt ___assert_rtn is replaced and another assert is not", {
   root <- portability_root()
   expect_false(is.null(root))
-  cc <- system2("R", c("CMD", "config", "CC"), stdout = TRUE)
+  # R CMD check puts a fake R on PATH that exits. The real binary is
+  # under R.home("bin").
+  cc <- system2(
+    file.path(R.home("bin"), "R"),
+    c("CMD", "config", "CC"),
+    stdout = TRUE
+  )
   expect_length(cc, 1L)
   expect_true(nzchar(cc))
   # system2 splits an argument on spaces, so the compiler and its flags
