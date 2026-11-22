@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* `tiny.mae` and `tiny.mmtf` are one water molecule shipped with the
+  package. The Maestro plugin and the MMTF reader return that water.
+  The portability tests read these files, so they run from an installed
+  package as well as from the source tree.
 * The bundled chemfiles builds its MMTF reader with the current libc++.
   msgpack-c, inside `external/mmtf-cpp.tar.gz`, does
   `using std::remove_volatile` after including `<memory>` and `<tuple>`

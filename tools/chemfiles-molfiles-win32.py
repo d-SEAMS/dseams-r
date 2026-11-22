@@ -26,8 +26,9 @@ _MSC_VER.
 
 The archive is repacked with gzip mtime 0 and the members' own
 metadata, so a re-vendor gives the same bytes. A second run changes
-nothing. tools/vendor-readers.sh runs the first form; the portability
-test checks the shipped archive.
+nothing. tools/vendor-readers.sh runs the first form. The portability
+test checks the shipped archive when the source tree is present, and
+reads the installed one-water Maestro file otherwise.
 """
 
 import gzip

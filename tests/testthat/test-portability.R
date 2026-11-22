@@ -238,66 +238,97 @@ tar_member_text <- function(tarball, member) {
   text
 }
 
+# src/chemfiles/external is not installed. When the source tree is
+# present these two tests still check the archives.
+# tools/chemfiles-msgpack-type-traits.py --check and
+# tools/chemfiles-molfiles-win32.py --check require the same bytes at
+# vendor time. An installed package is checked by reading the water
+# those readers decode. tools/readers holds tiny.mae and tiny.mmtf;
+# vendor-readers.sh copies them into inst/extdata, and the same files
+# sit beside this test for an install whose extdata predates that copy.
+# The geometry is tools/readers/tiny.pdb.
+reader_water <- function(name) {
+  shipped <- system.file("extdata", name, package = "dseams")
+  path <- if (nzchar(shipped)) shipped else testthat::test_path(name)
+  expect_true(file.exists(path), info = name)
+  path
+}
+
+expect_one_water <- function(path) {
+  expect_identical(nframes(path), 1L, label = path)
+  xyz <- unname(positions(read_frame(path, type = -1L)))
+  expect_equal(
+    xyz,
+    rbind(c(0, 0, 0), c(0.957, 0, 0), c(-0.24, 0.927, 0)),
+    tolerance = 1e-5,
+    label = path
+  )
+}
+
 test_that("vendored msgpack-c includes type_traits before remove_volatile", {
   root <- portability_root()
-  expect_false(is.null(root))
-  tarball <- file.path(root, "src", "chemfiles", "external", "mmtf-cpp.tar.gz")
-  expect_true(file.exists(tarball))
-  member <- "mmtf-cpp/msgpack-c/include/msgpack/v1/cpp_config_decl.hpp"
-  text <- tar_member_text(tarball, member)
-  block <- paste(
-    "#include <memory>",
-    "#include <tuple>",
-    "#include <type_traits>",
-    "",
-    "namespace msgpack {",
-    sep = "\n"
-  )
-  expect_true(grepl(block, text, fixed = TRUE))
-  traits <- regexpr("#include <type_traits>", text, fixed = TRUE)
-  use <- regexpr("using std::remove_volatile;", text, fixed = TRUE)
-  expect_gt(traits, 0L)
-  expect_gt(use, traits)
-  v2 <- tar_member_text(
-    tarball,
-    "mmtf-cpp/msgpack-c/include/msgpack/v2/cpp_config_decl.hpp"
-  )
-  expect_true(grepl("using v1::remove_volatile;", v2, fixed = TRUE))
+  if (!is.null(root)) {
+    tarball <- file.path(root, "src", "chemfiles", "external", "mmtf-cpp.tar.gz")
+    expect_true(file.exists(tarball))
+    member <- "mmtf-cpp/msgpack-c/include/msgpack/v1/cpp_config_decl.hpp"
+    text <- tar_member_text(tarball, member)
+    block <- paste(
+      "#include <memory>",
+      "#include <tuple>",
+      "#include <type_traits>",
+      "",
+      "namespace msgpack {",
+      sep = "\n"
+    )
+    expect_true(grepl(block, text, fixed = TRUE))
+    traits <- regexpr("#include <type_traits>", text, fixed = TRUE)
+    use <- regexpr("using std::remove_volatile;", text, fixed = TRUE)
+    expect_gt(traits, 0L)
+    expect_gt(use, traits)
+    v2 <- tar_member_text(
+      tarball,
+      "mmtf-cpp/msgpack-c/include/msgpack/v2/cpp_config_decl.hpp"
+    )
+    expect_true(grepl("using v1::remove_volatile;", v2, fixed = TRUE))
+  }
+  expect_one_water(reader_water("tiny.mmtf"))
 })
 
 test_that("vendored DESRES plugins take the Windows path on MinGW", {
   root <- portability_root()
-  expect_false(is.null(root))
-  tarball <- file.path(root, "src", "chemfiles", "external", "molfiles.tar.gz")
-  expect_true(file.exists(tarball))
-  old <- paste(
-    "#if defined(_MSC_VER)",
-    "#ifndef DESRES_WIN32",
-    "#define DESRES_WIN32",
-    sep = "\n"
-  )
-  win <- paste(
-    "#if defined(_WIN32)",
-    "#ifndef DESRES_WIN32",
-    "#define DESRES_WIN32",
-    sep = "\n"
-  )
-  for (member in c(
-    "molfiles/src/dtrplugin.hxx",
-    "molfiles/src/maeffplugin.cxx"
-  )) {
-    text <- tar_member_text(tarball, member)
-    expect_true(grepl(win, text, fixed = TRUE), info = member)
-    expect_false(grepl(old, text, fixed = TRUE), info = member)
+  if (!is.null(root)) {
+    tarball <- file.path(root, "src", "chemfiles", "external", "molfiles.tar.gz")
+    expect_true(file.exists(tarball))
+    old <- paste(
+      "#if defined(_MSC_VER)",
+      "#ifndef DESRES_WIN32",
+      "#define DESRES_WIN32",
+      sep = "\n"
+    )
+    win <- paste(
+      "#if defined(_WIN32)",
+      "#ifndef DESRES_WIN32",
+      "#define DESRES_WIN32",
+      sep = "\n"
+    )
+    for (member in c(
+      "molfiles/src/dtrplugin.hxx",
+      "molfiles/src/maeffplugin.cxx"
+    )) {
+      text <- tar_member_text(tarball, member)
+      expect_true(grepl(win, text, fixed = TRUE), info = member)
+      expect_false(grepl(old, text, fixed = TRUE), info = member)
+    }
+    cxx <- tar_member_text(tarball, "molfiles/src/dtrplugin.cxx")
+    guard <- regexpr("#ifndef DESRES_WIN32", cxx, fixed = TRUE)
+    include <- regexpr("#include <sys/mman.h>", cxx, fixed = TRUE)
+    windows <- regexpr("windows version", cxx, fixed = TRUE)
+    expect_gt(guard, 0L)
+    expect_gt(include, guard)
+    expect_gt(windows, include)
+    expect_true(grepl("read(fd, mapping, framesize)", cxx, fixed = TRUE))
   }
-  cxx <- tar_member_text(tarball, "molfiles/src/dtrplugin.cxx")
-  guard <- regexpr("#ifndef DESRES_WIN32", cxx, fixed = TRUE)
-  include <- regexpr("#include <sys/mman.h>", cxx, fixed = TRUE)
-  windows <- regexpr("windows version", cxx, fixed = TRUE)
-  expect_gt(guard, 0L)
-  expect_gt(include, guard)
-  expect_gt(windows, include)
-  expect_true(grepl("read(fd, mapping, framesize)", cxx, fixed = TRUE))
+  expect_one_water(reader_water("tiny.mae"))
 })
 
 test_that("the CMake floor check rejects the minimums chemfiles shipped", {

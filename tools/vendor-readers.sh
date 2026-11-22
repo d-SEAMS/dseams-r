@@ -286,6 +286,7 @@ cp "$con" "$extdata/tiny_multi_cuh2.con"
 cp "$pkg/tools/readers/tiny.pdb" "$pkg/tools/readers/tiny.gro" \
   "$pkg/tools/readers/tiny.xyz" "$pkg/tools/readers/tiny.pqr" \
   "$pkg/tools/readers/tiny.xsf" "$pkg/tools/readers/tiny.cube" \
-  "$pkg/tools/readers/tiny.rst7" "$extdata/"
+  "$pkg/tools/readers/tiny.rst7" "$pkg/tools/readers/tiny.mae" \
+  "$pkg/tools/readers/tiny.mmtf" "$extdata/"
 
 echo "vendor-readers.sh: readcon-core $readcon_rev and chemfiles 0.10.4"

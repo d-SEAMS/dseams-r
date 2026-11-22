@@ -19,8 +19,9 @@ waters, type 2 is oxygen). \code{"nucleation_f1.lammpstrj"} is the first frame
 of the d-SEAMS mW nucleation trajectory (4096 waters). Each dump has a
 \code{.source.txt} file or a header that names its origin.
 \code{"tiny_multi_cuh2.con"} is two CON frames of four atoms (readcon-core).
-\code{"tiny.pdb"}, \code{"tiny.gro"}, and \code{"tiny.xyz"} are one water, read through
-chemfiles (XYZ also has a native reader).
+\code{"tiny.pdb"}, \code{"tiny.gro"}, \code{"tiny.xyz"}, \code{"tiny.mae"}, and
+\code{"tiny.mmtf"} are one water, read through chemfiles (XYZ also has a
+native reader).
 }
 \examples{
 dseams_example()
