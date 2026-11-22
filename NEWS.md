@@ -4,12 +4,7 @@
   `-DNDEBUG`. The CMake Release flags had replaced CMake's default, so
   `assert` stayed in `libchemfiles.a`. readcon-core's release profile
   leaves Rust debug assertions and overflow checks off, and the cargo
-  line passes `-DNDEBUG` to a C file it compiles. On macOS, rustc still
-  archives an Apple compiler-rt object that calls `___assert_rtn` with
-  no `NDEBUG` guard. `tools/readcon-apple-builtins.sh` replaces that
-  object with the `abort()` the other platforms use, and
-  `tools/reader-symbols.sh` renames `abort` onto `dseams_r_abort`. The
-  check that reports `assert` in an archive is unchanged.
+  line passes `-DNDEBUG` to a C file it compiles.
 * `tiny.mae` and `tiny.mmtf` are one water molecule shipped with the
   package. The Maestro plugin and the MMTF reader return that water.
   The portability tests read these files, so they run from an installed
