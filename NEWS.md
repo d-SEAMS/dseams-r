@@ -25,6 +25,10 @@
   that still has one below; a test checks the shipped tree. The policy
   version stays below 3.22, so every chemfiles target compiles with the
   same flags as before. All formats and molfile plugins are kept.
+  CMake is no longer run with `-Wno-dev`: the raised floor leaves no
+  developer warning to hide, and CMake 4.5 answers the option with a
+  notice naming `-Wno-author`, which `R CMD check` reports as a
+  non-portable flag.
 * On macOS, rewriting the bundled readers requires llvm-objcopy. GNU
   objcopy does not rewrite Mach-O archives, and configure rejects it
   there. A Homebrew llvm install is used when its `llvm-objcopy` is

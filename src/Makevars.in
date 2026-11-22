@@ -102,7 +102,7 @@ readcon-core/target/release/libreadcon_core.a: readcon-core/Cargo.toml readcon-c
 	find readcon-core/vendor -name '.cargo-checksum.json' -delete
 
 chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
-	"$(CMAKE)" -Wno-dev -S chemfiles -B "$(CHEMFILES_BUILD)" \
+	"$(CMAKE)" -S chemfiles -B "$(CHEMFILES_BUILD)" \
 	  -DCMAKE_BUILD_TYPE=Release \
 	  -DCMAKE_INSTALL_PREFIX="$(CURDIR)/chemfiles-install" \
 	  -DCMAKE_INSTALL_LIBDIR=lib \
