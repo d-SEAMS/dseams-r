@@ -241,8 +241,9 @@ tar_member_text <- function(tarball, member) {
 # src/chemfiles/external is not installed. When the source tree is
 # present these tests still check the archives.
 # tools/chemfiles-msgpack-type-traits.py --check,
-# tools/chemfiles-molfiles-win32.py --check, and
-# tools/chemfiles-lzma-mingw.py --check require the same bytes at
+# tools/chemfiles-molfiles-win32.py --check,
+# tools/chemfiles-lzma-mingw.py --check, and
+# tools/chemfiles-fmt-mingw.py --check require the same bytes at
 # vendor time. An installed package is checked by reading the water
 # those readers decode. tools/readers holds tiny.mae and tiny.mmtf;
 # vendor-readers.sh copies them into inst/extdata, and the same files
@@ -359,6 +360,28 @@ test_that("vendored lzma uses the GCC bit scan under MinGW", {
     scan <- regexpr("_BitScanForward64(&tmp, x)", text, fixed = TRUE)
     expect_gt(intrin, 0L)
     expect_gt(scan, intrin)
+  }
+})
+
+test_that("vendored fmt does not undefine __STRICT_ANSI__ under MinGW", {
+  root <- portability_root()
+  if (!is.null(root)) {
+    tarball <- file.path(root, "src", "chemfiles", "external", "fmt.tar.gz")
+    expect_true(file.exists(tarball))
+    text <- tar_member_text(tarball, "fmt/include/fmt/os.h")
+    expect_false(grepl("#\\s*undef\\s+__STRICT_ANSI__\\b", text))
+    guard <- paste(
+      "#ifndef FMT_OS_H_",
+      "#define FMT_OS_H_",
+      "",
+      "// Keep __STRICT_ANSI__ intact under MinGW-w64: libstdc++ 14 uses",
+      "// __float128 Q literals in <limits> when __STRICT_ANSI__ is unset,",
+      "// which GCC rejects under chemfiles' -std=c++11.",
+      "#include <cerrno>",
+      sep = "\n"
+    )
+    expect_true(grepl(guard, text, fixed = TRUE))
+    expect_true(grepl('#include "format.h"', text, fixed = TRUE))
   }
 })
 

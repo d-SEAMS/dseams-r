@@ -167,8 +167,9 @@ PY
 # tools/chemfiles-molfiles.py, the CMake policy floor from
 # tools/chemfiles-cmake-floor.py, the msgpack-c <type_traits> include
 # from tools/chemfiles-msgpack-type-traits.py, the MinGW DESRES guards
-# from tools/chemfiles-molfiles-win32.py, and the MinGW lzma bit scan
-# from tools/chemfiles-lzma-mingw.py. cmake builds this tree at install
+# from tools/chemfiles-molfiles-win32.py, the MinGW lzma bit scan from
+# tools/chemfiles-lzma-mingw.py, and the MinGW fmt __STRICT_ANSI__ fix
+# from tools/chemfiles-fmt-mingw.py. cmake builds this tree at install
 # time.
 case "${DSEAMS_NO_DOWNLOAD:-}" in
   1|yes|true|TRUE)
@@ -228,9 +229,12 @@ python3 "$pkg/tools/chemfiles-cmake-floor.py" "$pkg/src/chemfiles"
 # msgpack-c includes, and MinGW does not take the DESRES Windows paths.
 # MinGW also defines _M_X64 from <stddef.h> and does not declare
 # _BitScanForward64, so the GCC builtin is the branch that compiles.
+# fmt 6 undefines __STRICT_ANSI__ under MinGW in os.h before <limits>,
+# which breaks libstdc++ 14 under chemfiles' -std=c++11.
 python3 "$pkg/tools/chemfiles-msgpack-type-traits.py" "$pkg/src/chemfiles"
 python3 "$pkg/tools/chemfiles-molfiles-win32.py" "$pkg/src/chemfiles"
 python3 "$pkg/tools/chemfiles-lzma-mingw.py" "$pkg/src/chemfiles"
+python3 "$pkg/tools/chemfiles-fmt-mingw.py" "$pkg/src/chemfiles"
 # Tests and diagnostic pragmas are not part of the library the package
 # compiles, and R CMD check rejects both the pragmas and the hidden files.
 rm -rf "$pkg/src/chemfiles/tests"

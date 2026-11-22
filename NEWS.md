@@ -1,5 +1,13 @@
 # dseams (development version)
 
+* The bundled fmt, inside `external/fmt.tar.gz`, undefined
+  `__STRICT_ANSI__` in `include/fmt/os.h` under `__MINGW32__` before
+  including `<limits>`. Under Rtools GCC 14 with chemfiles'
+  `-std=c++11`, that made libstdc++ emit `__float128` hex-float `Q`
+  literals that `-std=c++11` rejects when compiling `src/os.cc`.
+  `tools/chemfiles-fmt-mingw.py` removes that obsolete MinGW.org
+  workaround so `__STRICT_ANSI__` stays intact and `src/os.cc` compiles
+  with MinGW-w64 under `-std=c++11`.
 * `inst/AUTHORS` and `LICENSE.note` name the Rust standard library,
   compiler-rt, libm, and the other crates rustc archives into
   `libreadcon_core.a` that the vendor tree does not already list.
