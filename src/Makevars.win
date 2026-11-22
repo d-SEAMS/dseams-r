@@ -106,7 +106,6 @@ readcon-core/target/release/libreadcon_core.a: readcon-core/Cargo.toml readcon-c
 	    --target-dir readcon-core/target
 	rm -rf "$(CARGO_HOME_DIR)"
 	cp readcon-core/target/$(RUST_TARGET)/release/libreadcon_core.a $@
-	sh ../tools/readcon-apple-builtins.sh $@
 	sh ../tools/reader-symbols.sh "$(OBJCOPY)" $@
 	find readcon-core/vendor -name '.cargo-checksum.json' -delete
 
