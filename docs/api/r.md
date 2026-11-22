@@ -43,6 +43,19 @@ DSEAMS_ROOT=/path/to/seams-core \
 Use `--preclean` when changing between bundled and linked builds so R does not
 reuse objects compiled for the other mode.
 
+The bundled copy reads more than seams-core 2.14.1 as tagged: `nframes()`
+counts the frames of a CON file, and chemfiles reads the VMD molfile
+formats (PQR, XSF, Gaussian cube, AMBER7, VASP and the others `NEWS.md`
+lists). A linked engine built from the tag counts no CON
+frames and reads none of those formats. `tools/build-linked-engine.sh`
+builds a seams-core checkout with both, using the chemfiles tree that
+`tools/vendor.sh` writes into `src/chemfiles`:
+
+```bash
+sh tools/vendor.sh /path/to/seams-core
+(cd /path/to/seams-core && sh /path/to/dseams-r/tools/build-linked-engine.sh .)
+```
+
 ## Read a frame
 
 ```r

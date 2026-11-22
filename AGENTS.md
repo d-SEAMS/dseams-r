@@ -32,6 +32,7 @@ and the C++ reference `binding_oracle` live in
 | `tools/seams-core.ref` | `SEAMS_CORE_REPO` and `SEAMS_CORE_REF`, the seams-core revision the copy and CI use |
 | `tools/vendor.sh` | Copies the engine sources and example dumps from a seams-core tree, or from the pin |
 | `tools/fetch-engine.R` | Downloads the pinned seams-core source with base R |
+| `tools/build-linked-engine.sh` | Builds a seams-core checkout with the readers the copy has, for the linked checks |
 | `tests/testthat/` | `test-api.R`, `test-ice.R`, `test-s3.R`, `test-doc-examples.R` |
 | `inst/examples/` | Scripts the d-SEAMS site includes; `test-doc-examples.R` runs them |
 | `vignettes/` | `classifying-ice.Rmd` |
@@ -67,17 +68,21 @@ been built with those readers as well.
 
 ## Build and test
 
-All builds and checks run on a build host, not on a laptop. With a
-seams-core checkout at the pin built in `build/` (meson targets
-`src/libseams.so`, `bindings/libseams_lang.so`, `seams`,
-`bindings/binding_oracle`):
+All builds and checks run on a build host, not on a laptop. The tests
+that compare against seams-core and the linked check use a seams-core
+checkout at the pin, built in `build/` by `tools/build-linked-engine.sh`
+(meson targets `src/libseams.so`, `bindings/libseams_lang.so`, `seams`,
+`bindings/binding_oracle`). That script adds the two reader changes the copy carries, the CON frame count
+in `seams_lang.cpp` and chemfiles from `src/chemfiles` with the VMD
+molfile readers, which the reader tests require of a linked engine too:
 
 ```bash
-# DSEAMS_ROOT is a seams-core checkout at the pin, already built.
+# DSEAMS_ROOT is a seams-core checkout at the pin.
 export SEAMS_BIN="$DSEAMS_ROOT/build/seams"
+pixi run sh tools/vendor.sh "$DSEAMS_ROOT"
+(cd "$DSEAMS_ROOT" && pixi run sh "$OLDPWD/tools/build-linked-engine.sh" .)
 
 # bundled copy
-pixi run sh tools/vendor.sh "$DSEAMS_ROOT"
 pixi run R CMD build --no-manual .
 pixi run R CMD check --as-cran --no-manual dseams_*.tar.gz
 

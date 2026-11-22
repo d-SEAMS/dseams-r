@@ -49,15 +49,19 @@ jobs:
           manifest-path: seams-core/pixi.toml
           environments: default
           cache-key: pixi-seams-core-
-      - name: Build seams-core
-        working-directory: seams-core
-        run: |
-          pixi run meson setup build
-          pixi run ninja -C build seams src/libseams.so bindings/libseams_lang.so bindings/binding_oracle
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           manifest-path: dseams/pixi.toml
           cache-key: pixi-dseams-
+      # The engine is built with the readers the copy has (the CON frame
+      # count and chemfiles with the VMD molfile readers), from the
+      # chemfiles tree the copy writes, so the copy comes first.
+      - name: Copy the engine into the package
+        working-directory: dseams
+        run: pixi run sh tools/vendor.sh "$DSEAMS_ROOT"
+      - name: Build seams-core with the package's readers
+        working-directory: seams-core
+        run: pixi run sh ../dseams/tools/build-linked-engine.sh .
       - name: Install objcopy
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils
       - name: Rewrite a reader archive with objcopy
@@ -67,9 +71,7 @@ jobs:
         working-directory: dseams
         env:
           COVR_INSTALL: ${{ runner.temp }}/covr
-        run: |
-          pixi run sh tools/vendor.sh "$DSEAMS_ROOT"
-          pixi run Rscript .github/coverage.R
+        run: pixi run Rscript .github/coverage.R
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:

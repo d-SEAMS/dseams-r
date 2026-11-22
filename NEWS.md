@@ -1,5 +1,11 @@
 # dseams (development version)
 
+* A linked engine needs the readers the bundled copy has for `nframes()`
+  to count CON frames and for `read_frame()` to read the VMD molfile
+  formats; seams-core 2.14.1 as tagged has neither.
+  `tools/build-linked-engine.sh` builds a seams-core checkout with the
+  CON frame count and with chemfiles from the package's `src/chemfiles`,
+  and the linked check and the coverage job use it.
 * On Windows, readcon-core is built for the Rust GNU target of the
   Rtools compiler (`x86_64-pc-windows-gnu`, or
   `aarch64-pc-windows-gnullvm` on ARM). Cargo's MSVC default names the
