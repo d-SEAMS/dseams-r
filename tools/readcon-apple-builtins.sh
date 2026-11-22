@@ -21,7 +21,12 @@ if [ "$#" -ne 1 ]; then
   exit 2
 fi
 
-archive=$1
+# Make passes $@ as a path relative to src/. ar runs from a temporary
+# directory, so a relative path would be looked up there.
+case "$1" in
+  /*) archive=$1 ;;
+  *) archive=$(pwd)/$1 ;;
+esac
 if [ ! -f "$archive" ]; then
   echo "readcon-apple-builtins.sh: $archive is not a file" >&2
   exit 1

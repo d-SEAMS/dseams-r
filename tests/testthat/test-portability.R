@@ -533,6 +533,28 @@ test_that("compiler-rt ___assert_rtn is replaced and another assert is not", {
   expect_false(any(grepl("___assert_rtn", listed$out, fixed = TRUE)))
   expect_true(any(grepl("^_?abort U", listed$out)))
   expect_true(any(grepl("compilerrt_abort_impl T", listed$out, fixed = TRUE)))
+  # src/Makevars passes a path relative to src/. The script extracts
+  # members from a temporary directory, so that relative path has to be
+  # resolved before ar runs.
+  rel <- tempfile("compilerrt-rel-")
+  dir.create(rel)
+  archived <- run_capture("ar", c(
+    "rcs",
+    file.path(rel, "libreadcon_core.a"),
+    crt_o,
+    other_o
+  ))
+  expect_identical(archived$status, 0L)
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  setwd(rel)
+  rel_run <- run_script("libreadcon_core.a")
+  setwd(old_wd)
+  expect_identical(rel_run$status, 0L, info = paste(rel_run$out, collapse = "\n"))
+  rel_nm <- run_capture("nm", c("-P", file.path(rel, "libreadcon_core.a")))
+  expect_identical(rel_nm$status, 0L, info = paste(rel_nm$out, collapse = "\n"))
+  expect_false(any(grepl("___assert_rtn", rel_nm$out, fixed = TRUE)))
+  expect_true(any(grepl("compilerrt_abort_impl T", rel_nm$out, fixed = TRUE)))
 })
 
 test_that("the CMake floor check rejects the minimums chemfiles shipped", {
