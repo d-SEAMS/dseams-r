@@ -1,5 +1,15 @@
 # dseams (development version)
 
+* The bundled chemfiles and readcon-core static libraries are built with
+  `-DNDEBUG`. The CMake Release flags had replaced CMake's default, so
+  `assert` stayed in `libchemfiles.a`. readcon-core's release profile
+  leaves Rust debug assertions and overflow checks off, and the cargo
+  line passes `-DNDEBUG` to a C file it compiles. On macOS, rustc still
+  archives an Apple compiler-rt object that calls `___assert_rtn` with
+  no `NDEBUG` guard. `tools/readcon-apple-builtins.sh` replaces that
+  object with the `abort()` the other platforms use, and
+  `tools/reader-symbols.sh` renames `abort` onto `dseams_r_abort`. The
+  check that reports `assert` in an archive is unchanged.
 * The bundled lzma, inside `external/lzma.tar.gz`, calls
   `_BitScanForward64` whenever `_M_X64` is defined. MinGW-w64 defines
   `_M_X64` from `<stddef.h>`, which is included after the generated
