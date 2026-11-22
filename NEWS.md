@@ -1,5 +1,14 @@
 # dseams (development version)
 
+* The bundled chemfiles builds its MMTF reader with the current libc++.
+  msgpack-c, inside `external/mmtf-cpp.tar.gz`, does
+  `using std::remove_volatile` after including `<memory>` and `<tuple>`
+  only. libc++ 23, and the Apple clang used by the macOS R release,
+  no longer declares that name through those headers.
+  `tools/chemfiles-msgpack-type-traits.py` adds `#include <type_traits>`,
+  which is the upstream msgpack-c fix in commit
+  `9b801f087ab7434f2ab1ab3c0f48a966c19d3b70` (pull 1162, released in
+  8.0.0). The vendored header is the older copy shipped in mmtf-cpp.
 * A linked engine needs the readers the bundled copy has for `nframes()`
   to count CON frames and for `read_frame()` to read the VMD molfile
   formats; seams-core 2.14.1 as tagged has neither.

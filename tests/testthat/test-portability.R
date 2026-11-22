@@ -228,6 +228,43 @@ test_that("every vendored chemfiles CMake file meets the CMake 4 floor", {
   expect_identical(bad, character(), info = paste(bad, collapse = "\n"))
 })
 
+tar_member_text <- function(tarball, member) {
+  dir <- tempfile("vendored-member-")
+  utils::untar(tarball, files = member, exdir = dir)
+  path <- file.path(dir, member)
+  expect_true(file.exists(path), info = member)
+  text <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  unlink(dir, recursive = TRUE)
+  text
+}
+
+test_that("vendored msgpack-c includes type_traits before remove_volatile", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  tarball <- file.path(root, "src", "chemfiles", "external", "mmtf-cpp.tar.gz")
+  expect_true(file.exists(tarball))
+  member <- "mmtf-cpp/msgpack-c/include/msgpack/v1/cpp_config_decl.hpp"
+  text <- tar_member_text(tarball, member)
+  block <- paste(
+    "#include <memory>",
+    "#include <tuple>",
+    "#include <type_traits>",
+    "",
+    "namespace msgpack {",
+    sep = "\n"
+  )
+  expect_true(grepl(block, text, fixed = TRUE))
+  traits <- regexpr("#include <type_traits>", text, fixed = TRUE)
+  use <- regexpr("using std::remove_volatile;", text, fixed = TRUE)
+  expect_gt(traits, 0L)
+  expect_gt(use, traits)
+  v2 <- tar_member_text(
+    tarball,
+    "mmtf-cpp/msgpack-c/include/msgpack/v2/cpp_config_decl.hpp"
+  )
+  expect_true(grepl("using v1::remove_volatile;", v2, fixed = TRUE))
+})
+
 test_that("the CMake floor check rejects the minimums chemfiles shipped", {
   for (call in c(
     "cmake_minimum_required(VERSION 2.8.12)",
