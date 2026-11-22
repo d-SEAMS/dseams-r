@@ -355,6 +355,16 @@ test_that("compiler-rt ___assert_rtn is replaced and another assert is not", {
   # are separate arguments. CC is exported for the script, which splits
   # that value itself.
   cc_parts <- strsplit(cc, "[[:space:]]+")[[1L]]
+  # R CMD check does not always keep the compiler's directory on PATH.
+  # R CMD config CC is the bare name; the conda toolchain sits next to R.
+  if (!file.exists(cc_parts[[1L]])) {
+    found <- Sys.which(cc_parts[[1L]])
+    if (!nzchar(found)) {
+      found <- file.path(dirname(dirname(R.home())), "bin", cc_parts[[1L]])
+    }
+    cc_parts[[1L]] <- found
+  }
+  expect_true(file.exists(cc_parts[[1L]]), info = cc_parts[[1L]])
   dir <- tempfile("compilerrt-")
   dir.create(dir)
   on.exit(unlink(dir, recursive = TRUE), add = TRUE)
