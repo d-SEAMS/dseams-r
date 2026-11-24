@@ -23,6 +23,29 @@ the source package.
 
 3. Rust crates vendored in src/readcon-core/vendor
 
+Linkcell 0.6.0 and minimage 0.2.3
+  Copyright: Rohit Goswami
+  Sources: https://github.com/d-SEAMS/linkcell and https://github.com/lode-org/minimage
+
+cc 1.11.3 and find-msvc-tools 0.1.15
+  Copyright: Alex Crichton
+  Source: https://github.com/rust-lang/cc-rs
+
+crossbeam-deque 0.8.8, crossbeam-epoch 0.9.21 and crossbeam-utils 0.8.23
+  Copyright: The Crossbeam Project Developers
+  Source: https://github.com/crossbeam-rs/crossbeam
+
+either 1.19.0
+  Source: https://github.com/rayon-rs/either
+
+rayon 1.12.0 and rayon-core 1.13.0
+  Copyright: The Rust Project Developers
+  Source: https://github.com/rayon-rs/rayon
+
+shlex 2.0.1
+  Copyright: Nicholas Allegra (comex)
+  Source: https://github.com/comex/rust-shlex
+
 The crate set is pinned by tools/readcon-Cargo.lock. Authors are the
 `authors` field of each crate's Cargo.toml; where that field is absent,
 the entry says where the name comes from.

@@ -8,7 +8,7 @@ edition = "2024"
 rust-version = "1.88"
 license = "MIT"
 publish = false
-description = "CON file reader static library bundled with the dseams package"
+description = "Rust static library for trajectory reads and neighbour lists in dseams"
 
 [lib]
 name = "readcon_core"
@@ -28,6 +28,7 @@ zstd = []
 [dependencies]
 dlpk = { version = "0.1.5", features = ["ndarray", "half"] }
 half = "1.8"
+linkcell = "=0.6.0"
 ndarray = "0.17"
 fast-float2 = "0.2"
 flate2 = "1"

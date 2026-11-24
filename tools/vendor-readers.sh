@@ -104,6 +104,11 @@ cp "$pkg/tools/readcon-Cargo.toml" "$dest/Cargo.toml"
 cp "$pkg/tools/readcon-Cargo.lock" "$dest/Cargo.lock"
 cp "$readcon_src/build.rs" "$readcon_src/LICENSE" "$dest/"
 cp -R "$readcon_src/src" "$readcon_src/include" "$dest/"
+cat >> "$dest/src/lib.rs" <<'EOF'
+
+// Include the C ABI for the C++ engine in the Rust static library.
+extern crate linkcell as _;
+EOF
 # [[nodiscard]] on the C++ wrapper becomes a warning under R CMD check
 # when a caller discards the value. The engine copy drops it for the
 # same reason.
@@ -120,6 +125,10 @@ done
 )
 if [ ! -f "$dest/vendor/dlpk/.cargo-checksum.json" ]; then
   echo "vendor-readers.sh: cargo vendor did not write readcon-core checksums" >&2
+  exit 1
+fi
+if [ ! -f "$dest/vendor/linkcell/include/linkcell.hpp" ]; then
+  echo "vendor-readers.sh: cargo vendor did not write the Linkcell headers" >&2
   exit 1
 fi
 # Cargo looks up .cargo-checksum.json. That name is a hidden file, which

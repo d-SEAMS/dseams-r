@@ -1,5 +1,7 @@
 # dseams (development version)
 
+- The bundled engine uses Linkcell for neighbour lists. R source packages carry the Rust dependencies for offline installation.
+
 * Register the C `.Call()` entry points under their `seams_r_*` symbol
   names so `cpp11::cpp_register()`, `pkgload::load_all()`, and
   `testthat::test_local()` regenerate `src/cpp11.cpp` without symbol

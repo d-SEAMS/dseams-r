@@ -46,6 +46,16 @@ readcon-core 0.16.2 (src/readcon-core)
 Rust crates in src/readcon-core/vendor (paths relative to
 src/readcon-core), pinned by tools/readcon-Cargo.lock:
 
+linkcell 0.6.0 and minimage 0.2.3
+  Licence: MIT
+  Text: vendor/linkcell/LICENSE and vendor/minimage/LICENSE
+
+cc 1.11.3, find-msvc-tools 0.1.15 and shlex 2.0.1
+crossbeam-deque 0.8.8, crossbeam-epoch 0.9.21 and crossbeam-utils 0.8.23
+either 1.19.0, rayon 1.12.0 and rayon-core 1.13.0
+  Licence: MIT OR Apache-2.0
+  Text: LICENSE-MIT and LICENSE-APACHE in each crate's vendor directory
+
 adler2 2.0.1
   License: 0BSD OR MIT OR Apache-2.0
   Text:

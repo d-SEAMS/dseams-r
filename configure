@@ -185,7 +185,7 @@ else
   case "$(uname -s)" in
     Darwin) reader_syslibs="-lpthread" ;;
   esac
-  SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -Ireadcon-core/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1 -DSEAMS_LANG_VERSION='\"${version}\"'"
+  SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -Ireadcon-core/include -Ireadcon-core/vendor/linkcell/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_HAS_LINKCELL=1 -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1 -DSEAMS_LANG_VERSION='\"${version}\"'"
   SEAMS_LIBS="readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a ${reader_syslibs}"
   READER_DEPS="readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a"
   ENGINE_OBJECTS='$(SEAMS_OBJECTS)'

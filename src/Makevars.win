@@ -1,6 +1,6 @@
 CXX_STD = CXX20
 
-PKG_CPPFLAGS = -I. -Iseams -Iseams/include -Ireadcon-core/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='"2.14.1"' -DSEAMS_HAS_OPENMP=1 -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1
+PKG_CPPFLAGS = -I. -Iseams -Iseams/include -Ireadcon-core/include -Ireadcon-core/vendor/linkcell/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_HAS_LINKCELL=1 -DSEAMS_LANG_VERSION='"2.14.1"' -DSEAMS_HAS_OPENMP=1 -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a -lws2_32 -luserenv -lbcrypt -lntdll -lpthread
 
@@ -85,6 +85,7 @@ readcon-core/target/release/libreadcon_core.a: readcon-core/Cargo.toml readcon-c
 	  'cp "$$1" "$$(dirname "$$1")/.cargo-checksum.json"' _ {} \;
 	mkdir -p "$(CARGO_HOME_DIR)"
 	CARGO_HOME="$(CARGO_HOME_DIR)" \
+	  LINKCELL_OPENMP=0 \
 	  CARGO_PROFILE_RELEASE_LTO=off CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 \
 	  RUSTFLAGS="-C relocation-model=pic -A non_camel_case_types" \
 	  "$(CARGO)" rustc -j 2 --offline --locked --release --lib --crate-type staticlib \
