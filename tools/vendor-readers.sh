@@ -144,6 +144,7 @@ find "$dest/vendor" -depth \( \
   -name '.cargo_vcs_info.json' -o -name '.github' -o -name '.ignore' \
   -o -name '.vim' -o -name '.reuse' -o -name '.travis.yml' \
   -o -name '.rustfmt.toml' -o -name '.codecov.yml' -o -name '.gitignore' \
+  -o -name '.clippy.toml' -o -name '.tombi.toml' \
   \) -exec rm -rf {} +
 python3 - "$dest/vendor" << 'PY'
 import json
