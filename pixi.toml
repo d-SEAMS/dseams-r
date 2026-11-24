@@ -1,6 +1,6 @@
 [workspace]
 name = "dseams-r"
-version = "2.14.1"
+version = "2.14.2"
 channels = ["conda-forge"]
 platforms = ["linux-64", "osx-64", "osx-arm64"]
 
@@ -31,4 +31,4 @@ build = "R CMD build ."
 require-checkbashisms = "checkbashisms --version"
 # conda-forge's R adds -march=nocona to every compile; that flag is the
 # toolchain's, not the package's.
-check = { cmd = "R CMD check --as-cran --no-manual dseams_2.14.1.tar.gz", env = { _R_CHECK_COMPILATION_FLAGS_KNOWN_ = "-march=nocona" }, depends-on = ["require-checkbashisms"] }
+check = { cmd = "R CMD check --as-cran --no-manual dseams_2.14.2.tar.gz", env = { _R_CHECK_COMPILATION_FLAGS_KNOWN_ = "-march=nocona" }, depends-on = ["require-checkbashisms"] }

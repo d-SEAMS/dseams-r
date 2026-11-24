@@ -4,7 +4,7 @@ This is a new submission.
 
 The package compiles a copy of the d-SEAMS engine (C++20, in `src/seams`)
 together with the R glue, readcon-core, and patched chemfiles 0.10.4.
-`tools/vendor.sh` makes that copy from the seams-core tag `v2.14.1` when
+`tools/vendor.sh` makes that copy from the seams-core tag `v2.14.2` when
 the source package is built. The tarball carries the engine, the vendored
 readcon-core crates, and chemfiles, so installing it does not use the
 network. Building the bundled copy needs GNU make, Cargo, rustc >= 1.88,
@@ -17,7 +17,7 @@ console output and `exit` go through `src/dseams_r_io.cpp` to
 the bundled readers would otherwise resolve to `abort`, `exit`, and the
 C and C++ consoles.
 
-## R CMD check results
+## R CMD check results for 2.14.1
 
 0 errors | 0 warnings | 2 notes
 
