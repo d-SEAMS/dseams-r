@@ -57,6 +57,7 @@ SEAMS_OBJECTS = \
   seams/topo_neighbour_key.o \
   seams/topo_one_dim.o \
   seams/topo_two_dim.o \
+  seams/trajectory.o \
   seams/tum_offload.o \
   seams/water_select.o \
   seams/ylm_cartesian.o
