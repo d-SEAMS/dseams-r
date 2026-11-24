@@ -24,9 +24,10 @@ install.packages("remotes")
 remotes::install_github("d-SEAMS/dseams-r")
 ```
 
-An `R CMD build` source tarball carries the engine, vendored readcon-core
-crates, and patched chemfiles, and installs without a separate seams-core
-checkout or a network connection. A git checkout instead copies the engine
+An `R CMD build` source tarball carries the engine, vendored Rust
+dependencies for readcon-core and Linkcell, and patched chemfiles. It
+installs without a separate seams-core checkout or a network connection.
+A git checkout copies the engine
 from `SEAMS_CORE_SRC` or downloads the revision in `tools/seams-core.ref`;
 set `DSEAMS_NO_DOWNLOAD=1` to require a local source tree. The
 [R API guide](https://github.com/d-SEAMS/dseams-r/blob/main/docs/api/r.md#installing-from-source) also shows how to link
