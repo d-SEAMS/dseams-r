@@ -26,7 +26,7 @@ An `R CMD build` source tarball carries the engine and installs without a
 separate seams-core checkout or a network connection. A git checkout instead
 copies the engine from `SEAMS_CORE_SRC` or downloads the revision in
 `tools/seams-core.ref`; set `DSEAMS_NO_DOWNLOAD=1` to require a local source
-tree. The [R API guide](docs/api/r.md#installing-from-source) also shows how
+tree. The [R API guide](https://github.com/d-SEAMS/dseams-r/blob/main/docs/api/r.md#installing-from-source) also shows how
 to link an existing seams-core installation or build tree.
 
 ## Classify one frame
