@@ -177,6 +177,12 @@ __attribute__((noreturn)) void dseams_r_abort(void) {
   Rf_error("bundled reader aborted");
 }
 
+__attribute__((noreturn)) void dseams_r_assert_rtn(
+    const char *function, const char *file, int line, const char *expression) {
+  Rf_error("bundled reader assertion failed in %s at %s:%d: %s", function,
+           file, line, expression);
+}
+
 __attribute__((noreturn)) void dseams_r_exit(int status) {
   Rf_error("bundled reader exited with status %d", status);
 }

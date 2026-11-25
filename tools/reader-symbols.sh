@@ -22,6 +22,7 @@ if [ "$(uname -s)" = Darwin ]; then
 fi
 "$objcopy" \
   --redefine-sym "${prefix}abort=${prefix}dseams_r_abort" \
+  --redefine-sym "${prefix}__assert_rtn=${prefix}dseams_r_assert_rtn" \
   --redefine-sym "${prefix}exit=${prefix}dseams_r_exit" \
   --redefine-sym "${prefix}_exit=${prefix}dseams_r__exit" \
   --redefine-sym "${prefix}_Exit=${prefix}dseams_r__Exit" \
