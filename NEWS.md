@@ -1,5 +1,7 @@
 # dseams (development version)
 
+* On macOS `configure` also finds `llvm-objcopy` in Homebrew's keg-only
+  `llvm` (`brew --prefix llvm`) when it is not on `PATH`.
 * The linked CI jobs configure seams-core with chemfiles and readcon-core
   enabled, so `meson setup` stops instead of building an engine without
   them. The engine they build registers the same 58 chemfiles formats as

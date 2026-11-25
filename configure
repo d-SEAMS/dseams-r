@@ -83,6 +83,12 @@ CMAKE=$(find_tool cmake)
 OBJCOPY=$(find_tool objcopy llvm-objcopy)
 if [ "$(uname -s)" = Darwin ]; then
   OBJCOPY=$(find_tool llvm-objcopy)
+  # Homebrew's llvm is keg-only, so its llvm-objcopy is often not on PATH.
+  if [ -z "${OBJCOPY}" ] && command -v brew >/dev/null 2>&1 \
+    && llvm_prefix=$(brew --prefix llvm 2>/dev/null) \
+    && [ -x "${llvm_prefix}/bin/llvm-objcopy" ]; then
+    OBJCOPY="${llvm_prefix}/bin/llvm-objcopy"
+  fi
 fi
 CHEMFILES_BUILD=""
 CHEMFILES_CMAKE_ARGS=""
@@ -172,7 +178,7 @@ else
     exit 1
   fi
   if [ -z "${OBJCOPY}" ]; then
-    echo "configure: objcopy (GNU binutils) or llvm-objcopy (required on macOS) is needed to build the bundled readers" >&2
+    echo "configure: objcopy (GNU binutils) or llvm-objcopy (required on macOS, on PATH or from Homebrew llvm) is needed to build the bundled readers" >&2
     exit 1
   fi
   # The tarball stores cargo's checksum under a name that is not hidden.
