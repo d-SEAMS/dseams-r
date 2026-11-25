@@ -19,9 +19,10 @@ C and C++ consoles.
 
 ## R CMD check results for 2.14.2
 
-`R CMD check --no-manual` on R 4.5.3 (`x86_64-conda-linux-gnu`, Arch
-Linux) reported zero errors, zero warnings, and one note. The note
-listed the citation metadata that Cargo vendors with Linkcell and
+`R CMD check --as-cran --no-manual` on R 4.5.3
+(`x86_64-conda-linux-gnu`, Arch Linux) reported zero errors, zero
+warnings, and two notes. One note identifies a new submission. The
+other lists the citation metadata that Cargo vendors with Linkcell and
 Minimage under `src/readcon-core/vendor/`.
 
 The source tarball check passed 167 assertions and skipped eight
