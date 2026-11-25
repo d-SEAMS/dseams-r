@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cctype>
 #include <vector>
 
 #include <cpp11.hpp>
@@ -54,9 +53,7 @@ cpp11::sexp read_frame_(std::string path, int frame, int type_filter) {
 
 [[cpp11::register]]
 int nframes_(std::string path) {
-  if (path.size() >= 4 &&
-      std::equal(path.end() - 4, path.end(), ".con",
-                 [](unsigned char ch, char suffix) { return std::tolower(ch) == suffix; })) {
+  if (path.ends_with(".con")) {
     int count = 0;
     if (const char *message = seams_r_con_frames(path.c_str(), &count)) {
       cpp11::stop("%s", message);
