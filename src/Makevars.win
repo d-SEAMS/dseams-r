@@ -2,7 +2,7 @@ CXX_STD = CXX20
 
 PKG_CPPFLAGS = -I. -Iseams -Iseams/include -Ireadcon-core/include -Ireadcon-core/vendor/linkcell/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_HAS_LINKCELL=1 -DSEAMS_LANG_VERSION='"2.14.2"' -DSEAMS_HAS_OPENMP=1 -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
-PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(READER_DEPS) -lws2_32 -luserenv -lbcrypt -lntdll -ldbghelp -lpthread
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(READER_DEPS) -lws2_32 -luserenv -lbcrypt -lntdll -ldbghelp -lsynchronization -lpthread
 
 CARGO = cargo
 CMAKE = cmake
