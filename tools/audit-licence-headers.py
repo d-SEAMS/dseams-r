@@ -13,9 +13,12 @@ the nearest directory above it that has any (LICENSE*, COPYING*, ...,
 LICENSES/), or with the reference DECLARED names for trees that ship
 without one. Each file is scanned in its first 120 and last 80 lines and
 listed when it names a licence class the reference does not, carries a
-restriction phrase, or has a copyright line whose holder the reference
-does not name. Every listed holder is marked by whether inst/AUTHORS
-names it.
+restriction phrase, has a copyright line whose holder the reference
+does not name, or credits a person (written by, authors of this code,
+Author:, plugin by, contributed by, derived from code by) whom
+inst/AUTHORS does not name. Every listed holder is marked by whether
+inst/AUTHORS names it. A file named like a licence but with a source
+suffix (tng/ci-scripts/copyright.py) is scanned as a source file.
 
 The classification is by phrase, so the listing is for review; the
 reviewed result is inst/AUTHORS and LICENSE.note. The exit status is 0
@@ -25,6 +28,7 @@ unless a part cannot be read.
 import re
 import sys
 import tarfile
+import unicodedata
 from pathlib import Path
 
 HEAD_LINES = 120
@@ -38,7 +42,8 @@ CLASSES = [
     ("BSL", r"Boost Software License"),
     ("NCSA", r"University of Illinois Open Source License|to deal with the Software"),
     ("MIT", r"Permission is hereby granted, free of charge"),
-    ("BSD", r"Redistribution and use in source and binary forms"),
+    ("BSD", r"Redistribution and use in source and binary forms"
+            r"|\bBSD licen[cs]e\b|Revised BSD"),
     ("ISC", r"Permission to use, copy, modify,? and(/or)? distribute"),
     ("Zlib", r"altered source versions must be plainly marked"),
     ("public-domain", r"public domain"),
@@ -70,6 +75,16 @@ COPYRIGHT = re.compile(
 )
 LICENCE_FILE = re.compile(
     r"^(LICEN[CS]E|COPYING|COPYRIGHT|UNLICENSE|NOTICE)([-._].*)?$", re.I
+)
+SOURCE_SUFFIXES = {
+    ".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx", ".rs", ".py",
+    ".sh", ".pl", ".js", ".cmake", ".R", ".f", ".f90", ".bat",
+}
+CREDIT = re.compile(
+    r"(?i:\bwritten by|\bauthors? of this (?:code|file)(?: is| are)?:?"
+    r"|\bauthors?:|\bplugin by|\bcontributed by|\bderived from code by"
+    r"|\boriginal(?:ly)? (?:code )?(?:written )?by)"
+    r"\s+((?:[A-Z][\w.'\-]*,?\s+(?:and\s+)?)*[A-Z][\w.'\-]*)"
 )
 TEXT_SUFFIXES = {
     "", ".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx", ".inl",
@@ -128,12 +143,17 @@ def key_words(h):
     return [w for w in s.split() if len(w) > 2 and not w.islower() and w not in stop]
 
 
+def fold(text):
+    text = unicodedata.normalize("NFKD", text)
+    return "".join(c for c in text if not unicodedata.combining(c)).lower()
+
+
 def named_in(h, text):
     words = key_words(h)
     if not words:
         return True
-    low = text.lower()
-    return all(w.lower() in low for w in words)
+    low = fold(text)
+    return all(fold(w) in low for w in words)
 
 
 def head_tail(data):
@@ -154,11 +174,38 @@ def is_text(name, data):
     return True
 
 
+def is_licence_file(name):
+    return bool(LICENCE_FILE.match(name)) and Path(name).suffix not in SOURCE_SUFFIXES
+
+
+def credits_of(text):
+    out = []
+    for line in text.splitlines():
+        line = re.sub(r"<[^>]*>|\S+@\S+|[()]", " ", line)
+        for m in CREDIT.finditer(line):
+            names = []
+            for w in m.group(1).split():
+                w = w.strip(",")
+                if w == "and":
+                    continue
+                # A full stop after a word longer than an initial ends
+                # the sentence, and with it the name.
+                if w.endswith(".") and not re.fullmatch(r"(?:[A-Z]\.)+", w):
+                    names.append(w.rstrip("."))
+                    break
+                names.append(w)
+            # A credit names a person or body: at least two capitalised
+            # words, as in "Henri Menke" or "Julien Ferte".
+            if len(names) >= 2 and " ".join(names) not in out:
+                out.append(" ".join(names))
+    return out
+
+
 def licence_dirs(files):
     dirs = {}
     for p in files:
         parent, _, name = p.rpartition("/")
-        if LICENCE_FILE.match(name):
+        if is_licence_file(name):
             dirs.setdefault(parent, []).append(p)
         elif parent.endswith("LICENSES") or parent == "LICENSES":
             dirs.setdefault(parent.rpartition("/")[0] if "/" in parent else "", []).append(p)
@@ -212,7 +259,8 @@ def audit(part, label, files, authors, extra_ref=None):
         for h in holders_of(text):
             if not named_in(h, ref_text) and h not in foreign:
                 foreign.append(h)
-        if not (extra or restrict or foreign):
+        credits = [c for c in credits_of(text) if not named_in(c, authors)]
+        if not (extra or restrict or foreign or credits):
             continue
         listed += 1
         print("   - {}  (reference: {})".format(path, ref_label))
@@ -228,6 +276,9 @@ def audit(part, label, files, authors, extra_ref=None):
             mark = "named in inst/AUTHORS" if named_in(h, authors) else "NOT NAMED in inst/AUTHORS"
             print("       holder: {}  [{}]".format(h, mark))
             summary.setdefault("holder {}  [{}]".format(" ".join(key_words(h)), mark), []).append(path)
+        for c in credits:
+            print("       credit: {}  [NOT NAMED in inst/AUTHORS]".format(c))
+            summary.setdefault("credit {}  [NOT NAMED in inst/AUTHORS]".format(c), []).append(path)
     for path in binary:
         print("   - {}  (not scanned: binary or unknown type)".format(path))
     print("   files scanned: {}, listed: {}, not scanned: {}".format(scanned, listed, len(binary)))

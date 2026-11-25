@@ -3,7 +3,10 @@ Licences of the code in the dseams source package
 dseams itself, meaning the R code, the C and C++ glue in src/*.c and
 src/*.cpp, configure, cleanup and tools/, is under the MIT licence; see
 LICENSE. The d-SEAMS engine copied into src/seams is also MIT, by the
-d-SEAMS core team.
+d-SEAMS core team, except src/seams/include/iralib_interf.h, the C API
+header of Iterative Rotations and Assignments (IRA/SOFI): Apache-2.0,
+Copyright Miha Gunde and contributors, as its header states. The
+Apache-2.0 text is the same as src/readcon-core/vendor/cfg-if/LICENSE-APACHE.
 
 The source package also carries readcon-core, the Rust crates it builds
 with, and chemfiles with the libraries chemfiles bundles. rustc also
@@ -42,6 +45,16 @@ redistributed alongside MIT code, on these conditions:
   molfiles/LICENSE (UIUC Open Source License). plyplugin.cxx includes
   ply.c, so the ply.c "not sold" condition applies if plyplugin is
   ever compiled. It is not in the compiled list today.
+- molfiles/src/tngplugin.cxx: BSD, as its header states; the terms are
+  those of the TNG library, quoted at the end of this file. It ships in
+  the archive and is not compiled.
+- tng/ci-scripts/copyright.py, tng/ci-scripts/copyright.sh and
+  tng/ci-scripts/clang-format.sh carry TNG's Revised BSD notice and also
+  the GROMACS header they were copied from, which is LGPL-2.1-or-later;
+  tng/ci-scripts/git-pre-commit carries only that GROMACS header.
+  Redistributing them under the LGPL means keeping that notice and the
+  licence text available. They are developer scripts
+  that ship in the archive and are not compiled or run.
 - molfiles/src/ReadPARM.h and molfiles/src/ReadPARM7.h: their notice is
   kept unmodified and any change to the rest of the file is noted in
   comments. The bundled build compiles them (parm and parm7 plugins).
@@ -77,6 +90,8 @@ rayon-core 1.13.0
 shlex 2.0.1
   Licence: MIT OR Apache-2.0
   Text: LICENSE-MIT and LICENSE-APACHE in each crate's vendor directory
+  either's LICENSE-MIT reads "Copyright (c) 2015" without a name, as it
+    does upstream; inst/AUTHORS names the holder.
 
 adler2 2.0.1
   License: 0BSD OR MIT OR Apache-2.0
@@ -104,6 +119,7 @@ crunchy 0.2.4
 dlpk 0.1.5
   License: MIT OR Apache-2.0
   Text: vendor/dlpk/LICENSE-APACHE, vendor/dlpk/LICENSE-MIT
+  LICENSE-MIT: Copyright 2025 dlpk developers
 
 fast-float2 0.2.4
   License: MIT OR Apache-2.0
@@ -134,6 +150,8 @@ libc 0.2.191
 matrixmultiply 0.3.11
   License: MIT OR Apache-2.0
   Text: vendor/matrixmultiply/LICENSE-APACHE, vendor/matrixmultiply/LICENSE-MIT
+  vendor/matrixmultiply/src/constparse.rs: Copyright 2021 DutchGhost,
+    under the same licence (named in LICENSE-MIT)
 
 memchr 2.8.3
   License: Unlicense OR MIT
@@ -153,6 +171,9 @@ miniz_oxide 0.9.1
     vendor/miniz_oxide/LICENSE-APACHE.md
     vendor/miniz_oxide/LICENSE-MIT.md
     vendor/miniz_oxide/LICENSE-ZLIB.md
+  Those texts name as holders Rich Geldreich and Tenacious Software LLC
+    (2010-2014), RAD Game Tools and Valve Software (2013-2014), Frommi
+    (2017, 2020) and oyvindln (2017-2024).
 
 ndarray 0.17.2
   License: MIT OR Apache-2.0
@@ -195,6 +216,8 @@ quote 1.0.47
 rawpointer 0.2.1
   License: MIT OR Apache-2.0
   Text: vendor/rawpointer/LICENSE-APACHE, vendor/rawpointer/LICENSE-MIT
+  LICENSE-MIT reads "Copyright (c) 2015" without a name; inst/AUTHORS
+    names the holder.
 
 rustc-hash 2.1.3
   License: Apache-2.0 OR MIT
@@ -232,6 +255,7 @@ unicode-ident 1.0.27
     vendor/unicode-ident/LICENSE-APACHE
     vendor/unicode-ident/LICENSE-MIT
     vendor/unicode-ident/LICENSE-UNICODE
+  LICENSE-UNICODE: Copyright 1991-2023 Unicode, Inc.
 
 zlib-rs 0.6.8
   License: Zlib
@@ -366,6 +390,14 @@ gemmi.tar.gz
     stb_sprintf.h: MIT or public domain (Unlicense), text at the end
       of the file
     tinydir.h: BSD-2-Clause, text in the file header
+  Two gemmi headers are derived from code under other terms, which
+  their headers name without quoting a text:
+    gemmi/include/gemmi/seqalign.hpp: from ksw2_gg.c and ksw2.h of
+      ksw2 (https://github.com/lh3/ksw2) by Heng Li, MIT
+    gemmi/include/gemmi/fprime.hpp: from the Fortran Cromer-Liberman
+      code in Larch (https://github.com/xraypy/xraylarch), which its
+      header gives as BSD; Larch's code is based on the Cowan-Brennan
+      routines and on Don T. Cromer's original code
 lzma.tar.gz
   License: public domain (liblzma)
   Text: lzma/COPYING
@@ -376,7 +408,7 @@ mmtf-cpp.tar.gz
     copies of Boost.Preprocessor and Boost.Predef, also BSL-1.0
 molfiles.tar.gz
   License: University of Illinois Open Source License (NCSA) for every
-    file not listed below
+    file not listed below; molfiles/src/tngplugin.cxx is BSD
   Text: molfiles/LICENSE
   Most files carry "(C) Copyright ... The Board of Trustees of the
   University of Illinois". Files with no notice of their own, such as
@@ -399,6 +431,14 @@ molfiles.tar.gz
       Regents of the University of California (Bill Ross, UCSF). They
       may be distributed if the notice is kept unmodified and changes
       to the rest of the file are noted in comments.
+    molfiles/src/tngplugin.cxx: BSD. Its header has no copyright line
+      and says "This software and the TNG library are made available
+      under the BSD license. For details, see the license information
+      associated with the Gromacs TNG library". That licence is TNG's
+      Revised BSD licence, Copyright 2012-2013 The GROMACS development
+      team, quoted in full at the end of this file. The plugin's author
+      field names Magnus Lundborg; its RCS header names John Stone
+      (johns) as the last committer. Not compiled.
     molfiles/src/hoomdplugin.c, molfiles/src/plyplugin.cxx: carry a
       copyright header but no licence statement. hoomdplugin.c is
       Copyright 2009 Axel Kohlmeyer. plyplugin.cxx is Copyright
@@ -428,6 +468,16 @@ tng.tar.gz
   Text: tng/COPYING
   tng/include/tng/md5.h, tng/src/lib/md5.c: the zlib-style licence of
     Aladdin Enterprises, text in each file header
+  tng/ci-scripts/copyright.py, tng/ci-scripts/copyright.sh,
+  tng/ci-scripts/clang-format.sh: TNG's Revised BSD notice (Copyright
+    2020 The GROMACS development team) and, from the GROMACS sources
+    they were copied from, LGPL-2.1-or-later (Copyright 2013-2020 The
+    GROMACS development team).
+  tng/ci-scripts/git-pre-commit: LGPL-2.1-or-later only (Copyright
+    2013-2020 The GROMACS development team).
+  None of the four is compiled or run. LGPL-2.1 text:
+    share/licenses/LGPL-2.1 in every R installation, and
+    https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
 toml11.tar.gz
   License: MIT
   Text: toml11/LICENSE
@@ -496,3 +546,35 @@ here as in ply.c (ply.h differs only in trailing blanks):
     THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,
     EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
     WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+molfiles/src/tngplugin.cxx says it is "made available under the BSD
+license" of the TNG library and points to that licence. This is TNG's
+licence as tng/COPYING gives it, copied unchanged (section 1 of that
+file; section 2 there is Google Test's BSD-3-Clause licence, for
+src/tests/googletest, which tng.tar.gz does not ship):
+
+    Copyright (c) 2012-2013, The GROMACS development team,
+    check out http://www.gromacs.org for more information.
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+        * Redistributions of source code must retain the above copyright
+          notice, this list of conditions and the following disclaimer.
+        * Redistributions in binary form must reproduce the above copyright
+          notice, this list of conditions and the following disclaimer in the
+          documentation and/or other materials provided with the distribution.
+        * Neither the name of the GROMACS development team nor the
+          names of its contributors may be used to endorse or promote products
+          derived from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+    DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

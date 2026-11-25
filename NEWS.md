@@ -54,6 +54,13 @@
   headers give them, `inst/AUTHORS` names their authors, and DESCRIPTION
   lists the holders of the molfile files that carry their own terms in
   `Authors@R` and `Copyright`.
+* `LICENSE.note` lists `tngplugin.cxx` under BSD with TNG's terms, the
+  LGPL-2.1-or-later TNG developer scripts, the Apache-2.0
+  `iralib_interf.h` (Miha Gunde) in the engine, and the named holders of
+  the vendored crates; `either` 1.19.0 names none upstream, and
+  `inst/AUTHORS` credits its author, Ulrik Sverdrup. `Authors@R` adds Henri
+  Menke (`vtfplugin.c`) and Miha Gunde. `tools/audit-licence-headers.py`
+  also reports credited authors that `inst/AUTHORS` does not name.
 * The vendored `linkcell` and `minimage` crates no longer ship their
   `CITATION.cff`, which R CMD check reports as a CITATION file outside
   `inst/`. Their author, Rohit Goswami, is listed for both crates in

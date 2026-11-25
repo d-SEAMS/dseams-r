@@ -77,9 +77,10 @@ Where each note comes from:
   holds the engine and the chemfiles and readcon-core readers. After
   linking, `src/Makevars` removes its debug sections with the debug-only
   strip command in R's `Makeconf` (`strip --strip-debug` here). The
-  symbol table that the compiled-code check reads stays. Before that
-  step the same check reported `installed size is 75.6Mb` with
-  `libs  74.8Mb`.
+  symbol table that the compiled-code check reads stays. With the debug
+  sections kept (`DSEAMS_KEEP_DEBUG=1`) the same check, run again on the
+  same host, reports `installed size is 75.6Mb` with `libs  74.8Mb`. That
+  figure varies with the host compiler and its debug flags.
 - Future file timestamps: the check host. R could not get the current
   time from the web service it asks, so it could not compare the file
   times to it.

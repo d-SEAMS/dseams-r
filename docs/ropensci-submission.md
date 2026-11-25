@@ -71,7 +71,11 @@ Authors@R: c(
     person("The Regents of the University of California", role = "cph",
            comment = "ReadPARM.h and ReadPARM7.h in the bundled VMD molfile plugins"),
     person("Axel", "Kohlmeyer", role = c("ctb", "cph"),
-           comment = "hoomdplugin.c in the bundled VMD molfile plugins")
+           comment = "hoomdplugin.c in the bundled VMD molfile plugins"),
+    person("Henri", "Menke", role = "ctb",
+           comment = "vtfplugin.c in the bundled VMD molfile plugins"),
+    person("Miha", "Gunde", role = c("ctb", "cph"),
+           comment = "iralib_interf.h (IRA/SOFI C API) in src/seams")
     )
 Description: Structural analysis of water and ice in molecular dynamics
     trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh
@@ -90,8 +94,9 @@ Copyright: See file inst/AUTHORS for the copyright holders of the
     and compiler-rt rustc links into that library, chemfiles, and the
     libraries chemfiles bundles, including the VMD molfile plugins and
     their ABINIT (Rob Lahaye) and PLY (Greg Turk, Georgia Institute of
-    Technology) sources. LICENSE.note gives their licences and quotes
-    the ABINIT and PLY terms.
+    Technology) sources, the BSD tngplugin.cxx, and the Apache-2.0
+    iralib_interf.h (Miha Gunde) in the engine. LICENSE.note gives their
+    licences and quotes the ABINIT, PLY and TNG terms.
 URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core
@@ -433,9 +438,10 @@ Where each note comes from:
   holds the engine and the chemfiles and readcon-core readers. After
   linking, `src/Makevars` removes its debug sections with the debug-only
   strip command in R's `Makeconf` (`strip --strip-debug` here). The
-  symbol table that the compiled-code check reads stays. Before that
-  step the same check reported `installed size is 75.6Mb` with
-  `libs  74.8Mb`.
+  symbol table that the compiled-code check reads stays. With the debug
+  sections kept (`DSEAMS_KEEP_DEBUG=1`) the same check, run again on the
+  same host, reports `installed size is 75.6Mb` with `libs  74.8Mb`. That
+  figure varies with the host compiler and its debug flags.
 - Future file timestamps: the check host. R could not get the current
   time from the web service it asks, so it could not compare the file
   times to it.

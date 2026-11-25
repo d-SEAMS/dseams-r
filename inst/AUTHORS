@@ -12,6 +12,9 @@ the source package.
   Authors: the d-SEAMS core team
   License: MIT
   Source: https://github.com/d-SEAMS/seams-core
+  include/iralib_interf.h, the C API header of Iterative Rotations and
+    Assignments (IRA/SOFI): Miha Gunde and contributors; Apache-2.0
+    (https://github.com/mammasmias/IterativeRotationsAssignments)
 
 
 2. readcon-core 0.16.2 (src/readcon-core)
@@ -40,6 +43,12 @@ crossbeam-utils 0.8.23
   Source: https://github.com/crossbeam-rs/crossbeam
 
 either 1.19.0
+  Copyright: Ulrik Sverdrup (bluss), who wrote the crate in 2015 and
+    added its licence files upstream (rayon-rs/either commit 6bd01dccb4,
+    "Add license files"). Upstream's LICENSE-MIT, here and at the 1.19.0
+    tag, reads "Copyright (c) 2015" without a name, and Cargo.toml lists
+    no authors. Josh Stone (cuviper) maintains it in rayon-rs, with the
+    either contributors.
   Source: https://github.com/rayon-rs/either
 
 rayon 1.12.0
@@ -82,6 +91,7 @@ crunchy 0.2.4
 
 dlpk 0.1.5
   Authors: Guillaume Fraux, Rohit Goswami
+  Copyright: the dlpk developers (LICENSE-MIT)
   License: MIT OR Apache-2.0
   Source: https://github.com/metatensor/dlpk
 
@@ -118,6 +128,8 @@ libc 0.2.191
 
 matrixmultiply 0.3.11
   Authors: bluss, R. Janis Goldschmidt
+  Copyright: Ulrik Sverdrup "bluss" (2016-2023), R. Janis Goldschmidt
+    (2018), and DutchGhost (2021, src/constparse.rs), per LICENSE-MIT
   License: MIT OR Apache-2.0
   Source: https://github.com/bluss/matrixmultiply/
 
@@ -133,6 +145,9 @@ memmap2 0.9.12
 
 miniz_oxide 0.9.1
   Authors: Frommi, oyvindln, Rich Geldreich
+  Copyright: Rich Geldreich and Tenacious Software LLC (2010-2014),
+    RAD Game Tools and Valve Software (2013-2014), Frommi (2017, 2020),
+    oyvindln (2017-2024), per its LICENSE files
   License: MIT OR Zlib OR Apache-2.0
   Source: https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide
 
@@ -181,12 +196,14 @@ quote 1.0.47
   Source: https://github.com/dtolnay/quote
 
 rawpointer 0.2.1
-  Authors: bluss
+  Authors: bluss (Ulrik Sverdrup), the holder; LICENSE-MIT reads
+    "Copyright (c) 2015" without a name
   License: MIT OR Apache-2.0
   Source: https://github.com/bluss/rawpointer/
 
 rustc-hash 2.1.3
-  Authors: The Rust Project Developers
+  Authors: The Rust Project Developers; its CHANGELOG credits the hasher's
+    design and implementation to Orson Peters
   License: Apache-2.0 OR MIT
   Source: https://github.com/rust-lang/rustc-hash
 
@@ -224,6 +241,7 @@ syn 3.0.10
 
 unicode-ident 1.0.27
   Authors: David Tolnay
+  Copyright: Unicode, Inc. (1991-2023) for the data under LICENSE-UNICODE
   License: (MIT OR Apache-2.0) AND Unicode-3.0
   Source: https://github.com/dtolnay/unicode-ident
 
@@ -360,6 +378,8 @@ bzip2.tar.gz (bzip2 and libbzip2)
   Authors: Julian R Seward
   License: bzip2-1.0.6 (BSD-style)
   dlltest.c: Yoshioka Tsuneo; public domain
+  crctable.c says its table is "vaguely derived from code by Rob Warnock"
+    (comp.compression FAQ, section 51)
 fmt.tar.gz (fmt)
   Authors: Victor Zverovich and contributors
   License: MIT
@@ -368,7 +388,10 @@ fmt.tar.gz (fmt)
     Schulz) (include/fmt/ranges.h, test/ranges-test.cc)
   Copied code and documentation under their own terms:
     test/gtest, test/gmock, test/gmock-gtest-all.cc (Google Test and
-      Google Mock): Google Inc.; BSD-3-Clause
+      Google Mock): Google Inc.; BSD-3-Clause; authors named in the
+      headers: Zhanyong Wan, Sean Mcafee, Markus Heule, Marcus Boerger
+    README.rst: its benchmark section comes from tinyformat by Chris
+      Foster
     support/docopt.py: Vladimir Keleshev; MIT
     doc/python-license.txt, for the documentation taken from Python's:
       Python Software Foundation, BeOpen.com, Corporation for National
@@ -392,11 +415,24 @@ gemmi.tar.gz (gemmi headers)
       public domain, or MIT
     tinydir.h: Cong Xu, Lautis Sun, Baudouin Feildel, Andargor;
       BSD-2-Clause
+  Headers derived from other code:
+    seqalign.hpp: from ksw2 by Heng Li; MIT
+    fprime.hpp: from the Cromer-Liberman code in Larch (maintained by
+      Matthew Newville; BSD per the header), based on the Cowan-Brennan
+      routines and Don T. Cromer's original code
 lzma.tar.gz (liblzma from XZ Utils)
-  Authors: Lasse Collin, Igor Pavlov and the XZ Utils contributors
+  Authors: Lasse Collin, Igor Pavlov and the XZ Utils contributors.
+    liblzma/check/sha256.c and lzma.h credit the SHA-256 code to Kevin
+    Springle and Wei Dai (Crypto++, public domain);
+    liblzma/common/hardware_physmem.c is by Jonathan Nieder. lzma/AUTHORS
+    also names Jean-loup Gailly, Charles Levert and Paul Eggert for the
+    xzgrep and xzdiff scripts, which this archive does not contain.
   License: public domain (liblzma); see lzma/COPYING in the archive
 mmtf-cpp.tar.gz (mmtf-cpp)
-  Authors: University of California San Diego
+  Authors: University of California San Diego. File headers name
+    Gerardo Tauriello, Gabriel Studer, Daniel Farrell and Thomas Holder;
+    examples/traverse.cpp is based on traverse.c by Julien Ferte
+    (mmtf_c)
   License: MIT
   Includes msgpack-c (mmtf-cpp/msgpack-c):
     FURUHASHI Sadayuki, KONDO Takatoshi, Vladimir Volodko, MIZUKI
@@ -423,6 +459,11 @@ molfiles.tar.gz (VMD molfile plugins)
     Shaw Research
   molfiles/src/Gromacs.h implements the 3dfcoord algorithm by Frans van
     Hoesel (Europort project, 1995).
+  molfiles/src/vtfplugin.c, which the bundled build compiles, is "by
+    Olaf Lenz and Henri Menke" (its first line); its author fields
+    name Olaf Lenz.
+  molfiles/src/biomoccaplugin.cxx reads the format of Biomocca, written
+    by the CEG at UIUC.
   Files with their own copyright holders and terms:
     abinitplugin.c: Rob Lahaye, Sungkyunkwan University; may be used
       only as part of an open-source project (text in LICENSE.note)
@@ -435,6 +476,10 @@ molfiles.tar.gz (VMD molfile plugins)
     ReadPARM.h, ReadPARM7.h: Regents of the University of California,
       code by Bill Ross (UCSF); distributable with the notice kept
       unmodified and changes noted
+    tngplugin.cxx: BSD, the TNG library's licence (The GROMACS
+      development team; text in LICENSE.note); the file has no
+      copyright line; author field Magnus Lundborg, RCS committer John
+      Stone; not compiled
     hoomdplugin.c, plyplugin.cxx: carry a copyright header but no
       licence statement. hoomdplugin.c is Copyright 2009 Axel
       Kohlmeyer. plyplugin.cxx is Copyright 1995-2016 The Board of
@@ -459,9 +504,19 @@ tng.tar.gz (TNG trajectory library)
     Lindahl, David van der Spoel), under tng's BSD-3-Clause licence.
   include/tng/md5.h, src/lib/md5.c: Aladdin Enterprises (L. Peter
     Deutsch); zlib-style licence
+  ci-scripts/copyright.py, copyright.sh, clang-format.sh: The GROMACS
+    development team (led by Mark Abraham, David van der Spoel, Berk
+    Hess and Erik Lindahl); TNG's Revised BSD and the GROMACS
+    LGPL-2.1-or-later header (LICENSE.note)
+  ci-scripts/git-pre-commit: The GROMACS development team;
+    LGPL-2.1-or-later (LICENSE.note)
 toml11.tar.gz (toml11)
   Authors: Toru Niina
   License: MIT
 zlib.tar.gz (zlib)
   Authors: Jean-loup Gailly and Mark Adler
   License: Zlib
+  deflate.c and trees.c credit ideas from 'freeze' by Leonid Broukhis
+    and 'ar' by Haruhiko Okumura.
+  zlib/README also names Paul Marquess (the Perl interface) and A.M.
+    Kuchling (the Python interface); neither interface is in the archive.
