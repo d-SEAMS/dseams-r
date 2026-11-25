@@ -59,3 +59,15 @@ get_threads_ <- function() {
 lang_version_ <- function() {
   .Call(`_dseams_lang_version_`)
 }
+
+sprintf_capacity_ <- function(size) {
+  .Call(`_dseams_sprintf_capacity_`, size)
+}
+
+sprintf_chk_ <- function(text, size) {
+  .Call(`_dseams_sprintf_chk_`, text, size)
+}
+
+sprintf_result_ <- function(size, capacity) {
+  .Call(`_dseams_sprintf_result_`, size, capacity)
+}

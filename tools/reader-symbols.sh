@@ -8,8 +8,9 @@
 # and return 0. They do not return a character count. puts returns 0.
 # putchar returns the character it wrote. sprintf, vsprintf and the
 # checked sprintf wrappers return the count from vsnprintf. The checked
-# sprintf wrappers stop with an R error when the text does not fit the
-# object size. __assert_rtn, the Darwin assert handler, stops with an R
+# sprintf wrappers clamp an object size above INT_MAX, such as the
+# (size_t)-1 Darwin passes for an unknown size, to INT_MAX, and stop with
+# an R error when vsnprintf fails or the text does not fit. __assert_rtn, the Darwin assert handler, stops with an R
 # error that names the failed assertion.
 #
 # The generic list is ELF and COFF names, and it is emitted only from

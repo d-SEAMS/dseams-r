@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* The checked `sprintf` wrappers of the bundled readers clamp the object
+  size to `INT_MAX` before calling `vsnprintf`. Darwin's `__sprintf_chk`
+  passes `(size_t)-1` for an unknown size, for which `vsnprintf` returned
+  -1 and wrote nothing. A negative `vsnprintf` count is now an R error.
 * On macOS `configure` also finds `llvm-objcopy` in Homebrew's keg-only
   `llvm` (`brew --prefix llvm`) when it is not on `PATH`.
 * The linked CI jobs configure seams-core with chemfiles and readcon-core

@@ -7,6 +7,7 @@
 #include <cpp11/integers.hpp>
 #include <cpp11/strings.hpp>
 
+#include "dseams_r_io.h"
 #include "seams_lang.h"
 
 #ifdef _OPENMP
@@ -296,3 +297,41 @@ int get_threads_() {
 
 [[cpp11::register]]
 std::string lang_version_() { return seams_lang_version(); }
+
+// Test hooks for the checked sprintf wrappers in dseams_r_io.cpp. A
+// negative size stands for the (size_t)-1 that Darwin passes when the
+// object size is unknown.
+namespace {
+
+std::size_t object_size_arg(double size) {
+  return size < 0 ? static_cast<std::size_t>(-1) : static_cast<std::size_t>(size);
+}
+
+} // namespace
+
+[[cpp11::register]]
+double sprintf_capacity_(double size) {
+  return static_cast<double>(dseams_r::sprintf_capacity(object_size_arg(size)));
+}
+
+[[cpp11::register]]
+std::string sprintf_chk_(std::string text, double size) {
+  const std::size_t object_size = object_size_arg(size);
+  // The buffer holds the text or object_size bytes, whichever is larger,
+  // so the call writes inside it whatever the size says.
+  std::vector<char> buf(std::max(text.size() + 1,
+                                 size < 0 ? std::size_t{0} : object_size), '\0');
+  cpp11::unwind_protect([&] {
+    dseams_r_sprintf_chk(buf.data(), 1, object_size, "%s", text.c_str());
+  });
+  return std::string(buf.data());
+}
+
+[[cpp11::register]]
+int sprintf_result_(int size, double capacity) {
+  int out = 0;
+  cpp11::unwind_protect([&] {
+    out = dseams_r::checked_sprintf(size, object_size_arg(capacity));
+  });
+  return out;
+}
