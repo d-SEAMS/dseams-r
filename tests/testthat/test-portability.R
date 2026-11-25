@@ -37,12 +37,13 @@ portability_root <- function() {
   NULL
 }
 
+# Output goes through a file, so system2() returns the exit status rather
+# than warning on a non-zero one; the refusal tests expect a failure.
 run_capture <- function(cmd, args) {
-  out <- system2(cmd, args, stdout = TRUE, stderr = TRUE)
-  status <- attr(out, "status")
-  if (is.null(status)) {
-    status <- 0L
-  }
+  log <- tempfile("dseams-run-")
+  on.exit(unlink(log), add = TRUE)
+  status <- system2(cmd, args, stdout = log, stderr = log)
+  out <- if (file.exists(log)) readLines(log) else character()
   list(status = as.integer(status), out = out)
 }
 
