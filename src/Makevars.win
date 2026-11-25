@@ -2,13 +2,16 @@ CXX_STD = CXX20
 
 PKG_CPPFLAGS = -I. -Iseams -Iseams/include -Ireadcon-core/include -Ireadcon-core/vendor/linkcell/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_HAS_LINKCELL=1 -DSEAMS_LANG_VERSION='"2.14.2"' -DSEAMS_HAS_OPENMP=1 -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
-PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a -lws2_32 -luserenv -lbcrypt -lntdll -lpthread
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(READER_DEPS) -lws2_32 -luserenv -lbcrypt -lntdll -ldbghelp -lpthread
 
 CARGO = cargo
 CMAKE = cmake
 OBJCOPY = objcopy
 CHEMFILES_BUILD = $(TEMP)/dseams-chemfiles-build
-READER_DEPS = readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a
+# The Rust archive uses the same GNU ABI as the Rtools C++ objects.
+RUST_TARGET ?= x86_64-pc-windows-gnu
+READCON_ARCHIVE = readcon-core/target/$(RUST_TARGET)/release/libreadcon_core.a
+READER_DEPS = $(READCON_ARCHIVE) chemfiles-install/lib/libchemfiles.a
 
 # The same engine objects as src/Makevars.in; tools/vendor.sh checks that
 # the two lists agree.
@@ -79,23 +82,25 @@ $(OBJECTS): reader-stamp
 # user's home, so CARGO_HOME is a directory inside the package.
 CARGO_HOME_DIR = $(CURDIR)/readcon-core/cargo-home
 
-readcon-core/target/release/libreadcon_core.a: readcon-core/Cargo.toml readcon-core/Cargo.lock
+$(READCON_ARCHIVE): readcon-core/Cargo.toml readcon-core/Cargo.lock
 	rustc --version
 	"$(CARGO)" --version
 	find readcon-core/vendor -name cargo-checksum.json -exec sh -c \
 	  'cp "$$1" "$$(dirname "$$1")/.cargo-checksum.json"' _ {} \;
 	mkdir -p "$(CARGO_HOME_DIR)"
 	CARGO_HOME="$(CARGO_HOME_DIR)" \
+	  CC="$(firstword $(CC))" \
 	  LINKCELL_OPENMP=0 \
 	  CARGO_PROFILE_RELEASE_LTO=off CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 \
 	  RUSTFLAGS="-C relocation-model=pic -A non_camel_case_types" \
 	  "$(CARGO)" rustc -j 2 --offline --locked --release --lib --crate-type staticlib \
+	    --target "$(RUST_TARGET)" \
 	    --manifest-path readcon-core/Cargo.toml \
 	    --config 'source.crates-io.replace-with="vendored-sources"' \
 	    --config 'source.vendored-sources.directory="readcon-core/vendor"' \
 	    --target-dir readcon-core/target
 	rm -rf "$(CARGO_HOME_DIR)"
-	sh ../tools/reader-symbols.sh "$(OBJCOPY)" $@
+	sh ../tools/reader-symbols.sh "$(OBJCOPY)" "$@"
 	find readcon-core/vendor -name '.cargo-checksum.json' -delete
 
 chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt

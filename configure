@@ -81,6 +81,9 @@ find_tool() {
 CARGO=$(find_tool cargo)
 CMAKE=$(find_tool cmake)
 OBJCOPY=$(find_tool objcopy llvm-objcopy)
+if [ "$(uname -s)" = Darwin ]; then
+  OBJCOPY=$(find_tool llvm-objcopy)
+fi
 CHEMFILES_BUILD=""
 READER_DEPS=""
 
@@ -168,7 +171,7 @@ else
     exit 1
   fi
   if [ -z "${OBJCOPY}" ]; then
-    echo "configure: objcopy (GNU binutils) or llvm-objcopy is required to build the bundled readers" >&2
+    echo "configure: objcopy (GNU binutils) or llvm-objcopy (required on macOS) is needed to build the bundled readers" >&2
     exit 1
   fi
   # The tarball stores cargo's checksum under a name that is not hidden.

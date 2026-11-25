@@ -16,8 +16,10 @@ Steinhardt order parameters. The calculations are the
 ## Installation
 
 A C++20 compiler, GNU make, Cargo, rustc >= 1.88, cmake >= 3.15, and
-objcopy (from GNU binutils, or llvm-objcopy) are required. The package
-compiles the engine, readcon-core, and chemfiles as it installs.
+objcopy (from GNU binutils, or llvm-objcopy) are required. On macOS, put
+`llvm-objcopy` on `PATH`. On 64-bit Intel Windows, install Rtools and add
+the Rust target with `rustup target add x86_64-pc-windows-gnu`. The package
+compiles the engine, readcon-core, and Chemfiles as it installs.
 
 ```r
 install.packages("remotes")

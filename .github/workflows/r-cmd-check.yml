@@ -65,9 +65,14 @@ jobs:
       - name: Install checkbashisms
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends devscripts
-      - name: Install checkbashisms
+      - name: Install macOS package-check tools
         if: runner.os == 'macOS'
-        run: brew install checkbashisms
+        run: |
+          brew install checkbashisms llvm
+          echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
+      - name: Install the Rust target for Rtools
+        if: runner.os == 'Windows'
+        run: rustup target add x86_64-pc-windows-gnu
       - name: Copy the engine into the package
         shell: bash
         working-directory: dseams
