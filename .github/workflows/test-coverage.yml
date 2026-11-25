@@ -58,6 +58,8 @@ jobs:
         with:
           manifest-path: dseams/pixi.toml
           cache-key: pixi-dseams-
+      - name: Install objcopy
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils
       - name: Coverage
         working-directory: dseams
         env:

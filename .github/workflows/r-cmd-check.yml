@@ -1,9 +1,9 @@
 name: R-CMD-check
 on:
   push:
-    branches: [main, "release/**"]
+    branches: [main, develop, "release/**"]
   pull_request:
-    branches: [main, "release/**"]
+    branches: [main, develop, "release/**"]
   workflow_dispatch:
 
 permissions:
@@ -64,7 +64,7 @@ jobs:
       # and reports a WARNING when the script is missing.
       - name: Install checkbashisms
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends devscripts
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts
       - name: Install macOS package-check tools
         if: runner.os == 'macOS'
         run: |
@@ -73,6 +73,14 @@ jobs:
       - name: Install the Rust target for Rtools
         if: runner.os == 'Windows'
         run: rustup target add x86_64-pc-windows-gnu
+      - name: Require objcopy for the reader symbol tests
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          if ! command -v objcopy >/dev/null 2>&1 && ! command -v llvm-objcopy >/dev/null 2>&1; then
+            echo "objcopy is not on PATH; the reader symbol tests would skip" >&2
+            exit 1
+          fi
       - name: Copy the engine into the package
         shell: bash
         working-directory: dseams
@@ -139,7 +147,7 @@ jobs:
           manifest-path: dseams/pixi.toml
           cache-key: pixi-dseams-
       - name: Install checkbashisms
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends devscripts
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts
       - name: R CMD check
         working-directory: dseams
         run: |
