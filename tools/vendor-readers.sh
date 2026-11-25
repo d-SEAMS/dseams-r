@@ -140,18 +140,22 @@ find "$dest/vendor" -name '.cargo-checksum.json' -exec sh -c \
 # Remove Cargo tool configuration and changelog directories from the
 # vendored crates. R CMD build omits changelog.d, and Cargo checks
 # every file recorded in the manifest during offline installation.
+# R CMD check notes a CITATION file outside inst/; the crates'
+# CITATION.cff authors are listed in inst/AUTHORS.
 find "$dest/vendor" -depth \( \
   -name '.cargo_vcs_info.json' -o -name '.github' -o -name '.ignore' \
   -o -name '.vim' -o -name '.reuse' -o -name '.travis.yml' \
   -o -name '.rustfmt.toml' -o -name '.codecov.yml' -o -name '.gitignore' \
   -o -name '.clippy.toml' -o -name '.tombi.toml' -o -name 'changelog.d' \
+  -o -name 'CITATION' -o -name 'CITATION.*' \
   \) -exec rm -rf {} +
 # R CMD build hides dotted paths and drops every path under src/ that ends
 # in .d (its exclude pattern ^src/.*\.d$). A vendored path of either kind
 # left here is missing from the tarball while the checksums still list it.
-left=$(find "$dest/vendor" \( -name '.*' -o -name '*.d' \) -print)
+left=$(find "$dest/vendor" \( -name '.*' -o -name '*.d' \
+  -o -name 'CITATION' -o -name 'CITATION.*' \) -print)
 if [ -n "$left" ]; then
-  printf 'vendor-readers.sh: vendored paths R CMD build would hide or drop:\n%s\n' "$left" >&2
+  printf 'vendor-readers.sh: vendored paths R CMD build or check would reject:\n%s\n' "$left" >&2
   exit 1
 fi
 python3 - "$dest/vendor" << 'PY'

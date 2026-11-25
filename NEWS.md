@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* The vendored `linkcell` and `minimage` crates no longer ship their
+  `CITATION.cff`, which R CMD check reports as a CITATION file outside
+  `inst/`. Their author, Rohit Goswami, is listed for both crates in
+  `inst/AUTHORS`, and their licences stay in `LICENSE.note`.
 * `tools/vendor-readers.sh` stops when a vendored crate still has a
   dotted path or a path ending in `.d` after its removal list runs.
   R CMD build hides the first and drops the second (its exclude pattern
