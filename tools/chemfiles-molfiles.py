@@ -245,6 +245,13 @@ def main():
         'endif()', flags)
     flags.write_text(text, encoding="utf-8")
 
+    # Bundled msgpack uses type traits without including their header.
+    mmtf = chem / "src/formats/MMTF.cpp"
+    text = mmtf.read_text(encoding="utf-8")
+    text = replace_once(text, "#include <unordered_set>\n",
+                        "#include <unordered_set>\n#include <type_traits>\n", mmtf)
+    mmtf.write_text(text, encoding="utf-8")
+
     readers = plan(chem)
 
     hpp = chem / "include/chemfiles/formats/Molfile.hpp"
