@@ -137,14 +137,14 @@ fi
 # cargo runs. Other dotted vendor files are not needed to build.
 find "$dest/vendor" -name '.cargo-checksum.json' -exec sh -c \
   'mv "$1" "$(dirname "$1")/cargo-checksum.json"' _ {} \;
-# Hidden names are an R CMD check note, and they are not inputs to the
-# static library. Remove them before rewriting the checksums. Cargo
-# hashes every path listed in the checksum and stops if one is absent.
+# Remove Cargo tool configuration and changelog directories from the
+# vendored crates. R CMD build omits changelog.d, and Cargo checks
+# every file recorded in the manifest during offline installation.
 find "$dest/vendor" -depth \( \
   -name '.cargo_vcs_info.json' -o -name '.github' -o -name '.ignore' \
   -o -name '.vim' -o -name '.reuse' -o -name '.travis.yml' \
   -o -name '.rustfmt.toml' -o -name '.codecov.yml' -o -name '.gitignore' \
-  -o -name '.clippy.toml' -o -name '.tombi.toml' \
+  -o -name '.clippy.toml' -o -name '.tombi.toml' -o -name 'changelog.d' \
   \) -exec rm -rf {} +
 python3 - "$dest/vendor" << 'PY'
 import json
