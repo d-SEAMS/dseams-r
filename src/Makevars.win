@@ -103,6 +103,8 @@ $(READCON_ARCHIVE): readcon-core/Cargo.toml readcon-core/Cargo.lock
 	sh ../tools/reader-symbols.sh "$(OBJCOPY)" "$@"
 	find readcon-core/vendor -name '.cargo-checksum.json' -delete
 
+# The vendored LZMA headers use the Windows bit-scan intrinsic. MinGW's
+# C++ headers also use GNU floating-point literals in C++11 mode.
 chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	"$(CMAKE)" -S chemfiles -B "$(CHEMFILES_BUILD)" \
 	  -DCMAKE_BUILD_TYPE=Release \
@@ -112,8 +114,8 @@ chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
 	  -DCMAKE_C_COMPILER="$(firstword $(CC))" \
 	  -DCMAKE_CXX_COMPILER="$(firstword $(CXX))" \
-	  -DCMAKE_C_FLAGS="-O2 -fPIC -w" \
-	  -DCMAKE_CXX_FLAGS="-O2 -fPIC -w -DDESRES_WIN32" \
+	  -DCMAKE_C_FLAGS="-O2 -fPIC -w -include intrin.h" \
+	  -DCMAKE_CXX_FLAGS="-O2 -fPIC -w -DDESRES_WIN32 -fext-numeric-literals" \
 	  -DCMAKE_C_FLAGS_RELEASE="-O2" \
 	  -DCMAKE_CXX_FLAGS_RELEASE="-O2" \
 	  -DBUILD_SHARED_LIBS=OFF \
