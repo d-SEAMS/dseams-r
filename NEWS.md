@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* The bundled `FormatFactory.cpp` includes `<type_traits>` before
+  `chemfiles/formats/MMTF.hpp`, as `MMTF.cpp` does, so neither source
+  that reaches mmtf-cpp's msgpack-c depends on another header for
+  `std::remove_volatile` (missing through libc++'s headers).
 * The checked `sprintf` wrappers of the bundled readers clamp the object
   size to `INT_MAX` before calling `vsnprintf`. Darwin's `__sprintf_chk`
   passes `(size_t)-1` for an unknown size, for which `vsnprintf` returned

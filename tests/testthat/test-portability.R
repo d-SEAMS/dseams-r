@@ -327,14 +327,27 @@ read_text <- function(path) {
   paste(readLines(path, warn = FALSE), collapse = "\n")
 }
 
-test_that("the MMTF reader includes type_traits before mmtf-cpp", {
+test_that("every chemfiles source reaching mmtf-cpp includes type_traits first", {
   root <- portability_root()
   if (!is.null(root)) {
-    text <- read_text(file.path(root, "src", "chemfiles", "src", "formats", "MMTF.cpp"))
-    traits <- regexpr("#include <type_traits>", text, fixed = TRUE)
-    mmtf <- regexpr("#include <mmtf/", text, fixed = TRUE)
-    expect_gt(traits, 0L)
-    expect_gt(mmtf, traits)
+    src <- file.path(root, "src", "chemfiles", "src")
+    files <- list.files(src, pattern = "\\.cpp$", recursive = TRUE, full.names = TRUE)
+    # msgpack-c, inside mmtf-cpp, uses std::remove_volatile without
+    # including <type_traits>. MMTF.hpp includes mmtf/structure_data.hpp.
+    reach <- "#include <mmtf/|#include \"chemfiles/formats/MMTF.hpp\""
+    users <- character()
+    for (path in files) {
+      text <- read_text(path)
+      first <- regexpr(reach, text)
+      if (first < 0L) {
+        next
+      }
+      users <- c(users, basename(path))
+      traits <- regexpr("#include <type_traits>", text, fixed = TRUE)
+      expect_gt(traits, 0L, label = basename(path))
+      expect_gt(first, traits, label = basename(path))
+    }
+    expect_setequal(users, c("MMTF.cpp", "FormatFactory.cpp"))
   }
   expect_one_water(reader_water("tiny.mmtf"))
 })

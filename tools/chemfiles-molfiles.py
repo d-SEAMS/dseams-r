@@ -14,8 +14,9 @@ seams-core pin that changes the plugin list stops the script, so the
 change is reviewed here (tools/probe-molfiles.sh prints what a plugin
 registers) before it ships.
 
-It also makes two edits the patches do not: MinGW builds chemfiles with
--std=gnu++11, and MMTF.cpp includes <type_traits>.
+It also makes edits the patches do not: MinGW builds chemfiles with
+-std=gnu++11, and MMTF.cpp and FormatFactory.cpp, the two sources that
+reach msgpack-c, include <type_traits>.
 """
 
 import re
@@ -142,11 +143,14 @@ def main():
     flags.write_text(text, encoding="utf-8")
 
     # Bundled msgpack uses type traits without including their header.
-    mmtf = chem / "src/formats/MMTF.cpp"
-    text = mmtf.read_text(encoding="utf-8")
-    text = replace_once(text, "#include <unordered_set>\n",
-                        "#include <unordered_set>\n#include <type_traits>\n", mmtf)
-    mmtf.write_text(text, encoding="utf-8")
+    # MMTF.cpp includes mmtf-cpp directly, and FormatFactory.cpp through
+    # chemfiles/formats/MMTF.hpp; both include <type_traits> first.
+    for source, anchor in (("src/formats/MMTF.cpp", "#include <unordered_set>\n"),
+                           ("src/FormatFactory.cpp", "#include <functional>\n")):
+        path = chem / source
+        text = path.read_text(encoding="utf-8")
+        text = replace_once(text, anchor, anchor + "#include <type_traits>\n", path)
+        path.write_text(text, encoding="utf-8")
 
     for plugin in sorted(PLUGINS):
         print("chemfiles-molfiles.py: builds {}".format(plugin))

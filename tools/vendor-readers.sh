@@ -187,7 +187,7 @@ PY
 # chemfiles 0.10.4 with every seams-core patch (mmCIF, MOL2, frame visit,
 # LAMMPS Data sections, the VMD molfile readers, hostile-file bounds in
 # chemfiles and in its molfiles, TNG, mmtf-cpp and gemmi archives, span
-# under NDEBUG, Apple zlib, fmt/libc++), the MinGW flags and MMTF include
+# under NDEBUG, Apple zlib, fmt/libc++), the MinGW flags and msgpack includes
 # from tools/chemfiles-molfiles.py, the CMake policy floor from
 # tools/chemfiles-cmake-floor.py, and LF line endings in the generated
 # headers from tools/chemfiles-lf-headers.py. cmake builds this tree at
@@ -271,7 +271,8 @@ if ! grep -q seams_with_frame "$pkg/src/chemfiles/src/Trajectory.cpp"; then
   echo "vendor-readers.sh: chemfiles frame-visit patch did not apply" >&2
   exit 1
 fi
-# The MinGW C++ dialect and the MMTF type_traits include, and a check
+# The MinGW C++ dialect, the type_traits include in the two sources that
+# reach msgpack-c, and a check
 # that the molfiles patch builds every plugin chemfiles lists as
 # compilable except the ones excluded for a stated reason.
 python3 "$pkg/tools/chemfiles-molfiles.py" "$pkg/src/chemfiles"
