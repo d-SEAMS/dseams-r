@@ -272,9 +272,9 @@ if ! grep -q seams_with_frame "$pkg/src/chemfiles/src/Trajectory.cpp"; then
   exit 1
 fi
 # The MinGW C++ dialect, the type_traits include in the two sources that
-# reach msgpack-c, and a check
-# that the molfiles patch builds every plugin chemfiles lists as
-# compilable except the ones excluded for a stated reason.
+# reach msgpack-c, and a check that the molfiles patch builds every plugin
+# chemfiles lists as compilable except the ones excluded for a stated
+# reason.
 python3 "$pkg/tools/chemfiles-molfiles.py" "$pkg/src/chemfiles"
 # CMake 4 refuses cmake_minimum_required() below 3.5, which chemfiles and
 # the libraries in external/*.tar.gz ask for. Raise each one to
