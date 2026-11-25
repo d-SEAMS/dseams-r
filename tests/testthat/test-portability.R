@@ -232,6 +232,72 @@ test_that("every vendored chemfiles CMake file meets the CMake 4 floor", {
   expect_identical(bad, character(), info = paste(bad, collapse = "\n"))
 })
 
+# src/chemfiles is not installed. When the source tree is present these
+# tests check the MinGW and libc++ paths develop takes in the bundled
+# chemfiles: tools/chemfiles-molfiles.py adds <type_traits> to MMTF.cpp
+# and selects gnu++11 under MinGW, and Makevars.win passes -include
+# intrin.h and -DDESRES_WIN32. An installed package is checked by reading
+# the water those readers decode. tools/readers holds tiny.mae and
+# tiny.mmtf; vendor-readers.sh copies them into inst/extdata, and the
+# same files sit beside this test for an install whose extdata predates
+# that copy. The geometry is tools/readers/tiny.pdb.
+reader_water <- function(name) {
+  shipped <- system.file("extdata", name, package = "dseams")
+  path <- if (nzchar(shipped)) shipped else testthat::test_path(name)
+  expect_true(file.exists(path), info = name)
+  path
+}
+
+expect_one_water <- function(path) {
+  expect_identical(nframes(path), 1L, label = path)
+  xyz <- unname(positions(read_frame(path, type = -1L)))
+  expect_equal(
+    xyz,
+    rbind(c(0, 0, 0), c(0.957, 0, 0), c(-0.24, 0.927, 0)),
+    tolerance = 1e-5,
+    label = path
+  )
+}
+
+read_text <- function(path) {
+  expect_true(file.exists(path), info = path)
+  paste(readLines(path, warn = FALSE), collapse = "\n")
+}
+
+test_that("the MMTF reader includes type_traits before mmtf-cpp", {
+  root <- portability_root()
+  if (!is.null(root)) {
+    text <- read_text(file.path(root, "src", "chemfiles", "src", "formats", "MMTF.cpp"))
+    traits <- regexpr("#include <type_traits>", text, fixed = TRUE)
+    mmtf <- regexpr("#include <mmtf/", text, fixed = TRUE)
+    expect_gt(traits, 0L)
+    expect_gt(mmtf, traits)
+  }
+  expect_one_water(reader_water("tiny.mmtf"))
+})
+
+test_that("the Windows chemfiles build takes the MinGW paths", {
+  root <- portability_root()
+  if (!is.null(root)) {
+    mk <- readLines(file.path(root, "src", "Makevars.win"), warn = FALSE)
+    cflags <- grep("-DCMAKE_C_FLAGS=", mk, fixed = TRUE, value = TRUE)
+    cxxflags <- grep("-DCMAKE_CXX_FLAGS=", mk, fixed = TRUE, value = TRUE)
+    expect_length(cflags, 1L)
+    expect_length(cxxflags, 1L)
+    expect_true(grepl("-include intrin.h", cflags, fixed = TRUE))
+    expect_true(grepl("-DDESRES_WIN32", cxxflags, fixed = TRUE))
+    flags <- read_text(file.path(root, "src", "chemfiles", "cmake", "CompilerFlags.cmake"))
+    mingw <- paste(
+      "if(MINGW)",
+      "    set(CMAKE_CXX_EXTENSIONS ON)",
+      "    set(CHFL_CXX11_FLAG \"-std=gnu++11\")",
+      sep = "\n"
+    )
+    expect_true(grepl(mingw, flags, fixed = TRUE))
+  }
+  expect_one_water(reader_water("tiny.mae"))
+})
+
 test_that("the CMake floor check rejects the minimums chemfiles shipped", {
   for (call in c(
     "cmake_minimum_required(VERSION 2.8.12)",

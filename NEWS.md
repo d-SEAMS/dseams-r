@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* `tiny.mae` and `tiny.mmtf` are one water molecule shipped with the
+  package. The Maestro plugin and the MMTF reader return that water.
+  The portability tests read these files, so they run from an installed
+  package as well as from the source tree.
 * On Windows, readcon-core is built for the Rust GNU target of the
   Rtools compiler: `aarch64-pc-windows-gnullvm` when the compiler's
   `-dumpmachine` names aarch64, else `x86_64-pc-windows-gnu`.
