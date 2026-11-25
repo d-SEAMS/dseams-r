@@ -62,14 +62,17 @@ tree, crates included) and patched chemfiles 0.10.4. A tarball from
 bundled compile needs GNU make, Cargo, rustc >= 1.88, cmake >= 3.15,
 and objcopy (or llvm-objcopy), and it always builds the CON reader and
 chemfiles. Cargo and CMake run at most two jobs, and Cargo's home is
-`src/readcon-core/cargo-home`, which the build removes. A linked engine is expected to have
-been built with those readers as well.
+`src/readcon-core/cargo-home`, which the build removes. A linked engine
+needs the same readers: configure seams-core with
+`meson setup build -Dwith_chemfiles=enabled -Dwith_readcon=enabled`, as
+CI does. Its reader probe rejects a chemfiles without all 37 VMD molfile
+readers and builds the patched 0.10.4 copy instead.
 
 ## Build and test
 
 All builds and checks run on a build host, not on a laptop. With a
-seams-core checkout at the pin built in `build/` (meson targets
-`src/libseams.so`, `bindings/libseams_lang.so`, `seams`,
+seams-core checkout at the pin configured as above and built in `build/`
+(meson targets `src/libseams.so`, `bindings/libseams_lang.so`, `seams`,
 `bindings/binding_oracle`):
 
 ```bash

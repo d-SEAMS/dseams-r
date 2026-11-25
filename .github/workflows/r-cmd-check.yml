@@ -162,10 +162,14 @@ jobs:
           manifest-path: seams-core/pixi.toml
           environments: default
           cache-key: pixi-seams-core-
+      # Enabled, not auto: setup stops when chemfiles or readcon-core is
+      # missing. A chemfiles without all 37 VMD molfile readers fails the
+      # seams-core reader probe, so meson builds the patched copy, which
+      # registers the same formats as the bundled src/chemfiles.
       - name: Build seams-core
         working-directory: seams-core
         run: |
-          pixi run meson setup build
+          pixi run meson setup build -Dwith_chemfiles=enabled -Dwith_readcon=enabled
           pixi run ninja -C build seams src/libseams.so bindings/libseams_lang.so bindings/binding_oracle
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:

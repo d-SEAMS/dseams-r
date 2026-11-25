@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* The linked CI jobs configure seams-core with chemfiles and readcon-core
+  enabled, so `meson setup` stops instead of building an engine without
+  them. The engine they build registers the same 58 chemfiles formats as
+  the bundled copy, the 37 VMD molfile readers among them.
 * The shared library loses its debug sections after linking, through the
   debug-only strip command in R's `Makeconf` (`strip --strip-debug`,
   `strip -S` on macOS). The symbol table, every reader and every format
