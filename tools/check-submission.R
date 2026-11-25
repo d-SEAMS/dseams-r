@@ -1,7 +1,7 @@
 # Copyright (c) d-SEAMS developers
 # The rOpenSci draft pastes DESCRIPTION into a fence. This compares that
-# fence to the file, byte for byte, and checks that Ruhila Goswami's
-# contributor role and ORCID are the same in DESCRIPTION, codemeta.json,
+# fence to the file after normalizing Windows line endings. It checks that
+# Ruhila Goswami's role and ORCID match in DESCRIPTION, codemeta.json,
 # the draft, and README.md.
 #
 #   Rscript tools/check-submission.R
@@ -19,7 +19,7 @@ read_text <- function(path) {
   raw <- if (size == 0L) raw(0L) else readBin(path, "raw", n = size)
   txt <- rawToChar(raw)
   Encoding(txt) <- "UTF-8"
-  txt
+  gsub("\r\n", "\n", txt, fixed = TRUE)
 }
 
 extract_description_block <- function(md) {
@@ -141,7 +141,7 @@ write_submission_description <- function(root) {
   desc <- read_text(file.path(root, "DESCRIPTION"))
   md <- read_text(draft_path)
   updated <- replace_description_block(md, desc)
-  # Write bytes unchanged, including the final newline the file already has.
+  # Keep the draft's final newline and write LF line endings.
   writeBin(charToRaw(updated), draft_path)
   problems <- check_submission(root)
   if (length(problems)) {
