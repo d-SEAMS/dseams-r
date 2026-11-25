@@ -225,6 +225,26 @@ def main():
     new = "set(VMD_MOLFILE_PLUGINS\n" + "".join("    " + p + "\n" for p in plugins) + ")"
     cmake.write_text(replace_once(text, old, new, cmake), encoding="utf-8")
 
+    # MinGW's standard library uses GNU floating-point literals in C++11.
+    flags = chem / "cmake/CompilerFlags.cmake"
+    text = flags.read_text(encoding="utf-8")
+    text = replace_once(
+        text, 'CHECK_COMPILER_FLAG(CXX "-std=c++11" COMPILER_SUPPORTS_CXX11)',
+        'CHECK_COMPILER_FLAG(CXX "${CHFL_CXX11_FLAG}" COMPILER_SUPPORTS_CXX11)', flags)
+    text = replace_once(
+        text, 'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")',
+        'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CHFL_CXX11_FLAG}")', flags)
+    text = replace_once(
+        text, 'set(CMAKE_CXX_EXTENSIONS OFF)',
+        'if(MINGW)\n'
+        '    set(CMAKE_CXX_EXTENSIONS ON)\n'
+        '    set(CHFL_CXX11_FLAG "-std=gnu++11")\n'
+        'else()\n'
+        '    set(CMAKE_CXX_EXTENSIONS OFF)\n'
+        '    set(CHFL_CXX11_FLAG "-std=c++11")\n'
+        'endif()', flags)
+    flags.write_text(text, encoding="utf-8")
+
     readers = plan(chem)
 
     hpp = chem / "include/chemfiles/formats/Molfile.hpp"
