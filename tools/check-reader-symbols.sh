@@ -107,11 +107,19 @@ config_lines() {
 work=$(mktemp -d "${TMPDIR:-/tmp}/dseams-symbols.XXXXXX")
 trap 'rm -rf "${work}"' EXIT
 
+# The objects R's compiler writes on this host. reader-symbols.sh reads
+# the format from the archive, and must reach the same answer.
+case "${system_name}" in
+  Darwin) format=mach-o ;;
+  MINGW* | MSYS* | CYGWIN* | Windows*) format=coff ;;
+  *) format=elf ;;
+esac
+
 config_lines CC > "${work}/cc"
 config_lines AR > "${work}/ar"
-sh "${symbols}" --print-map "${system_name}" > "${work}/map"
+sh "${symbols}" --print-map "${format}" > "${work}/map"
 if [ ! -s "${work}/map" ]; then
-  die "the symbol map for ${system_name} is empty"
+  die "the ${format} symbol map is empty"
 fi
 
 src=${work}/fixture.c
@@ -221,7 +229,11 @@ require_rewritten() {
 undefined_symbols "${archive}" fixture.o "${work}/before" || exit 1
 require_sources "${work}/before" "${work}/map" "before rewrite" || exit 1
 
-sh "${symbols}" "${objcopy}" "${archive}" "${system_name}"
+found=$(sh "${symbols}" --format "${archive}")
+if [ "${found}" != "${format}" ]; then
+  die "reader-symbols.sh reads ${archive} as ${found}, not ${format}"
+fi
+sh "${symbols}" "${objcopy}" "${archive}"
 
 undefined_symbols "${archive}" fixture.o "${work}/after" || exit 1
 require_rewritten "${work}/after" "${work}/before" "${work}/map" || exit 1
@@ -230,7 +242,7 @@ require_rewritten "${work}/after" "${work}/before" "${work}/map" || exit 1
 # way the platform does, so the map's spelling of abort must match it.
 abort_from=$(awk '$2 ~ /^_?dseams_r_abort$/ { print $1 }' "${work}/map")
 if [ -z "${abort_from}" ]; then
-  die "the ${system_name} map has no entry for abort"
+  die "the ${format} map has no entry for abort"
 fi
 awk -v f="${abort_from}" '$1 == f' "${work}/map" > "${work}/abort-map"
 
@@ -262,7 +274,7 @@ shift
 "${archiver}" "$@" crs "${work}/libreader.a" "${reader_obj}"
 undefined_symbols "${work}/libreader.a" reader.o "${work}/reader-before" || exit 1
 require_sources "${work}/reader-before" "${work}/abort-map" "in the abort() reader" || exit 1
-sh "${symbols}" "${objcopy}" "${work}/libreader.a" "${system_name}"
+sh "${symbols}" "${objcopy}" "${work}/libreader.a"
 undefined_symbols "${work}/libreader.a" reader.o "${work}/reader-after" || exit 1
 require_rewritten "${work}/reader-after" "${work}/reader-before" "${work}/map" || exit 1
 

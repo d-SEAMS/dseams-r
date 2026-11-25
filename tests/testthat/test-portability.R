@@ -46,9 +46,9 @@ run_capture <- function(cmd, args) {
   list(status = as.integer(status), out = out)
 }
 
-read_map <- function(root, system_name) {
+read_map <- function(root, format) {
   script <- file.path(root, "tools", "reader-symbols.sh")
-  got <- run_capture("sh", c(script, "--print-map", system_name))
+  got <- run_capture("sh", c(script, "--print-map", format))
   expect_identical(got$status, 0L, info = paste(got$out, collapse = "\n"))
   lines <- got$out[nzchar(got$out)]
   parts <- strsplit(lines, " ", fixed = TRUE)
@@ -97,26 +97,26 @@ defined_wrappers <- function(found) {
   unique(c(found$asm, found$funs, found$vars))
 }
 
-test_that("each platform map names every source once", {
+test_that("each object format map names every source once", {
   root <- portability_root()
   expect_false(is.null(root))
-  for (system_name in c("Linux", "Darwin", "Windows_NT")) {
-    map <- read_map(root, system_name)
+  for (format in c("elf", "mach-o", "coff")) {
+    map <- read_map(root, format)
     expect_gt(length(map$lines), 0L)
     expect_identical(
       anyDuplicated(sub(" .*", "", map$lines)),
       0L,
-      info = system_name
+      info = format
     )
   }
 })
 
-test_that("Darwin targets are the Mach-O names of the wrappers", {
+test_that("Mach-O targets are the Mach-O names of the wrappers", {
   root <- portability_root()
   expect_false(is.null(root))
-  darwin <- read_map(root, "Darwin")
-  linux <- read_map(root, "Linux")
-  windows <- read_map(root, "Windows_NT")
+  darwin <- read_map(root, "mach-o")
+  linux <- read_map(root, "elf")
+  windows <- read_map(root, "coff")
   found <- wrapper_symbols(root)
   defined <- defined_wrappers(found)
 
@@ -155,6 +155,130 @@ test_that("Darwin targets are the Mach-O names of the wrappers", {
   )
   expect_true("dseams_r___imp___acrt_iob_func" %in% found$vars)
   expect_true("dseams_r___acrt_iob_func" %in% found$funs)
+})
+
+# An ar archive of MEMBERS, a named list of raw vectors, in the layout
+# the platform archivers write: a GNU archive has a "/" symbol table and a
+# "//" name table before the objects, a BSD archive stores each name in
+# the member after a "#1/N" header and starts with __.SYMDEF.
+write_ar <- function(path, members, bsd = FALSE) {
+  pad <- function(x, n) formatC(x, width = -n, flag = "-")
+  header <- function(name, size) {
+    charToRaw(paste0(
+      pad(name, 16L), pad("0", 12L), pad("0", 6L), pad("0", 6L),
+      pad("644", 8L), pad(as.character(size), 10L), "`\n"
+    ))
+  }
+  member <- function(name, data) {
+    if (bsd) {
+      stored <- c(charToRaw(name), as.raw(rep(0L, 8L - nchar(name) %% 8L)))
+      body <- c(stored, data)
+      out <- c(header(paste0("#1/", length(stored)), length(body)), body)
+    } else {
+      out <- c(header(name, length(data)), data)
+    }
+    if (length(out) %% 2L == 1L) c(out, charToRaw("\n")) else out
+  }
+  bytes <- charToRaw("!<arch>\n")
+  if (bsd) {
+    bytes <- c(bytes, member("__.SYMDEF SORTED", as.raw(c(0, 0, 0, 0))))
+  } else {
+    bytes <- c(bytes, member("/", as.raw(c(0, 0, 0, 0))))
+    bytes <- c(bytes, member("//", charToRaw("a_long_member_name.o/\n")))
+  }
+  for (name in names(members)) {
+    bytes <- c(bytes, member(if (bsd) name else paste0(name, "/"), members[[name]]))
+  }
+  writeBin(bytes, path)
+  path
+}
+
+object_bytes <- function(magic) c(as.raw(strtoi(magic, 16L)), as.raw(rep(0L, 60L)))
+
+# An objcopy that records its arguments, one per line, in LOG.
+recording_objcopy <- function(dir, log) {
+  stub <- file.path(dir, "objcopy-stub")
+  writeLines(c(
+    "#!/bin/sh",
+    sprintf("for a in \"$@\"; do printf '%%s\\n' \"$a\"; done > '%s'", log)
+  ), stub)
+  Sys.chmod(stub, "755")
+  stub
+}
+
+test_that("the symbol map follows the object format of the archive", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  script <- file.path(root, "tools", "reader-symbols.sh")
+  dir <- tempfile("dseams-ar-")
+  dir.create(dir)
+  on.exit(unlink(dir, recursive = TRUE), add = TRUE)
+  log <- file.path(dir, "objcopy.log")
+  stub <- recording_objcopy(dir, log)
+
+  cases <- list(
+    list(format = "elf", magic = c("7f", "45", "4c", "46"), bsd = FALSE),
+    list(format = "mach-o", magic = c("cf", "fa", "ed", "fe"), bsd = TRUE),
+    list(format = "mach-o", magic = c("ce", "fa", "ed", "fe"), bsd = FALSE),
+    list(format = "coff", magic = c("64", "86", "05", "00"), bsd = FALSE),
+    list(format = "coff", magic = c("64", "aa", "02", "00"), bsd = FALSE),
+    list(format = "coff", magic = c("00", "00", "ff", "ff"), bsd = FALSE)
+  )
+  for (case in cases) {
+    info <- paste(case$format, paste(case$magic, collapse = ""))
+    archive <- write_ar(
+      file.path(dir, "lib.a"),
+      list(reader.o = object_bytes(case$magic)),
+      bsd = case$bsd
+    )
+    got <- run_capture("sh", c(script, "--format", archive))
+    expect_identical(got$status, 0L, info = info)
+    expect_identical(got$out, case$format, info = info)
+
+    unlink(log)
+    got <- run_capture("sh", c(script, stub, archive))
+    expect_identical(got$status, 0L, info = paste(c(info, got$out), collapse = "\n"))
+    args <- readLines(log)
+    expect_identical(args[[length(args)]], archive, info = info)
+    pairs <- args[which(args == "--redefine-sym") + 1L]
+    map <- read_map(root, case$format)
+    expect_identical(pairs, paste0(map$from, "=", map$to), info = info)
+  }
+
+  # The first object decides; a member with no object magic is passed over.
+  archive <- write_ar(
+    file.path(dir, "mixed.a"),
+    list(
+      notes.txt = charToRaw("not an object\n"),
+      reader.o = object_bytes(c("cf", "fa", "ed", "fe")),
+      other.o = object_bytes(c("7f", "45", "4c", "46"))
+    )
+  )
+  got <- run_capture("sh", c(script, "--format", archive))
+  expect_identical(got$out, "mach-o")
+})
+
+test_that("an archive with no object member is refused", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  script <- file.path(root, "tools", "reader-symbols.sh")
+  dir <- tempfile("dseams-ar-")
+  dir.create(dir)
+  on.exit(unlink(dir, recursive = TRUE), add = TRUE)
+  log <- file.path(dir, "objcopy.log")
+  stub <- recording_objcopy(dir, log)
+
+  archive <- write_ar(file.path(dir, "lib.a"), list(notes.txt = charToRaw("text\n")))
+  got <- run_capture("sh", c(script, stub, archive))
+  expect_false(identical(got$status, 0L))
+  expect_true(any(grepl("has no ELF, Mach-O or COFF member", got$out, fixed = TRUE)))
+  expect_false(file.exists(log))
+
+  not_ar <- file.path(dir, "plain.o")
+  writeBin(object_bytes(c("7f", "45", "4c", "46")), not_ar)
+  got <- run_capture("sh", c(script, "--format", not_ar))
+  expect_false(identical(got$status, 0L))
+  expect_true(any(grepl("is not an ar archive", got$out, fixed = TRUE)))
 })
 
 # The floor tools/chemfiles-cmake-floor.py writes: CMake 4 refuses a

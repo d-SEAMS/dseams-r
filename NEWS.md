@@ -7,6 +7,11 @@
   `chemfiles/formats/MMTF.hpp`, as `MMTF.cpp` does, so neither source
   that reaches mmtf-cpp's msgpack-c depends on another header for
   `std::remove_volatile` (missing through libc++'s headers).
+* `tools/reader-symbols.sh` picks the ELF, Mach-O or COFF symbol names
+  from the magic number of the first object in the archive instead of
+  from `uname`, so an archive built for another platform gets that
+  platform's names, and an archive with no such object is an error.
+  `--format ARCHIVE` prints the format it reads.
 * The checked `sprintf` wrappers of the bundled readers clamp the object
   size to `INT_MAX` before calling `vsnprintf`. Darwin's `__sprintf_chk`
   passes `(size_t)-1` for an unknown size, for which `vsnprintf` returned
@@ -118,7 +123,7 @@
   rewritten too; stdin still comes from the C runtime. On macOS the
   rewrite uses the Mach-O names, which carry one more leading underscore
   (`___printf_chk`, `__ZSt4cout`).
-  `tools/reader-symbols.sh --print-map SYSTEM` prints the rename list
+  `tools/reader-symbols.sh --print-map FORMAT` prints the rename list
   for one object format and stops on a duplicate source name.
 
 # dseams 2.14.2 (2026-11-24)
