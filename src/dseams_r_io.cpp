@@ -195,12 +195,23 @@ __attribute__((noreturn)) void dseams_r__Exit(int status) {
   Rf_error("bundled reader exited with status %d", status);
 }
 
+// The printf-family wrappers below return 0. They report that the text
+// was handed to R, not how many characters R printed.
 int dseams_r_printf(const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
   Rvprintf(fmt, args);
   va_end(args);
   return 0;
+}
+
+int dseams_r_vprintf(const char *fmt, va_list args) {
+  Rvprintf(fmt, args);
+  return 0;
+}
+
+int dseams_r_vprintf_chk(int, const char *fmt, va_list args) {
+  return dseams_r_vprintf(fmt, args);
 }
 
 int dseams_r_puts(const char *text) {
@@ -254,5 +265,24 @@ int dseams_r_sprintf_chk(char *buf, int flags, size_t capacity, const char *fmt,
   va_end(args);
   return size;
 }
+
+#if defined(_WIN32)
+// idx 1 and 2 are the UCRT stdout and stderr. idx 0 is stdin, and any
+// other index is another CRT stream. Those go to the real
+// __acrt_iob_func. This call sits in an object reader-symbols.sh does
+// not rewrite, so it still resolves to the CRT import.
+FILE *dseams_r___acrt_iob_func(unsigned idx) {
+  if (idx == 1U) {
+    return dseams_r_stdout;
+  }
+  if (idx == 2U) {
+    return dseams_r_stderr;
+  }
+  return __acrt_iob_func(idx);
+}
+
+// mingw-w64 dllimport references the import slot, not the function.
+FILE *(*dseams_r___imp___acrt_iob_func)(unsigned) = dseams_r___acrt_iob_func;
+#endif
 
 } // extern "C"

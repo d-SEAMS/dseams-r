@@ -1,3 +1,12 @@
+# dseams (development version)
+
+* The bundled readers' symbol rewrite also covers `vprintf` and
+  `__vprintf_chk`, which write to the R console and return 0. On
+  Windows the UCRT `__acrt_iob_func` and its dllimport slot are
+  rewritten too; stdin still comes from the C runtime.
+  `tools/reader-symbols.sh --print-map SYSTEM` prints the rename list
+  for one object format and stops on a duplicate source name.
+
 # dseams 2.14.2 (2026-11-24)
 
 - The bundled engine uses Linkcell for neighbour lists. R source packages carry the Rust dependencies for offline installation.
