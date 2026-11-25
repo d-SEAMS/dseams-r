@@ -113,7 +113,7 @@ chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	  -DCMAKE_C_COMPILER="$(firstword $(CC))" \
 	  -DCMAKE_CXX_COMPILER="$(firstword $(CXX))" \
 	  -DCMAKE_C_FLAGS="-O2 -fPIC -w" \
-	  -DCMAKE_CXX_FLAGS="-O2 -fPIC -w" \
+	  -DCMAKE_CXX_FLAGS="-O2 -fPIC -w -DDESRES_WIN32" \
 	  -DCMAKE_C_FLAGS_RELEASE="-O2" \
 	  -DCMAKE_CXX_FLAGS_RELEASE="-O2" \
 	  -DBUILD_SHARED_LIBS=OFF \
