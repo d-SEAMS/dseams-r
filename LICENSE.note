@@ -513,9 +513,10 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 
-The terms of the two molfile plugin sources that carry their own text,
-copied unchanged from their file headers (trailing blanks removed), for
-the parts above that name them:
+The terms of three molfile plugin sources, for the parts above that name
+them. abinitplugin.c and ply.c/ply.h carry their own text, copied
+unchanged from their file headers (trailing blanks removed);
+tngplugin.cxx refers to TNG's BSD licence, copied from tng/COPYING:
 
 molfiles/src/abinitplugin.c, by Rob Lahaye, Sungkyunkwan University,
 Korea. This is the start of the file's header comment, which holds all of
