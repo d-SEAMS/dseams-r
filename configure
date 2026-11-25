@@ -181,6 +181,13 @@ else
     echo "configure: objcopy (GNU binutils) or llvm-objcopy (required on macOS, on PATH or from Homebrew llvm) is needed to build the bundled readers" >&2
     exit 1
   fi
+  # A program named llvm-objcopy can be a wrapper around another objcopy.
+  # Only LLVM's rewrites Mach-O symbol names, and its --version says LLVM.
+  if [ "$(uname -s)" = Darwin ] \
+    && ! "${OBJCOPY}" --version 2>/dev/null | sed -n 1p | grep -i -q llvm; then
+    echo "configure: on macOS the bundled readers need LLVM's llvm-objcopy; ${OBJCOPY} --version does not report LLVM" >&2
+    exit 1
+  fi
   # The tarball stores cargo's checksum under a name that is not hidden.
   # The Makevars rule restores the name cargo looks up, before the build.
   if [ ! -f src/readcon-core/vendor/dlpk/cargo-checksum.json ] \

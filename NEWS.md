@@ -5,7 +5,8 @@
   passes `(size_t)-1` for an unknown size, for which `vsnprintf` returned
   -1 and wrote nothing. A negative `vsnprintf` count is now an R error.
 * On macOS `configure` also finds `llvm-objcopy` in Homebrew's keg-only
-  `llvm` (`brew --prefix llvm`) when it is not on `PATH`.
+  `llvm` (`brew --prefix llvm`) when it is not on `PATH`, and stops when
+  the program it chose does not report LLVM in `--version`.
 * The linked CI jobs configure seams-core with chemfiles and readcon-core
   enabled, so `meson setup` stops instead of building an engine without
   them. The engine they build registers the same 58 chemfiles formats as
