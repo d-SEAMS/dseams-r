@@ -461,7 +461,7 @@ same compilation flag note. Its installed size check is OK.
 The testthat run inside the bundled check printed:
 
 ```
-[ FAIL 0 | WARN 0 | SKIP 2 | PASS 429 ]
+[ FAIL 0 | WARN 0 | SKIP 2 | PASS 473 ]
 ```
 
 The two skips are `SEAMS_BIN is not set` (`test-ice.R` line 77) and
@@ -471,7 +471,7 @@ the build the package links, and a bundled build links none. The linked
 check, with `SEAMS_BIN` and `SEAMS_CPP_ORACLE` from that build, printed:
 
 ```
-[ FAIL 0 | WARN 0 | SKIP 0 | PASS 433 ]
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 477 ]
 ```
 
 In both, the cubic-ice test read `mW_cubic.lammpstrj` with SHA-256
