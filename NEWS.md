@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* The shared library loses its debug sections after linking, through the
+  debug-only strip command in R's `Makeconf` (`strip --strip-debug`,
+  `strip -S` on macOS). The symbol table, every reader and every format
+  stay; `DSEAMS_KEEP_DEBUG=1` keeps the debug sections.
 * The bundled chemfiles carries every seams-core chemfiles patch, not
   only the mmCIF, MOL2 and frame-visit ones. `tools/vendor-readers.sh`
   applies them in the order seams-core's `ChemfilesDep.cmake` uses and
