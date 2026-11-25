@@ -65,15 +65,16 @@ jobs:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
       # R CMD check --as-cran runs checkbashisms on configure and cleanup,
-      # and reports a WARNING when the script is missing. The bundled
-      # chemfiles links SQLite3 for its DESRES .dms reader.
-      - name: Install checkbashisms and SQLite3
+      # and qpdf on the PDFs in the package, and reports a WARNING when
+      # either is missing. The bundled chemfiles links SQLite3 for its
+      # DESRES .dms reader.
+      - name: Install checkbashisms, qpdf and SQLite3
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts libsqlite3-dev
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts qpdf libsqlite3-dev
       - name: Install macOS package-check tools
         if: runner.os == 'macOS'
         run: |
-          brew install checkbashisms llvm
+          brew install checkbashisms llvm qpdf
           echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
       - name: Install the Rust target for Rtools
         if: runner.os == 'Windows'
