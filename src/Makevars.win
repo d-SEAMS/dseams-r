@@ -96,6 +96,10 @@ $(READCON_ARCHIVE): readcon-core/Cargo.toml readcon-core/Cargo.lock
 	  CC="$(firstword $(CC))" \
 	  LINKCELL_OPENMP=0 \
 	  CARGO_PROFILE_RELEASE_LTO=off CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 \
+	  CARGO_PROFILE_RELEASE_DEBUG=false \
+	  CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=false \
+	  CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=false \
+	  CFLAGS="$(CFLAGS) -DNDEBUG" CXXFLAGS="$(CXXFLAGS) -DNDEBUG" \
 	  RUSTFLAGS="-C relocation-model=pic -A non_camel_case_types" \
 	  "$(CARGO)" rustc -j 2 --offline --locked --release --lib --crate-type staticlib \
 	    --target "$(RUST_TARGET)" \
@@ -104,6 +108,7 @@ $(READCON_ARCHIVE): readcon-core/Cargo.toml readcon-core/Cargo.lock
 	    --config 'source.vendored-sources.directory="readcon-core/vendor"' \
 	    --target-dir readcon-core/target
 	rm -rf "$(CARGO_HOME_DIR)"
+	sh ../tools/readcon-apple-builtins.sh "$@"
 	sh ../tools/reader-symbols.sh "$(OBJCOPY)" "$@"
 	find readcon-core/vendor -name '.cargo-checksum.json' -delete
 
@@ -119,10 +124,10 @@ chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
 	  -DCMAKE_C_COMPILER="$(firstword $(CC))" \
 	  -DCMAKE_CXX_COMPILER="$(firstword $(CXX))" \
-	  -DCMAKE_C_FLAGS="-O2 -fPIC -w -include intrin.h" \
-	  -DCMAKE_CXX_FLAGS="-O2 -fPIC -w -DDESRES_WIN32" \
-	  -DCMAKE_C_FLAGS_RELEASE="-O2" \
-	  -DCMAKE_CXX_FLAGS_RELEASE="-O2" \
+	  -DCMAKE_C_FLAGS="-O2 -fPIC -w -include intrin.h -DNDEBUG" \
+	  -DCMAKE_CXX_FLAGS="-O2 -fPIC -w -DDESRES_WIN32 -DNDEBUG" \
+	  -DCMAKE_C_FLAGS_RELEASE="-O2 -DNDEBUG" \
+	  -DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG" \
 	  -DBUILD_SHARED_LIBS=OFF \
 	  -DCHFL_BUILD_TESTS=OFF \
 	  -DCHFL_BUILD_DOCUMENTATION=OFF \

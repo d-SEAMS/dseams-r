@@ -298,6 +298,188 @@ test_that("the Windows chemfiles build takes the MinGW paths", {
   expect_one_water(reader_water("tiny.mae"))
 })
 
+test_that("bundled readers are compiled with NDEBUG", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  cmake_flags <- c(
+    "-DCMAKE_C_FLAGS=",
+    "-DCMAKE_CXX_FLAGS=",
+    "-DCMAKE_C_FLAGS_RELEASE=",
+    "-DCMAKE_CXX_FLAGS_RELEASE="
+  )
+  flags <- c(
+    "-DCHFL_SYSTEM_LZMA=OFF",
+    "CARGO_PROFILE_RELEASE_DEBUG=false",
+    "CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=false",
+    "CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=false",
+    "CFLAGS=\"$(CFLAGS) -DNDEBUG\"",
+    "sh ../tools/readcon-apple-builtins.sh"
+  )
+  for (name in c("src/Makevars.in", "src/Makevars.win")) {
+    lines <- readLines(file.path(root, name), warn = FALSE)
+    text <- paste(lines, collapse = "\n")
+    # Makevars.win adds Windows flags before -DNDEBUG on some lines.
+    for (key in cmake_flags) {
+      line <- grep(paste0(key, "\""), lines, fixed = TRUE, value = TRUE)
+      expect_length(line, 1L)
+      expect_true(grepl("-DNDEBUG\"", line, fixed = TRUE), info = paste(name, key))
+    }
+    for (flag in flags) {
+      expect_true(grepl(flag, text, fixed = TRUE), info = paste(name, flag))
+    }
+  }
+  cargo <- paste(
+    readLines(file.path(root, "tools/readcon-Cargo.toml"), warn = FALSE),
+    collapse = "\n"
+  )
+  expect_true(grepl("debug = false", cargo, fixed = TRUE))
+  expect_true(grepl("debug-assertions = false", cargo, fixed = TRUE))
+  expect_true(grepl("overflow-checks = false", cargo, fixed = TRUE))
+  script <- readLines(
+    file.path(root, "tools/readcon-apple-builtins.sh"),
+    warn = FALSE
+  )
+  body <- paste(script, collapse = "\n")
+  expect_true(grepl("abort();", body, fixed = TRUE))
+  expect_false(any(grepl("objcopy", script, fixed = TRUE)))
+  expect_false(any(grepl("___assert_rtn=", script, fixed = TRUE)))
+})
+
+test_that("compiler-rt ___assert_rtn is replaced and another assert is not", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  cc <- system2("R", c("CMD", "config", "CC"), stdout = TRUE)
+  expect_length(cc, 1L)
+  expect_true(nzchar(cc))
+  # system2 splits an argument on spaces, so the compiler and its flags
+  # are separate arguments. CC is exported for the script, which splits
+  # that value itself.
+  cc_parts <- strsplit(cc, "[[:space:]]+")[[1L]]
+  dir <- tempfile("compilerrt-")
+  dir.create(dir)
+  on.exit(unlink(dir, recursive = TRUE), add = TRUE)
+  old_cc <- Sys.getenv("CC", unset = NA_character_)
+  on.exit(
+    if (is.na(old_cc)) Sys.unsetenv("CC") else Sys.setenv(CC = old_cc),
+    add = TRUE
+  )
+  Sys.setenv(CC = cc)
+  writeLines(
+    "void dseams_probe_symbol(void) {}\n",
+    file.path(dir, "probe.c")
+  )
+  probe <- file.path(dir, "probe.o")
+  got <- run_capture(cc_parts[[1L]], c(
+    cc_parts[-1L],
+    "-c",
+    "-O2",
+    file.path(dir, "probe.c"),
+    "-o",
+    probe
+  ))
+  expect_identical(got$status, 0L, info = paste(got$out, collapse = "\n"))
+  syms <- run_capture("nm", c("-P", probe))
+  expect_identical(syms$status, 0L, info = paste(syms$out, collapse = "\n"))
+  prefixed <- any(grepl("^_dseams_probe_symbol ", syms$out))
+  bare <- any(grepl("^dseams_probe_symbol ", syms$out))
+  expect_true(prefixed || bare)
+  if (prefixed) {
+    assert_c <- "__assert_rtn"
+    impl_c <- "__compilerrt_abort_impl"
+  } else {
+    assert_c <- "___assert_rtn"
+    impl_c <- "___compilerrt_abort_impl"
+  }
+  writeLines(
+    sprintf(
+      paste0(
+        "void %s(const char *func, const char *file, int line, const char *expr);\n",
+        "void %s(const char *file, int line, const char *function) {\n",
+        "  %s(function, file, line, \"libcompiler_rt abort\");\n",
+        "}\n"
+      ),
+      assert_c, impl_c, assert_c
+    ),
+    file.path(dir, "crt.c")
+  )
+  writeLines(
+    sprintf(
+      paste0(
+        "void %s(const char *func, const char *file, int line, const char *expr);\n",
+        "void extra_assert(void) { %s(\"f\", \"g\", 1, \"e\"); }\n"
+      ),
+      assert_c, assert_c
+    ),
+    file.path(dir, "extra.c")
+  )
+  writeLines(
+    "int other_reader(int x) { return x + 1; }\n",
+    file.path(dir, "other.c")
+  )
+  compile <- function(name) {
+    src <- file.path(dir, paste0(name, ".c"))
+    obj <- file.path(dir, paste0(name, ".o"))
+    compiled <- run_capture(cc_parts[[1L]], c(
+      cc_parts[-1L],
+      "-c",
+      "-O2",
+      "-fPIC",
+      src,
+      "-o",
+      obj
+    ))
+    expect_identical(
+      compiled$status,
+      0L,
+      info = paste(compiled$out, collapse = "\n")
+    )
+    obj
+  }
+  crt_o <- compile("crt")
+  extra_o <- compile("extra")
+  other_o <- compile("other")
+  ok <- file.path(dir, "libok.a")
+  bad <- file.path(dir, "libbad.a")
+  archived <- run_capture("ar", c("rcs", ok, crt_o, other_o))
+  expect_identical(archived$status, 0L)
+  archived <- run_capture("ar", c("rcs", bad, crt_o, other_o, extra_o))
+  expect_identical(archived$status, 0L)
+  before <- run_capture("ar", c("t", bad))$out
+  script <- file.path(root, "tools", "readcon-apple-builtins.sh")
+  run_script <- function(archive) {
+    run_capture("sh", c(script, archive))
+  }
+  # system2 warns when a captured command returns non-zero. The status
+  # is the result under test, so the output goes to files, which does
+  # not warn, and the expectation still requires the failure.
+  bad_out <- tempfile("compilerrt-out-")
+  bad_err <- tempfile("compilerrt-err-")
+  bad_status <- system2(
+    "sh",
+    c(script, bad),
+    stdout = bad_out,
+    stderr = bad_err
+  )
+  bad_run <- list(
+    status = as.integer(bad_status),
+    out = c(
+      readLines(bad_out, warn = FALSE),
+      readLines(bad_err, warn = FALSE)
+    )
+  )
+  expect_identical(bad_run$status, 1L, info = paste(bad_run$out, collapse = "\n"))
+  expect_true(any(grepl("outside compiler-rt", bad_run$out, fixed = TRUE)))
+  after <- run_capture("ar", c("t", bad))$out
+  expect_identical(sort(after), sort(before))
+  ok_run <- run_script(ok)
+  expect_identical(ok_run$status, 0L, info = paste(ok_run$out, collapse = "\n"))
+  listed <- run_capture("nm", c("-P", ok))
+  expect_identical(listed$status, 0L, info = paste(listed$out, collapse = "\n"))
+  expect_false(any(grepl("___assert_rtn", listed$out, fixed = TRUE)))
+  expect_true(any(grepl("^_?abort U", listed$out)))
+  expect_true(any(grepl("compilerrt_abort_impl T", listed$out, fixed = TRUE)))
+})
+
 test_that("the CMake floor check rejects the minimums chemfiles shipped", {
   for (call in c(
     "cmake_minimum_required(VERSION 2.8.12)",
