@@ -174,8 +174,10 @@ PY
 
 # chemfiles 0.10.4 with the seams-core patches (mmCIF, MOL2, frame visit,
 # Apple zlib, fmt/libc++), the VMD molfile readers from
-# tools/chemfiles-molfiles.py, and the CMake policy floor from
-# tools/chemfiles-cmake-floor.py. cmake builds this tree at install time.
+# tools/chemfiles-molfiles.py, the CMake policy floor from
+# tools/chemfiles-cmake-floor.py, and LF line endings in the generated
+# headers from tools/chemfiles-lf-headers.py. cmake builds this tree at
+# install time.
 case "${DSEAMS_NO_DOWNLOAD:-}" in
   1|yes|true|TRUE)
     if [ -z "${CHEMFILES_TARBALL:-}" ]; then
@@ -230,6 +232,9 @@ python3 "$pkg/tools/chemfiles-molfiles.py" "$pkg/src/chemfiles"
 # the libraries in external/*.tar.gz ask for. Raise each one to
 # VERSION 3.5...3.10, then refuse a tree that still has one below.
 python3 "$pkg/tools/chemfiles-cmake-floor.py" "$pkg/src/chemfiles"
+# configure_file() writes config.h and exports.h through a text-mode
+# stream, which is CRLF on Windows, and they are installed under src/.
+python3 "$pkg/tools/chemfiles-lf-headers.py" "$pkg/src/chemfiles"
 # Tests and diagnostic pragmas are not part of the library the package
 # compiles, and R CMD check rejects both the pragmas and the hidden files.
 rm -rf "$pkg/src/chemfiles/tests"

@@ -361,6 +361,46 @@ test_that("the Windows chemfiles build takes the MinGW paths", {
   expect_one_water(reader_water("tiny.mae"))
 })
 
+# tools/chemfiles-lf-headers.py. Without NEWLINE_STYLE, configure_file()
+# writes config.h and exports.h with CRLF on Windows, and R CMD check
+# reports them under src/chemfiles-install. That directory exists only
+# after a bundled install in the same tree, as in R CMD check's
+# 00_pkg_src.
+test_that("chemfiles writes its generated headers with LF line endings", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  chem <- file.path(root, "src", "chemfiles")
+  text <- paste(readLines(file.path(chem, "CMakeLists.txt"), warn = FALSE), collapse = "\n")
+  config <- paste(
+    "configure_file (",
+    "  \"${PROJECT_SOURCE_DIR}/include/chemfiles/config.in.h\"",
+    "  \"${PROJECT_BINARY_DIR}/include/chemfiles/config.h\"",
+    "  NEWLINE_STYLE LF",
+    ")",
+    sep = "\n"
+  )
+  exports <- paste(
+    "    EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/exports.h.in",
+    ")",
+    "configure_file(",
+    "  \"${PROJECT_BINARY_DIR}/exports.h.in\"",
+    "  \"${PROJECT_BINARY_DIR}/include/chemfiles/exports.h\"",
+    "  @ONLY NEWLINE_STYLE LF",
+    ")",
+    sep = "\n"
+  )
+  expect_true(grepl(config, text, fixed = TRUE))
+  expect_true(grepl(exports, text, fixed = TRUE))
+  installed <- file.path(root, "src", "chemfiles-install", "include", "chemfiles")
+  for (name in c("config.h", "exports.h")) {
+    path <- file.path(installed, name)
+    if (file.exists(path)) {
+      bytes <- readBin(path, "raw", file.info(path)$size)
+      expect_false(any(bytes == as.raw(13L)), info = path)
+    }
+  }
+})
+
 test_that("bundled readers are compiled with NDEBUG", {
   root <- portability_root()
   expect_false(is.null(root))

@@ -1,5 +1,12 @@
 # dseams (development version)
 
+* The bundled chemfiles writes its generated `config.h` and `exports.h`
+  with LF line endings on every platform. `configure_file()` without
+  `NEWLINE_STYLE` writes through a text-mode stream, which is CRLF on
+  Windows, and R CMD check there reported both headers under
+  `src/chemfiles-install`. `tools/chemfiles-lf-headers.py` sets
+  `NEWLINE_STYLE LF` on `config.h` and passes the export header through
+  one more `configure_file(@ONLY NEWLINE_STYLE LF)`.
 * `inst/AUTHORS` and `LICENSE.note` name the Rust standard library,
   compiler-rt, libm, and the other crates rustc archives into
   `libreadcon_core.a` that the vendor tree does not already list.
