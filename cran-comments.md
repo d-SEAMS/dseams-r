@@ -70,7 +70,9 @@ Where each note comes from:
   carries the engine, readcon-core with its vendored crates, and
   chemfiles with every reader and format it builds, so installing needs
   no network. No reader, format or licence file is left out to make it
-  smaller.
+  smaller. Two builds of the same tree differ by a few hundred bytes,
+  because the tarball records when it was built; the bundled and linked
+  checks here built the tarball separately.
 - Installed size: the package. `libs` is the one shared library, which
   holds the engine and the chemfiles and readcon-core readers. After
   linking, `src/Makevars` removes its debug sections with the debug-only
