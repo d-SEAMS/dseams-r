@@ -35,6 +35,8 @@ jobs:
       SEAMS_LIBDIR: ${{ github.workspace }}/seams-core/build/bindings
       SEAMS_BIN: ${{ github.workspace }}/seams-core/build/seams
       SEAMS_CPP_ORACLE: ${{ github.workspace }}/seams-core/build/bindings/binding_oracle
+      DSEAMS_REQUIRE_DATA: "1"
+      DSEAMS_INPUTS_LOG: ${{ github.workspace }}/dseams-inputs.log
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -70,6 +72,9 @@ jobs:
         run: |
           pixi run sh tools/vendor.sh "$DSEAMS_ROOT"
           pixi run Rscript .github/coverage.R
+      - name: The cubic-ice test read mW_cubic and did not skip
+        working-directory: dseams
+        run: pixi run Rscript tools/check-test-inputs.R "$RUNNER_TEMP/covr/dseams/dseams-tests/testthat.Rout" "$DSEAMS_INPUTS_LOG"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:

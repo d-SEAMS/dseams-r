@@ -78,6 +78,10 @@ jobs:
         run: sh tools/vendor.sh "$DSEAMS_ROOT"
       - name: Build and check
         working-directory: dseams
+        env:
+          DSEAMS_ROOT: ${{ github.workspace }}/seams-core
+          DSEAMS_REQUIRE_DATA: "1"
+          DSEAMS_INPUTS_LOG: ${{ github.workspace }}/dseams-inputs.log
         run: |
           set -eu
           R CMD build --no-manual .
@@ -91,6 +95,7 @@ jobs:
           case "$status" in
             *ERROR*|*WARNING*) exit 1 ;;
           esac
+          Rscript tools/check-test-inputs.R dseams.Rcheck/tests/testthat.Rout "$DSEAMS_INPUTS_LOG"
       - name: Checksums and notes
         working-directory: dseams
         env:
