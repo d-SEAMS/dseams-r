@@ -84,11 +84,18 @@ OBJCOPY=$(find_tool objcopy llvm-objcopy)
 if [ "$(uname -s)" = Darwin ]; then
   OBJCOPY=$(find_tool llvm-objcopy)
   # Homebrew's llvm is keg-only, so its llvm-objcopy is often not on PATH.
+  # brew names the keg; without brew on PATH, its two default prefixes
+  # (Apple silicon, then Intel) are tried.
   if [ -z "${OBJCOPY}" ] && command -v brew >/dev/null 2>&1 \
     && llvm_prefix=$(brew --prefix llvm 2>/dev/null) \
     && [ -x "${llvm_prefix}/bin/llvm-objcopy" ]; then
     OBJCOPY="${llvm_prefix}/bin/llvm-objcopy"
   fi
+  for keg in /opt/homebrew/opt/llvm/bin /usr/local/opt/llvm/bin; do
+    if [ -z "${OBJCOPY}" ] && [ -x "${keg}/llvm-objcopy" ]; then
+      OBJCOPY="${keg}/llvm-objcopy"
+    fi
+  done
 fi
 CHEMFILES_BUILD=""
 CHEMFILES_CMAKE_ARGS=""

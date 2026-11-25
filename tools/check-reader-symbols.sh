@@ -31,14 +31,21 @@ objcopy_is_llvm() {
 }
 
 # Homebrew llvm is keg-only, so llvm-objcopy is often absent from PATH.
+# brew names the keg; without brew on PATH, its two default prefixes
+# (Apple silicon, then Intel) are tried, as configure does.
 brew_llvm_objcopy() {
-  if ! command -v brew >/dev/null 2>&1; then
+  if command -v brew >/dev/null 2>&1 \
+    && prefix=$(brew --prefix llvm 2>/dev/null) \
+    && [ -n "${prefix}" ] && [ -x "${prefix}/bin/llvm-objcopy" ]; then
+    printf '%s\n' "${prefix}/bin/llvm-objcopy"
     return 0
   fi
-  prefix=$(brew --prefix llvm 2>/dev/null) || return 0
-  if [ -n "${prefix}" ] && [ -x "${prefix}/bin/llvm-objcopy" ]; then
-    printf '%s\n' "${prefix}/bin/llvm-objcopy"
-  fi
+  for keg in /opt/homebrew/opt/llvm/bin /usr/local/opt/llvm/bin; do
+    if [ -x "${keg}/llvm-objcopy" ]; then
+      printf '%s\n' "${keg}/llvm-objcopy"
+      return 0
+    fi
+  done
   return 0
 }
 
