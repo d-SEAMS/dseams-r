@@ -27,26 +27,64 @@ has_sha256 <- function(path, expected) {
   file.exists(path) && identical(file_sha256(path), expected)
 }
 
-# The verified local copy of a pinned input. With DSEAMS_ROOT the file
-# goes to $DSEAMS_ROOT/input/traj through that tree's input/fetch.py;
-# otherwise to DSEAMS_INPUT_CACHE (default: the session temp directory)
-# through download.file(). A verified copy is not downloaded again. A
-# failed download or a different digest is an error, not a skip.
+# Where a pinned input may already be on disk: $DSEAMS_ROOT/input/traj,
+# then DSEAMS_INPUT_CACHE (default: the session temp directory).
+seams_input_dirs <- function() {
+  root <- Sys.getenv("DSEAMS_ROOT", unset = "")
+  cache <- Sys.getenv("DSEAMS_INPUT_CACHE",
+                      unset = file.path(tempdir(), "seams-inputs"))
+  c(if (nzchar(root)) file.path(root, "input", "traj"), cache)
+}
+
+seams_inputs_online <- function() {
+  ok <- tryCatch(
+    length(curlGetHeaders("https://huggingface.co", timeout = 10L)) > 0L,
+    error = function(e) FALSE
+  )
+  isTRUE(ok)
+}
+
+# The verified local copy of a pinned input, in this order:
+#
+# 1. A copy in seams_input_dirs() with the pinned digest. A copy with any
+#    other digest is an error.
+# 2. $DSEAMS_ROOT/input/fetch.py, when DSEAMS_ROOT and python3 are there.
+#    It must pin the same revision and digest; any failure is an error.
+# 3. download.file() into DSEAMS_INPUT_CACHE. With no local source this
+#    needs the network, so the test skips on CRAN (NOT_CRAN unset) and
+#    when huggingface.co does not answer. DSEAMS_REQUIRE_DATA=1 turns
+#    both skips into errors. A failed download or a different digest is
+#    always an error.
+#
+# DSEAMS_INPUTS_LOG, when set, gets one line per resolved input:
+# "<name> <sha256> <path>".
 seams_input <- function(name) {
   expected <- seams_inputs_sha256[[name]]
+  path <- seams_input_resolve(name, expected)
+  log <- Sys.getenv("DSEAMS_INPUTS_LOG", unset = "")
+  if (nzchar(log)) {
+    cat(paste(name, expected, path), "\n", sep = "", file = log, append = TRUE)
+  }
+  path
+}
+
+seams_input_resolve <- function(name, expected) {
+  for (dir in seams_input_dirs()) {
+    path <- file.path(dir, name)
+    if (file.exists(path)) {
+      got <- file_sha256(path)
+      if (!identical(got, expected)) {
+        stop(path, ": expected sha256 ", expected, ", found ", got,
+             "; delete it to fetch the pinned copy")
+      }
+      return(path)
+    }
+  }
   root <- Sys.getenv("DSEAMS_ROOT", unset = "")
   fetch_py <- if (nzchar(root)) file.path(root, "input", "fetch.py") else ""
-  dest <- if (nzchar(root)) {
-    file.path(root, "input", "traj")
-  } else {
-    Sys.getenv("DSEAMS_INPUT_CACHE", unset = file.path(tempdir(), "seams-inputs"))
-  }
-  path <- file.path(dest, name)
-  if (has_sha256(path, expected)) {
-    return(path)
-  }
   python <- Sys.which("python3")
   if (nzchar(fetch_py) && file.exists(fetch_py) && nzchar(python)) {
+    dest <- file.path(root, "input", "traj")
     pins <- readLines(fetch_py, warn = FALSE)
     if (!any(grepl(seams_inputs_revision, pins, fixed = TRUE)) ||
         !any(grepl(expected, pins, fixed = TRUE))) {
@@ -57,28 +95,44 @@ seams_input <- function(name) {
     if (!identical(as.integer(status), 0L)) {
       stop("input/fetch.py ", name, " exited with status ", status)
     }
-  } else {
-    dir.create(dest, recursive = TRUE, showWarnings = FALSE)
-    url <- paste0(
-      "https://huggingface.co/datasets/d-SEAMS/seams-core-inputs/resolve/",
-      seams_inputs_revision, "/traj/", name
-    )
-    partial <- paste0(path, ".partial")
-    on.exit(unlink(partial), add = TRUE)
-    old <- options(timeout = max(300, getOption("timeout")))
-    on.exit(options(old), add = TRUE)
-    status <- utils::download.file(url, partial, mode = "wb", quiet = TRUE)
-    if (!identical(as.integer(status), 0L)) {
-      stop("could not download ", url)
+    path <- file.path(dest, name)
+    if (!has_sha256(path, expected)) {
+      stop(path, " does not have sha256 ", expected)
     }
-    got <- file_sha256(partial)
-    if (!identical(got, expected)) {
-      stop(name, ": expected sha256 ", expected, ", downloaded ", got)
-    }
-    file.rename(partial, path)
+    return(path)
   }
-  if (!has_sha256(path, expected)) {
-    stop(path, " does not have sha256 ", expected)
+  if (!identical(Sys.getenv("DSEAMS_REQUIRE_DATA"), "1")) {
+    why <- paste0(
+      name, " is not in DSEAMS_ROOT/input/traj or DSEAMS_INPUT_CACHE and"
+    )
+    if (!identical(Sys.getenv("NOT_CRAN"), "true")) {
+      testthat::skip(paste(why, "network tests do not run on CRAN"))
+    }
+    if (!seams_inputs_online()) {
+      testthat::skip(paste(why, "huggingface.co is not reachable"))
+    }
+  }
+  dest <- seams_input_dirs()[[length(seams_input_dirs())]]
+  dir.create(dest, recursive = TRUE, showWarnings = FALSE)
+  path <- file.path(dest, name)
+  url <- paste0(
+    "https://huggingface.co/datasets/d-SEAMS/seams-core-inputs/resolve/",
+    seams_inputs_revision, "/traj/", name
+  )
+  partial <- paste0(path, ".partial")
+  on.exit(unlink(partial), add = TRUE)
+  old <- options(timeout = max(300, getOption("timeout")))
+  on.exit(options(old), add = TRUE)
+  status <- utils::download.file(url, partial, mode = "wb", quiet = TRUE)
+  if (!identical(as.integer(status), 0L)) {
+    stop("could not download ", url)
+  }
+  got <- file_sha256(partial)
+  if (!identical(got, expected)) {
+    stop(name, ": expected sha256 ", expected, ", downloaded ", got)
+  }
+  if (!file.rename(partial, path)) {
+    stop("could not move ", partial, " to ", path)
   }
   path
 }

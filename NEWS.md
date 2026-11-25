@@ -13,15 +13,17 @@
   log readers. `tools/chemfiles-molfiles.py` now checks that plugin list
   and keeps the MinGW and MMTF edits. The DESRES reader links SQLite3,
   which `SystemRequirements` names.
-* The cubic-ice test runs on every check instead of skipping when
-  `DSEAMS_ROOT` has no `input/traj/mW_cubic.lammpstrj` (seams-core moved
-  that file out of git into the Hugging Face dataset
-  `d-SEAMS/seams-core-inputs`). The test helper fetches the copy pinned
-  by seams-core v2.14.2 and checks its SHA-256: through
-  `$DSEAMS_ROOT/input/fetch.py` when `DSEAMS_ROOT` and `python3` are
-  there, else with `download.file()` into `DSEAMS_INPUT_CACHE` or the
-  session temp directory. A verified copy is not fetched again, and a
-  failed download or a different digest fails the test.
+* The cubic-ice test runs instead of skipping when `DSEAMS_ROOT` has no
+  `input/traj/mW_cubic.lammpstrj` (seams-core moved that file out of git
+  into the Hugging Face dataset `d-SEAMS/seams-core-inputs`). The test
+  helper uses a copy in `$DSEAMS_ROOT/input/traj` or `DSEAMS_INPUT_CACHE`,
+  else `$DSEAMS_ROOT/input/fetch.py` when `DSEAMS_ROOT` and `python3` are
+  there, else `download.file()` into `DSEAMS_INPUT_CACHE` or the session
+  temp directory, and checks the SHA-256 pinned by seams-core v2.14.2. A
+  local copy with another digest, a failing `fetch.py`, a failed download
+  or a different digest fails the test. Only with no local source does the
+  test skip, on CRAN and when huggingface.co is unreachable, and it says
+  why; `DSEAMS_REQUIRE_DATA=1` turns that skip into an error.
 * The vendored `linkcell` and `minimage` crates no longer ship their
   `CITATION.cff`, which R CMD check reports as a CITATION file outside
   `inst/`. Their author, Rohit Goswami, is listed for both crates in

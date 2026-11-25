@@ -89,8 +89,9 @@ test_that("seeded cages match the seams CLI", {
 })
 
 test_that("cubic ice is 4096 cubic and 4096 double-diamond", {
-  # mW_cubic.lammpstrj (1.4 MB) is not shipped. seams_input() fetches
-  # the copy pinned by seams-core v2.14.2 and checks its SHA-256.
+  # mW_cubic.lammpstrj (1.4 MB) is not shipped. seams_input() uses a
+  # local copy or fetches the one pinned by seams-core v2.14.2, and checks
+  # its SHA-256; it skips only with no local copy and no network.
   cubic <- seams_input("mW_cubic.lammpstrj")
   frame <- read_frame(cubic, type = 1L)
   ice <- chill_plus(frame)
