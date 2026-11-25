@@ -53,11 +53,27 @@ test_that("lang_tasks.R prints four bonds per water and the Ih rings", {
 test_that("science_tutorials.R reproduces the tutorial counts", {
   seams_root()
   out <- run_example("science_tutorials.R")
+  # DSEAMS_BRINE_T0 and DSEAMS_BRINE_TEND are not set by CI. The example
+  # then prints a fixed skip line; the test requires that line so the
+  # brine counts are not dropped without a failure.
+  brine <- c(Sys.getenv("DSEAMS_BRINE_T0"), Sys.getenv("DSEAMS_BRINE_TEND"))
+  if (all(nzchar(brine)) && all(file.exists(brine))) {
+    brine_lines <- c(
+      "brine t0 hexagonal 733",
+      "brine tend hexagonal 741"
+    )
+  } else {
+    brine_lines <- paste(
+      "brine tutorial skipped: cannot fetch d-SEAMS/brine-front-230K at",
+      "4828e33ecf419c70643b2d466bfa4f283b4138dc"
+    )
+  }
   expect_true(all(c(
     "interface hexagonal 352 water 434 interfacial 49 cubic 1",
     "nucleus cubic 47 hexagonal 62 water 3589 interfacial 240",
     "cages sII 512 16", "cages sII 51264 8", "cages sH 512 12",
-    "cages sH sh 8", "cages sH 51268 4"
+    "cages sH sh 8", "cages sH 51268 4",
+    brine_lines
   ) %in% out))
 })
 
@@ -70,8 +86,17 @@ test_that("readers.R reads the shipped CON, PDB, GRO, and XYZ files", {
 # (SEAMS_LIBDIR or DSEAMS_SYSTEM_ENGINE). The bundled copy includes
 # readcon-core and chemfiles, so this comparison covers CON as well.
 test_that("r_capi.R matches the C++ oracle", {
-  seams_root()
+  root <- Sys.getenv("DSEAMS_ROOT", unset = "")
   oracle <- Sys.getenv("SEAMS_CPP_ORACLE", unset = "")
-  skip_if(oracle == "" || !file.exists(oracle), "SEAMS_CPP_ORACLE is not set")
+  missing <- character()
+  if (root == "" || !dir.exists(file.path(root, "input", "traj"))) {
+    missing <- c(missing, "DSEAMS_ROOT is not set")
+  }
+  if (oracle == "" || !file.exists(oracle)) {
+    missing <- c(missing, "SEAMS_CPP_ORACLE is not set")
+  }
+  if (length(missing)) {
+    skip(paste(missing, collapse = "; "))
+  }
   expect_identical(run_example("r_capi.R"), "r capi ok")
 })

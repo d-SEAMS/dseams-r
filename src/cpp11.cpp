@@ -111,6 +111,27 @@ extern "C" SEXP _dseams_lang_version_() {
     return cpp11::as_sexp(lang_version_());
   END_CPP11
 }
+// dseams.cpp
+double sprintf_capacity_(double size);
+extern "C" SEXP _dseams_sprintf_capacity_(SEXP size) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(sprintf_capacity_(cpp11::as_cpp<cpp11::decay_t<double>>(size)));
+  END_CPP11
+}
+// dseams.cpp
+std::string sprintf_chk_(std::string text, double size);
+extern "C" SEXP _dseams_sprintf_chk_(SEXP text, SEXP size) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(sprintf_chk_(cpp11::as_cpp<cpp11::decay_t<std::string>>(text), cpp11::as_cpp<cpp11::decay_t<double>>(size)));
+  END_CPP11
+}
+// dseams.cpp
+int sprintf_result_(int size, double capacity);
+extern "C" SEXP _dseams_sprintf_result_(SEXP size, SEXP capacity) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(sprintf_result_(cpp11::as_cpp<cpp11::decay_t<int>>(size), cpp11::as_cpp<cpp11::decay_t<double>>(capacity)));
+  END_CPP11
+}
 
 extern "C" {
 /* .Call calls */
@@ -137,42 +158,45 @@ extern SEXP seams_r_threads(SEXP);
 extern SEXP seams_r_vertices(SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_dseams_cages_",           (DL_FUNC) &_dseams_cages_,           5},
-    {"_dseams_chill_plus_",      (DL_FUNC) &_dseams_chill_plus_,      5},
-    {"_dseams_get_threads_",     (DL_FUNC) &_dseams_get_threads_,     0},
-    {"_dseams_jump_tau90_",      (DL_FUNC) &_dseams_jump_tau90_,      5},
-    {"_dseams_lang_version_",    (DL_FUNC) &_dseams_lang_version_,    0},
-    {"_dseams_nframes_",         (DL_FUNC) &_dseams_nframes_,         1},
-    {"_dseams_nop_",             (DL_FUNC) &_dseams_nop_,             1},
-    {"_dseams_positions_",       (DL_FUNC) &_dseams_positions_,       1},
-    {"_dseams_q4_q6_",           (DL_FUNC) &_dseams_q4_q6_,           3},
-    {"_dseams_read_frame_",      (DL_FUNC) &_dseams_read_frame_,      3},
-    {"_dseams_rings_",           (DL_FUNC) &_dseams_rings_,           5},
-    {"_dseams_set_threads_",     (DL_FUNC) &_dseams_set_threads_,     1},
-    {"_dseams_signature_cages_", (DL_FUNC) &_dseams_signature_cages_, 5},
-    {"_dseams_steinhardt_",      (DL_FUNC) &_dseams_steinhardt_,      5},
-    {"_dseams_symmetry_",        (DL_FUNC) &_dseams_symmetry_,        2},
-    {"seams_r_cages",            (DL_FUNC) &seams_r_cages,            5},
-    {"seams_r_chill",            (DL_FUNC) &seams_r_chill,            5},
-    {"seams_r_coordination",     (DL_FUNC) &seams_r_coordination,     3},
-    {"seams_r_count",            (DL_FUNC) &seams_r_count,            1},
-    {"seams_r_density",          (DL_FUNC) &seams_r_density,          4},
-    {"seams_r_domains",          (DL_FUNC) &seams_r_domains,          4},
-    {"seams_r_fingerprint",      (DL_FUNC) &seams_r_fingerprint,      3},
-    {"seams_r_hbonds",           (DL_FUNC) &seams_r_hbonds,           6},
-    {"seams_r_knn",              (DL_FUNC) &seams_r_knn,              4},
-    {"seams_r_monolayer",        (DL_FUNC) &seams_r_monolayer,        4},
-    {"seams_r_pairs",            (DL_FUNC) &seams_r_pairs,            2},
-    {"seams_r_prisms",           (DL_FUNC) &seams_r_prisms,           2},
-    {"seams_r_rdf",              (DL_FUNC) &seams_r_rdf,              3},
-    {"seams_r_read",             (DL_FUNC) &seams_r_read,             4},
-    {"seams_r_running_cn",       (DL_FUNC) &seams_r_running_cn,       3},
-    {"seams_r_signature",        (DL_FUNC) &seams_r_signature,        4},
-    {"seams_r_site",             (DL_FUNC) &seams_r_site,             2},
-    {"seams_r_steinhardt",       (DL_FUNC) &seams_r_steinhardt,       4},
-    {"seams_r_system",           (DL_FUNC) &seams_r_system,           0},
-    {"seams_r_threads",          (DL_FUNC) &seams_r_threads,          1},
-    {"seams_r_vertices",         (DL_FUNC) &seams_r_vertices,         4},
+    {"_dseams_cages_",            (DL_FUNC) &_dseams_cages_,            5},
+    {"_dseams_chill_plus_",       (DL_FUNC) &_dseams_chill_plus_,       5},
+    {"_dseams_get_threads_",      (DL_FUNC) &_dseams_get_threads_,      0},
+    {"_dseams_jump_tau90_",       (DL_FUNC) &_dseams_jump_tau90_,       5},
+    {"_dseams_lang_version_",     (DL_FUNC) &_dseams_lang_version_,     0},
+    {"_dseams_nframes_",          (DL_FUNC) &_dseams_nframes_,          1},
+    {"_dseams_nop_",              (DL_FUNC) &_dseams_nop_,              1},
+    {"_dseams_positions_",        (DL_FUNC) &_dseams_positions_,        1},
+    {"_dseams_q4_q6_",            (DL_FUNC) &_dseams_q4_q6_,            3},
+    {"_dseams_read_frame_",       (DL_FUNC) &_dseams_read_frame_,       3},
+    {"_dseams_rings_",            (DL_FUNC) &_dseams_rings_,            5},
+    {"_dseams_set_threads_",      (DL_FUNC) &_dseams_set_threads_,      1},
+    {"_dseams_signature_cages_",  (DL_FUNC) &_dseams_signature_cages_,  5},
+    {"_dseams_sprintf_capacity_", (DL_FUNC) &_dseams_sprintf_capacity_, 1},
+    {"_dseams_sprintf_chk_",      (DL_FUNC) &_dseams_sprintf_chk_,      2},
+    {"_dseams_sprintf_result_",   (DL_FUNC) &_dseams_sprintf_result_,   2},
+    {"_dseams_steinhardt_",       (DL_FUNC) &_dseams_steinhardt_,       5},
+    {"_dseams_symmetry_",         (DL_FUNC) &_dseams_symmetry_,         2},
+    {"seams_r_cages",             (DL_FUNC) &seams_r_cages,             5},
+    {"seams_r_chill",             (DL_FUNC) &seams_r_chill,             5},
+    {"seams_r_coordination",      (DL_FUNC) &seams_r_coordination,      3},
+    {"seams_r_count",             (DL_FUNC) &seams_r_count,             1},
+    {"seams_r_density",           (DL_FUNC) &seams_r_density,           4},
+    {"seams_r_domains",           (DL_FUNC) &seams_r_domains,           4},
+    {"seams_r_fingerprint",       (DL_FUNC) &seams_r_fingerprint,       3},
+    {"seams_r_hbonds",            (DL_FUNC) &seams_r_hbonds,            6},
+    {"seams_r_knn",               (DL_FUNC) &seams_r_knn,               4},
+    {"seams_r_monolayer",         (DL_FUNC) &seams_r_monolayer,         4},
+    {"seams_r_pairs",             (DL_FUNC) &seams_r_pairs,             2},
+    {"seams_r_prisms",            (DL_FUNC) &seams_r_prisms,            2},
+    {"seams_r_rdf",               (DL_FUNC) &seams_r_rdf,               3},
+    {"seams_r_read",              (DL_FUNC) &seams_r_read,              4},
+    {"seams_r_running_cn",        (DL_FUNC) &seams_r_running_cn,        3},
+    {"seams_r_signature",         (DL_FUNC) &seams_r_signature,         4},
+    {"seams_r_site",              (DL_FUNC) &seams_r_site,              2},
+    {"seams_r_steinhardt",        (DL_FUNC) &seams_r_steinhardt,        4},
+    {"seams_r_system",            (DL_FUNC) &seams_r_system,            0},
+    {"seams_r_threads",           (DL_FUNC) &seams_r_threads,           1},
+    {"seams_r_vertices",          (DL_FUNC) &seams_r_vertices,          4},
     {NULL, NULL, 0}
 };
 }

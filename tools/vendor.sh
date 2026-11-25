@@ -67,10 +67,8 @@ if [ "$engine" != "$engine_win" ]; then
   exit 1
 fi
 version=$(sed -n 's/^Version:[[:space:]]*//p' "$pkg/DESCRIPTION")
-if ! grep -q "SEAMS_LANG_VERSION='\"$version\"'" "$pkg/src/Makevars.win"; then
-  echo "vendor.sh: src/Makevars.win does not carry version $version" >&2
-  exit 1
-fi
+. "$pkg/tools/bundled-tools.sh"
+require_makevars_win_version "$pkg" "$version" vendor.sh || exit 1
 for name in $engine; do
   if [ "$name" = seams_lang ]; then
     cp "$root/bindings/cxx/seams_lang.cpp" "$dest/"

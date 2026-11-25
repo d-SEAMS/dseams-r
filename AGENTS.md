@@ -53,23 +53,31 @@ and the C++ reference `binding_oracle` live in
 3. Otherwise compile the bundled copy in `src/seams`.
 
 In every mode `src/seams`, `src/readcon-core`, `src/chemfiles`, and
-`inst/extdata` must exist. When they do not, `tools/vendor.sh` writes them
-from `SEAMS_CORE_SRC` or `DSEAMS_ROOT`, else from the revision in
-`tools/seams-core.ref`, which it downloads unless `DSEAMS_NO_DOWNLOAD=1`.
+`inst/extdata` must exist. `configure` and `configure.win` read
+`tools/vendored-sentinels` and run `tools/vendor.sh` when any entry is
+missing. `tools/vendor.sh` writes them from `SEAMS_CORE_SRC` or
+`DSEAMS_ROOT`, else from the revision in `tools/seams-core.ref`, which
+it downloads unless `DSEAMS_NO_DOWNLOAD=1`. `configure.win` applies the
+same rustc, cargo, cmake and objcopy requirements as a bundled Unix
+build, and it refuses a `Makevars.win` whose `SEAMS_LANG_VERSION` is
+not `Version` from DESCRIPTION.
 The same step vendors readcon-core (the wrap revision in that seams-core
 tree, crates included) and patched chemfiles 0.10.4. A tarball from
 `R CMD build` carries those copies and installs with no network. The
 bundled compile needs GNU make, Cargo, rustc >= 1.88, cmake >= 3.15,
 and objcopy (or llvm-objcopy), and it always builds the CON reader and
 chemfiles. Cargo and CMake run at most two jobs, and Cargo's home is
-`src/readcon-core/cargo-home`, which the build removes. A linked engine is expected to have
-been built with those readers as well.
+`src/readcon-core/cargo-home`, which the build removes. A linked engine
+needs the same readers: configure seams-core with
+`meson setup build -Dwith_chemfiles=enabled -Dwith_readcon=enabled`, as
+CI does. Its reader probe rejects a chemfiles without all 37 VMD molfile
+readers and builds the patched 0.10.4 copy instead.
 
 ## Build and test
 
 All builds and checks run on a build host, not on a laptop. With a
-seams-core checkout at the pin built in `build/` (meson targets
-`src/libseams.so`, `bindings/libseams_lang.so`, `seams`,
+seams-core checkout at the pin configured as above and built in `build/`
+(meson targets `src/libseams.so`, `bindings/libseams_lang.so`, `seams`,
 `bindings/binding_oracle`):
 
 ```bash
@@ -92,12 +100,22 @@ adds `-march=nocona`; `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`
 names it as a toolchain flag (the `pixi run check` task sets it).
 
 Every check must pass before a change is called done: no ERROR, no
-WARNING. The check reports one NOTE, which is expected. Fix the code under test; do
+WARNING. On Ubuntu's R 4.3.3 the bundled `--as-cran` check reports four
+NOTEs and the linked check three; `cran-comments.md` quotes them and says
+which come from the host. Fix the code under test; do
 not skip, loosen or delete a test to get there. A test changes only when the
 behavior it pins changes on purpose, and the commit says so. Without
 `DSEAMS_ROOT`, `SEAMS_BIN` and `SEAMS_CPP_ORACLE` some tests report a skip;
 CI sets them, and so should a local run that touches an analysis.
 `SEAMS_CPP_ORACLE` must come from the build the package links.
+The cubic-ice test needs `mW_cubic.lammpstrj` from the Hugging Face
+dataset `d-SEAMS/seams-core-inputs`. `tests/testthat/helper-inputs.R`
+uses a verified copy in `$DSEAMS_ROOT/input/traj` or `DSEAMS_INPUT_CACHE`,
+else fetches it at the revision and SHA-256 that `input/fetch.py` pins at
+the seams-core ref. With no local copy and no `fetch.py` it skips on CRAN
+and offline; `DSEAMS_REQUIRE_DATA=1`, which CI sets, makes that an error,
+and CI checks `DSEAMS_INPUTS_LOG` and the testthat log afterwards. Move
+those pins with `SEAMS_CORE_REF`.
 
 ## When the engine changes
 

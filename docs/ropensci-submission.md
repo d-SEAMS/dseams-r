@@ -57,7 +57,27 @@ Authors@R: c(
     person("Ruhila", "Goswami", role = "ctb",
            comment = c(ORCID = "0000-0002-5443-9356")),
     person("d-SEAMS core team", role = "cph",
-           comment = "seams-core engine sources bundled in src/seams")
+           comment = "seams-core engine sources bundled in src/seams"),
+    person("The Board of Trustees of the University of Illinois", role = "cph",
+           comment = "VMD molfile plugins bundled with chemfiles"),
+    person("Rob", "Lahaye", role = c("ctb", "cph"),
+           comment = "abinitplugin.c in the bundled VMD molfile plugins"),
+    person("Greg", "Turk", role = "ctb",
+           comment = "ply.c and ply.h in the bundled VMD molfile plugins"),
+    person("Georgia Institute of Technology", role = "cph",
+           comment = "ply.c and ply.h in the bundled VMD molfile plugins"),
+    person("D. E. Shaw Research, LLC", role = "cph",
+           comment = "dms, dtr and maeff plugins in the bundled VMD molfile plugins"),
+    person("The Regents of the University of California", role = "cph",
+           comment = "ReadPARM.h and ReadPARM7.h in the bundled VMD molfile plugins"),
+    person("Axel", "Kohlmeyer", role = c("ctb", "cph"),
+           comment = "hoomdplugin.c in the bundled VMD molfile plugins"),
+    person("Henri", "Menke", role = "ctb",
+           comment = "vtfplugin.c in the bundled VMD molfile plugins"),
+    person("Olaf", "Lenz", role = "ctb",
+           comment = "vtfplugin.c in the bundled VMD molfile plugins"),
+    person("Miha", "Gunde", role = c("ctb", "cph"),
+           comment = "iralib_interf.h (IRA/SOFI C API) in src/seams")
     )
 Description: Structural analysis of water and ice in molecular dynamics
     trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh
@@ -71,8 +91,18 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
-Copyright: See file inst/AUTHORS for the bundled readcon-core, Rust
-    crates, and chemfiles; LICENSE.note gives their licences.
+License_restricts_use: yes
+Copyright: See file inst/AUTHORS for the copyright holders of the
+    bundled engine, readcon-core, Rust crates, the Rust standard library
+    and compiler-rt rustc links into that library, chemfiles, and the
+    libraries chemfiles bundles, including the VMD molfile plugins and
+    their ABINIT (Rob Lahaye), PLY (Greg Turk, Georgia Institute of
+    Technology) and VTF (Olaf Lenz and Henri Menke) sources, the BSD
+    tngplugin.cxx, and the Apache-2.0 iralib_interf.h (Miha Gunde) in
+    the engine. LICENSE.note gives their licences and quotes the ABINIT,
+    PLY and TNG terms. The MIT grant in file LICENSE does not remove
+    those restrictions: abinitplugin.c may not be part of a closed-source
+    project, and ply.c and ply.h may not be sold.
 URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core
@@ -90,7 +120,9 @@ LinkingTo:
     RcppEigen (>= 0.3.4.0.0)
 VignetteBuilder: knitr
 SystemRequirements: C++20, GNU make, Cargo (Rust's package manager),
-    rustc (>= 1.88), cmake (>= 3.15), objcopy (GNU binutils or LLVM)
+    rustc (>= 1.88; on Windows with the x86_64-pc-windows-gnu target),
+    cmake (>= 3.15), objcopy (GNU binutils or LLVM), SQLite3 (library and
+    headers)
 NeedsCompilation: yes
 Config/testthat/edition: 3
 X-schema.org-keywords: molecular-dynamics, trajectory-analysis, ice,
@@ -316,16 +348,27 @@ The run history is the Actions page:
 <https://github.com/d-SEAMS/dseams-r/actions>.
 
 - `r-cmd-check.yml` (`name: R-CMD-check`) runs on pushes and pull
-  requests to `main` and `release/**`, and on `workflow_dispatch`. The
-  bundled job copies the engine at the pin in `tools/seams-core.ref`
-  and runs `R CMD check --no-manual --as-cran` on Linux (R release and
-  devel), macOS, and Windows. On the Linux release cell that job also
-  checks that `cpp11::cpp_register()` leaves `R/cpp11.R` and
-  `src/cpp11.cpp` unchanged. The linked job
-  builds seams-core at that pin and runs `R CMD check --no-manual` with
-  the package linked against that build. Both jobs set
-  `_R_CHECK_FORCE_SUGGESTS_=true`.
-- `test-coverage.yml` (`name: test-coverage`) runs on the same events.
+  requests to `main`, `develop`, and `release/**`, and on
+  `workflow_dispatch`. The bundled job copies the engine at the pin in
+  `tools/seams-core.ref` and runs `R CMD check --no-manual --as-cran`
+  on Linux (R release and devel), macOS, and Windows. Linux installs
+  binutils and qpdf. The macOS job installs Homebrew llvm and puts its `bin`
+  directory on `PATH`, because rewriting the bundled readers needs
+  llvm-objcopy. Linux and macOS then run `tools/check-reader-symbols.sh`
+  and fail if objcopy, nm, ar, or the C compiler is missing. On the
+  Linux release cell that job also checks that `cpp11::cpp_register()`
+  leaves `R/cpp11.R` and `src/cpp11.cpp` unchanged. The linked job
+  builds seams-core at that pin with `-Dwith_chemfiles=enabled
+  -Dwith_readcon=enabled`, so the linked engine has the chemfiles VMD
+  molfile readers and the `.con` readers the bundled copy has, runs `tools/check-reader-symbols.sh`,
+  and runs `R CMD check --no-manual` with the package linked against
+  that build. Both jobs set `_R_CHECK_FORCE_SUGGESTS_=true` and
+  `DSEAMS_REQUIRE_DATA=1`, and after the check run
+  `tools/check-test-inputs.R`, which fails unless the cubic-ice test read
+  `mW_cubic.lammpstrj` with its pinned SHA-256 and did not skip. The
+  bundled Linux and macOS jobs install qpdf.
+- `test-coverage.yml` (`name: test-coverage`) runs on pushes and pull
+  requests to `main` and `release/**`, and on `workflow_dispatch`.
   It links the package to a seams-core build at the pin and runs covr
   on the R code (`.github/coverage.R`). `.covrignore` lists `src` and
   `.pixi`, so the engine copy and the C and C++ glue under `src/` are
@@ -343,95 +386,126 @@ The run history is the Actions page:
   `R CMD check --as-cran --no-manual`, and publishes the source
   tarball for `d-SEAMS/dseams-r`.
 
-`pkgcheck` was not run for this revision. The check that was run is
-`R CMD check --as-cran` of the bundled tarball `dseams_2.14.1.tar.gz`,
-on R 4.5.3 (2026-03-11), platform `x86_64-conda-linux-gnu`, on Ubuntu
-24.04.5 LTS. The log says R was compiled by
-`x86_64-conda-linux-gnu-cc (conda-forge gcc 14.4.0-7) 14.4.0` and
-`GNU Fortran (conda-forge gcc 14.4.0-7) 14.4.0`.
-`_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona` was set, because this
-R adds `-march=nocona`. `DSEAMS_ROOT`, `SEAMS_BIN`, and
-`SEAMS_CPP_ORACLE` were unset. The log is `logs/check-ascran-00check.log`.
-It ends:
+`molfiles/src/ply.c` and `molfiles/src/ply.h` (Georgia Institute of
+Technology, 1998) permit use, copying, modification, and distribution
+on condition that the software is not sold. They are shipped and are
+not compiled. `molfiles/src/plyplugin.cxx` includes `ply.c`, so that
+condition would apply if plyplugin were compiled. plyplugin is not in
+the compiled list. `LICENSE.note` states this. DESCRIPTION keeps
+`License: MIT + file LICENSE` and sets `License_restricts_use: yes`.
+File `LICENSE` names those restricted components. `Authors@R` credits
+Olaf Lenz for `vtfplugin.c` as well as Henri Menke.
+
+`pkgcheck` was not run for this revision.
+
+`R CMD check --as-cran --no-manual` ran on Ubuntu 24.04.5 LTS with
+Ubuntu's R 4.3.3 (`r-base-core` 4.3.3-2build2, compiled by gcc 13.2.0),
+with qpdf 11.9.0 and checkbashisms on `PATH`. The CRAN incoming checks
+were on, and no `_R_CHECK_*` variable was set except
+`_R_CHECK_FORCE_SUGGESTS_=true`. `DSEAMS_ROOT` was a seams-core v2.14.2
+tree and `DSEAMS_REQUIRE_DATA=1`. The install printed
+`rustc 1.100.0 (0ef1bc386 2026-11-09)`,
+`cargo 1.100.0 (3acc79c0c 2026-11-05)` and cmake 3.28.3. R prints curly
+quotes; they are written as ASCII apostrophes below.
+
+The bundled check, which compiles the engine copy as CRAN does, finished:
 
 ```
-Status: 2 NOTEs
+Status: 4 NOTEs
 ```
 
-The two notes in that log are:
+0 errors | 0 warnings | 4 notes
 
 ```
-* checking CRAN incoming feasibility ... [2s/13s] NOTE
-Maintainer: ‘Rohit Goswami <rgoswami@ieee.org>’
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: 'Rohit Goswami <rgoswami@ieee.org>'
 
 New submission
 
-Size of tarball: 7946434 bytes
+Size of tarball: 9498395 bytes
+* checking installed package size ... NOTE
+  installed size is 14.4Mb
+  sub-directories of 1Mb or more:
+    libs  13.7Mb
+* checking for future file timestamps ... NOTE
+unable to verify current time
+* checking compilation flags used ... NOTE
+Compilation used the following non-portable flag(s):
+  '-mno-omit-leaf-frame-pointer'
 ```
 
+Where each note comes from:
+
+- New submission and the size of the tarball: the package. The tarball
+  carries the engine, readcon-core with its vendored crates, and
+  chemfiles with every reader and format it builds, so installing needs
+  no network. No reader, format or licence file is left out to make it
+  smaller. Both checks in this run read one tarball, so both incoming
+  notes quote the same size. A second build of the same tree differs by
+  a few hundred bytes, because the tarball records when it was built.
+- Installed size: the package. `libs` is the one shared library, which
+  holds the engine and the chemfiles and readcon-core readers. After
+  linking, `src/Makevars` removes its debug sections with the debug-only
+  strip command in R's `Makeconf` (`strip --strip-debug` here). The
+  symbol table that the compiled-code check reads stays. With the debug
+  sections kept (`DSEAMS_KEEP_DEBUG=1`) the same check, run again on the
+  same host, reports `installed size is 75.6Mb` with `libs  74.8Mb`. That
+  figure varies with the host compiler and its debug flags.
+- Future file timestamps: the check host. R could not get the current
+  time from the web service it asks, so it could not compare the file
+  times to it.
+- `-mno-omit-leaf-frame-pointer`: the check host. Ubuntu builds R with
+  that flag in `CXXFLAGS` (`R CMD config CXXFLAGS` prints it), and R
+  passes it to every compile. The package's `Makevars` does not add it.
+
+Without qpdf on `PATH` the same R also reports
+`'qpdf' is needed for checks on size reduction of PDFs` as a WARNING;
+that comes from the host, not the package.
+
+The check linked against a seams-core v2.14.2 build (`SEAMS_LIBDIR`)
+finished with `Status: 3 NOTEs`: the same incoming feasibility note
+(`Size of tarball: 9498395 bytes`), the same timestamp note and the
+same compilation flag note. Its installed size check is OK.
+
+The testthat run inside the bundled check printed:
+
 ```
-* checking HTML version of manual ... NOTE
-Skipping checking HTML validation: no command 'tidy' found.
-Please obtain a recent version of HTML Tidy by downloading a binary
-release or compiling the source code from <https://www.html-tidy.org/>.
+[ FAIL 0 | WARN 0 | SKIP 2 | PASS 625 ]
 ```
 
-The same log has `checking PDF version of manual ... OK` and
-`checking tests ... OK`. `R CMD build` (`logs/build.log`) does not
-build the PDF manual. The built DESCRIPTION (`logs/built-description.txt`) keeps
-`Date: 2026-11-17` and adds `Packaged: 2026-11-20 19:10:54 UTC; ubuntu`.
-
-The install log (`logs/check-ascran-00install.out`) prints
-`rustc 1.100.0 (0ef1bc386 2026-11-09)`,
-`cargo 1.100.0 (3acc79c0c 2026-11-05)`, and
-`Running CMake version 3.28.3`. The C++ compile line defines
-`-DSEAMS_HAS_READCON=1`.
-
-`logs/check-ascran-testthat.Rout` prints:
+The two skips are `SEAMS_BIN is not set` (`test-ice.R` line 77) and
+`SEAMS_CPP_ORACLE is not set` (`test-doc-examples.R` line 99): those
+tests compare against the seams-core executable and the C++ oracle of
+the build the package links, and a bundled build links none. The linked
+check, with `SEAMS_BIN` and `SEAMS_CPP_ORACLE` from that build, printed:
 
 ```
-[ FAIL 0 | WARN 0 | SKIP 8 | PASS 167 ]
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 629 ]
 ```
 
-Seven skips are `DSEAMS_ROOT is not set`
-(`test-doc-examples.R` lines 21, 27, 32, 37, 54, and 73, and
-`test-ice.R` line 89). One skip is `SEAMS_BIN is not set`
-(`test-ice.R` line 73). The CON reader tests are not in that list.
-The examples (`logs/check-ascran-examples.Rout`) print:
+In both, the cubic-ice test read `mW_cubic.lammpstrj` with SHA-256
+`66d854880bb9431abc9eb25d68b0622d94a0160dd03e1ac7d636343d9830485d`.
+That 1.4 MB file is not in the package. With no copy in
+`$DSEAMS_ROOT/input/traj` or `DSEAMS_INPUT_CACHE` and no
+`$DSEAMS_ROOT/input/fetch.py`, the test downloads the pinned copy, and
+on CRAN it skips instead with:
 
 ```
-> nframes(con)
-[1] 2
-> read_frame(con, type = -1L)
-dseams frame 1 atoms 4
+Reason: mW_cubic.lammpstrj is not in DSEAMS_ROOT/input/traj or DSEAMS_INPUT_CACHE and network tests do not run on CRAN
 ```
 
-`con` there is `dseams_example("tiny_multi_cuh2.con")`. A separate read
-(`logs/test-suite.log`) prints `CON_READ nframes=2 nrow=4 class=dseams_frame`
-and `CON_MESSAGE_ABSENT TRUE`. The string
-`readcon-core is not in this build; CON input needs it` is not in the
-check logs. In seams-core that string is thrown only when
-`SEAMS_HAS_READCON` is unset, and this build sets it.
+Run against the installed package in a network namespace with no
+network, the test skipped with that reason when `NOT_CRAN` was unset,
+skipped with `... and huggingface.co is not reachable` when
+`NOT_CRAN=true`, and failed with `cannot open URL` when
+`DSEAMS_REQUIRE_DATA=1`.
 
-`testthat::test_local(".", load_package = "installed")` from this
-checkout prints `[ FAIL 0 | WARN 0 | SKIP 8 | PASS 168 ]` with the same
-eight skips (`logs/test-local.log`). The submission
-test is not skipped: the checkout contains `tools/check-submission.R`.
-
-`testthat::test_check("dseams")`, run with the working directory set
-to the `tests/` directory of an installed copy that is not this
-checkout, prints `[ FAIL 0 | WARN 0 | SKIP 9 | PASS 166 ]`
-(`logs/test-check-call.log`). The ninth skip is
-`tools/check-submission.R is not beside this test run`
-(`test-submission.R` line 44). `R CMD check` runs the same
-`test_check("dseams")` from `tests/testthat.R` inside the unpacked
-source, where `00_pkg_src` still has `tools/check-submission.R`, so
-that run does not skip the submission test. `docs/` and
+`R CMD check` runs `test_check("dseams")` from `tests/testthat.R`
+inside the unpacked source, where `00_pkg_src` still has
+`tools/check-submission.R` and `tools/reader-symbols.sh`, so that run
+does not skip the submission test or the symbol-map tests. `docs/` and
 `codemeta.json` are listed in `.Rbuildignore` and are not in
 `00_pkg_src`.
-
-A check linked against a built seams-core, a check in a network
-namespace with no network, and `pkgcheck` were not run.
 
 Names shared with other packages stay. `positions()` is the frame
 coordinate matrix and `symmetry()` is the shell-symmetry code. `dseams` does not depend on the other packages that export

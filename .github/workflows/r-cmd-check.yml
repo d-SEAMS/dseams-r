@@ -1,9 +1,9 @@
 name: R-CMD-check
 on:
   push:
-    branches: [main, "release/**"]
+    branches: [main, develop, "release/**"]
   pull_request:
-    branches: [main, "release/**"]
+    branches: [main, develop, "release/**"]
   workflow_dispatch:
 
 permissions:
@@ -44,6 +44,10 @@ jobs:
       _R_CHECK_FORCE_SUGGESTS_: true
       # The tests that read input/traj beyond the shipped examples.
       DSEAMS_ROOT: ${{ github.workspace }}/seams-core
+      # A test that needs a pinned input fails instead of skipping, and
+      # tools/check-test-inputs.R reads this log after the check.
+      DSEAMS_REQUIRE_DATA: "1"
+      DSEAMS_INPUTS_LOG: ${{ github.workspace }}/dseams-inputs.log
     steps:
       # The package and seams-core are checked out side by side, so that
       # R CMD build does not pick up the seams-core tree as package content.
@@ -61,18 +65,41 @@ jobs:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
       # R CMD check --as-cran runs checkbashisms on configure and cleanup,
-      # and reports a WARNING when the script is missing.
-      - name: Install checkbashisms
+      # and qpdf on the PDFs in the package, and reports a WARNING when
+      # either is missing. The bundled chemfiles links SQLite3 for its
+      # DESRES .dms reader.
+      - name: Install checkbashisms, qpdf and SQLite3
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends devscripts
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts qpdf libsqlite3-dev
       - name: Install macOS package-check tools
         if: runner.os == 'macOS'
         run: |
-          brew install checkbashisms llvm
+          brew install checkbashisms llvm qpdf
           echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
       - name: Install the Rust target for Rtools
         if: runner.os == 'Windows'
         run: rustup target add x86_64-pc-windows-gnu
+      # The archive rewrite is not a testthat test and does not skip.
+      # Linux has binutils from the step above. macOS has Homebrew llvm
+      # on PATH. A missing objcopy, nm, ar, or compiler fails this step.
+      - name: Rewrite a reader archive with objcopy
+        if: runner.os != 'Windows'
+        shell: bash
+        working-directory: dseams
+        run: sh tools/check-reader-symbols.sh
+      - name: Require objcopy for the reader symbol rewrite
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          if ! command -v objcopy >/dev/null 2>&1 && ! command -v llvm-objcopy >/dev/null 2>&1; then
+            echo "objcopy is not on PATH" >&2
+            exit 1
+          fi
+      - name: Submission notes are ASCII
+        shell: bash
+        working-directory: dseams
+        run: |
+          Rscript -e 'files <- c("cran-comments.md", "docs/ropensci-submission.md"); bad <- files[!vapply(files, function(f) { b <- readBin(f, "raw", file.info(f)[["size"]]); !any(b > as.raw(127)) }, logical(1))]; if (length(bad)) { message(paste(bad, collapse = "\n")); quit(status = 1) }'
       - name: Copy the engine into the package
         shell: bash
         working-directory: dseams
@@ -102,6 +129,10 @@ jobs:
           args: 'c("--no-manual", "--as-cran")'
           error-on: '"warning"'
           upload-snapshots: true
+      - name: The cubic-ice test read mW_cubic and did not skip
+        shell: bash
+        working-directory: dseams
+        run: Rscript tools/check-test-inputs.R check/dseams.Rcheck/tests/testthat.Rout "$DSEAMS_INPUTS_LOG"
 
   # seams-core built at the pin, and the package linked against its
   # libseams and libseams_lang instead of compiling the copy.
@@ -115,6 +146,8 @@ jobs:
       SEAMS_LIBDIR: ${{ github.workspace }}/seams-core/build/bindings
       SEAMS_BIN: ${{ github.workspace }}/seams-core/build/seams
       SEAMS_CPP_ORACLE: ${{ github.workspace }}/seams-core/build/bindings/binding_oracle
+      DSEAMS_REQUIRE_DATA: "1"
+      DSEAMS_INPUTS_LOG: ${{ github.workspace }}/dseams-inputs.log
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -129,23 +162,37 @@ jobs:
           manifest-path: seams-core/pixi.toml
           environments: default
           cache-key: pixi-seams-core-
+      # Enabled, not auto: setup stops when chemfiles or readcon-core is
+      # missing. A chemfiles without all 37 VMD molfile readers fails the
+      # seams-core reader probe, so meson builds the patched copy, which
+      # registers the same formats as the bundled src/chemfiles.
       - name: Build seams-core
         working-directory: seams-core
         run: |
-          pixi run meson setup build
+          pixi run meson setup build -Dwith_chemfiles=enabled -Dwith_readcon=enabled
           pixi run ninja -C build seams src/libseams.so bindings/libseams_lang.so bindings/binding_oracle
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           manifest-path: dseams/pixi.toml
           cache-key: pixi-dseams-
       - name: Install checkbashisms
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends devscripts
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts
+      - name: Rewrite a reader archive with objcopy
+        working-directory: dseams
+        run: pixi run sh tools/check-reader-symbols.sh
+      - name: Submission notes are ASCII
+        working-directory: dseams
+        run: |
+          pixi run Rscript -e 'files <- c("cran-comments.md", "docs/ropensci-submission.md"); bad <- files[!vapply(files, function(f) { b <- readBin(f, "raw", file.info(f)[["size"]]); !any(b > as.raw(127)) }, logical(1))]; if (length(bad)) { message(paste(bad, collapse = "\n")); quit(status = 1) }'
       - name: R CMD check
         working-directory: dseams
         run: |
           pixi run sh tools/vendor.sh "$DSEAMS_ROOT"
           pixi run R CMD build --no-manual .
           pixi run R CMD check --no-manual dseams_*.tar.gz
+      - name: The cubic-ice test read mW_cubic and did not skip
+        working-directory: dseams
+        run: pixi run Rscript tools/check-test-inputs.R dseams.Rcheck/tests/testthat.Rout "$DSEAMS_INPUTS_LOG"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:

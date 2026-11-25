@@ -12,7 +12,8 @@ to seams-core, bugs in the R interface to
 `src/seams` and `inst/extdata` are produced by `tools/vendor.sh` from a
 seams-core source tree (`SEAMS_CORE_SRC`, or the revision in
 `tools/seams-core.ref`, which it downloads). They are not stored in git.
-`configure` runs that script when they are missing.
+`configure` and `configure.win` run that script when an entry in
+`tools/vendored-sentinels` is missing.
 
 ```sh
 # SEAMS_CORE_SRC names a seams-core source tree.

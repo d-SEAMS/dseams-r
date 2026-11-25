@@ -60,9 +60,13 @@ jobs:
         with:
           use-public-rspm: true
       # R CMD check --as-cran runs checkbashisms on configure and cleanup,
-      # and qpdf on the built vignette PDFs.
-      - name: Install checkbashisms and qpdf
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends devscripts qpdf
+      # and qpdf on the built vignette PDFs. The bundled chemfiles links
+      # SQLite3 for its DESRES .dms reader.
+      - name: Install checkbashisms, qpdf and SQLite3
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts qpdf libsqlite3-dev
+      - name: Rewrite a reader archive with objcopy
+        working-directory: dseams
+        run: sh tools/check-reader-symbols.sh
       - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           working-directory: dseams
@@ -74,6 +78,10 @@ jobs:
         run: sh tools/vendor.sh "$DSEAMS_ROOT"
       - name: Build and check
         working-directory: dseams
+        env:
+          DSEAMS_ROOT: ${{ github.workspace }}/seams-core
+          DSEAMS_REQUIRE_DATA: "1"
+          DSEAMS_INPUTS_LOG: ${{ github.workspace }}/dseams-inputs.log
         run: |
           set -eu
           R CMD build --no-manual .
@@ -87,6 +95,7 @@ jobs:
           case "$status" in
             *ERROR*|*WARNING*) exit 1 ;;
           esac
+          Rscript tools/check-test-inputs.R dseams.Rcheck/tests/testthat.Rout "$DSEAMS_INPUTS_LOG"
       - name: Checksums and notes
         working-directory: dseams
         env:

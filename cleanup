@@ -1,3 +1,3 @@
 #!/bin/sh
-rm -f src/Makevars src/*.o src/*.so src/*.dll src/seams/*.o src/reader-stamp
+rm -f src/Makevars src/*.o src/*.so src/*.dll src/seams/*.o src/reader-stamp src/rust-target.mk
 rm -rf src/readcon-core/target src/readcon-core/cargo-home src/chemfiles-build src/chemfiles-install

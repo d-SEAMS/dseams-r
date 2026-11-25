@@ -4,7 +4,9 @@
 #endif
 #include "dseams_r_io.h"
 
+#include <climits>
 #include <cstdarg>
+#include <cstddef>
 #include <cstdio>
 #include <stdexcept>
 #include <streambuf>
@@ -171,6 +173,31 @@ __attribute__((constructor(101))) void init_reader_consoles() {
 
 } // namespace
 
+namespace dseams_r {
+
+// Darwin's __sprintf_chk and __vsprintf_chk pass (size_t)-1 when the
+// compiler does not know the size of the destination. vsnprintf fails
+// with EOVERFLOW and writes nothing for a size above INT_MAX, so the size
+// is clamped first.
+std::size_t sprintf_capacity(std::size_t object_size) {
+  const std::size_t limit = static_cast<std::size_t>(INT_MAX);
+  return object_size > limit ? limit : object_size;
+}
+
+// A negative count is a vsnprintf failure, and the buffer holds nothing
+// usable. A count of capacity or more means the text was cut.
+int checked_sprintf(int size, std::size_t capacity) {
+  if (size < 0) {
+    Rf_error("bundled reader output could not be formatted");
+  }
+  if (static_cast<std::size_t>(size) >= capacity) {
+    Rf_error("bundled reader output exceeds its buffer");
+  }
+  return size;
+}
+
+} // namespace dseams_r
+
 extern "C" {
 
 __attribute__((noreturn)) void dseams_r_abort(void) {
@@ -195,12 +222,23 @@ __attribute__((noreturn)) void dseams_r__Exit(int status) {
   Rf_error("bundled reader exited with status %d", status);
 }
 
+// The printf-family wrappers below return 0. They report that the text
+// was handed to R, not how many characters R printed.
 int dseams_r_printf(const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
   Rvprintf(fmt, args);
   va_end(args);
   return 0;
+}
+
+int dseams_r_vprintf(const char *fmt, va_list args) {
+  Rvprintf(fmt, args);
+  return 0;
+}
+
+int dseams_r_vprintf_chk(int, const char *fmt, va_list args) {
+  return dseams_r_vprintf(fmt, args);
 }
 
 int dseams_r_puts(const char *text) {
@@ -237,22 +275,39 @@ int dseams_r_printf_chk(int, const char *fmt, ...) {
   return 0;
 }
 
-int dseams_r_vsprintf_chk(char *buf, int, size_t capacity, const char *fmt,
+int dseams_r_vsprintf_chk(char *buf, int, size_t object_size, const char *fmt,
                          va_list args) {
-  const int size = std::vsnprintf(buf, capacity, fmt, args);
-  if (size >= 0 && static_cast<size_t>(size) >= capacity) {
-    Rf_error("bundled reader output exceeds its buffer");
-  }
-  return size;
+  const size_t capacity = dseams_r::sprintf_capacity(object_size);
+  return dseams_r::checked_sprintf(std::vsnprintf(buf, capacity, fmt, args),
+                                   capacity);
 }
 
-int dseams_r_sprintf_chk(char *buf, int flags, size_t capacity, const char *fmt,
-                        ...) {
+int dseams_r_sprintf_chk(char *buf, int flags, size_t object_size,
+                        const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
-  const int size = dseams_r_vsprintf_chk(buf, flags, capacity, fmt, args);
+  const int size = dseams_r_vsprintf_chk(buf, flags, object_size, fmt, args);
   va_end(args);
   return size;
 }
+
+#if defined(_WIN32)
+// idx 1 and 2 are the UCRT stdout and stderr. idx 0 is stdin, and any
+// other index is another CRT stream. Those go to the real
+// __acrt_iob_func. This call sits in an object reader-symbols.sh does
+// not rewrite, so it still resolves to the CRT import.
+FILE *dseams_r___acrt_iob_func(unsigned idx) {
+  if (idx == 1U) {
+    return dseams_r_stdout;
+  }
+  if (idx == 2U) {
+    return dseams_r_stderr;
+  }
+  return __acrt_iob_func(idx);
+}
+
+// mingw-w64 dllimport references the import slot, not the function.
+FILE *(*dseams_r___imp___acrt_iob_func)(unsigned) = dseams_r___acrt_iob_func;
+#endif
 
 } // extern "C"

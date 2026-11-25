@@ -1,7 +1,7 @@
 #!/bin/sh
 # Copyright (c) d-SEAMS developers
-# Print what each VMD molfile plugin registers, for the READERS and
-# EXCLUDED tables in tools/chemfiles-molfiles.py.
+# Print what each VMD molfile plugin registers, to review a plugin before
+# it moves between PLUGINS and EXCLUDED in tools/chemfiles-molfiles.py.
 #
 #   sh tools/probe-molfiles.sh MOLFILES_TAR_GZ PLUGIN...
 #

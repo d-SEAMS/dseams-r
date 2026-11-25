@@ -6,8 +6,9 @@
 #' of the d-SEAMS mW nucleation trajectory (4096 waters). Each dump has a
 #' `.source.txt` file or a header that names its origin.
 #' `"tiny_multi_cuh2.con"` is two CON frames of four atoms (readcon-core).
-#' `"tiny.pdb"`, `"tiny.gro"`, and `"tiny.xyz"` are one water, read through
-#' chemfiles (XYZ also has a native reader).
+#' `"tiny.pdb"`, `"tiny.gro"`, `"tiny.xyz"`, `"tiny.mae"`, and
+#' `"tiny.mmtf"` are one water, read through chemfiles (XYZ also has a
+#' native reader).
 #'
 #' @param name File name. `NULL` lists the files.
 #' @return A path, or a character vector of file names when `name` is `NULL`.
@@ -18,7 +19,7 @@
 dseams_example <- function(name = NULL) {
   dir <- system.file("extdata", package = "dseams", mustWork = TRUE)
   if (is.null(name)) {
-    return(list.files(dir, pattern = "\\.(lammpstrj|con|pdb|gro|xyz)$"))
+    return(list.files(dir, pattern = "\\.(lammpstrj|con|pdb|gro|xyz|mae|mmtf)$"))
   }
   path <- file.path(dir, name)
   if (!file.exists(path)) {
@@ -41,8 +42,8 @@ dseams_example <- function(name = NULL) {
 #'   which the source package does by default. That build also enables
 #'   the VMD molfile readers chemfiles can compile, so files such as
 #'   `.pqr`, `.xsf`, `.cube`, `.car`, `.cor`, `.rst7`, `.parm7`, `.mae`,
-#'   `.bgf`, `.vtf`, `.binpos`, `.dtr`, `.POSCAR` and `.OUTCAR` are read
-#'   too. The format is chosen from the extension.
+#'   `.bgf`, `.vtf`, `.binpos`, `.dtr`, `.dms`, `.g96`, `.POSCAR` and
+#'   `.OUTCAR` are read too. The format is chosen from the extension.
 #' @param frame 1-based frame index.
 #' @param type LAMMPS type filter.
 #' @param x A `dseams_frame`, for `print()`.

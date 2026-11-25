@@ -12,7 +12,27 @@ Authors@R: c(
     person("Ruhila", "Goswami", role = "ctb",
            comment = c(ORCID = "0000-0002-5443-9356")),
     person("d-SEAMS core team", role = "cph",
-           comment = "seams-core engine sources bundled in src/seams")
+           comment = "seams-core engine sources bundled in src/seams"),
+    person("The Board of Trustees of the University of Illinois", role = "cph",
+           comment = "VMD molfile plugins bundled with chemfiles"),
+    person("Rob", "Lahaye", role = c("ctb", "cph"),
+           comment = "abinitplugin.c in the bundled VMD molfile plugins"),
+    person("Greg", "Turk", role = "ctb",
+           comment = "ply.c and ply.h in the bundled VMD molfile plugins"),
+    person("Georgia Institute of Technology", role = "cph",
+           comment = "ply.c and ply.h in the bundled VMD molfile plugins"),
+    person("D. E. Shaw Research, LLC", role = "cph",
+           comment = "dms, dtr and maeff plugins in the bundled VMD molfile plugins"),
+    person("The Regents of the University of California", role = "cph",
+           comment = "ReadPARM.h and ReadPARM7.h in the bundled VMD molfile plugins"),
+    person("Axel", "Kohlmeyer", role = c("ctb", "cph"),
+           comment = "hoomdplugin.c in the bundled VMD molfile plugins"),
+    person("Henri", "Menke", role = "ctb",
+           comment = "vtfplugin.c in the bundled VMD molfile plugins"),
+    person("Olaf", "Lenz", role = "ctb",
+           comment = "vtfplugin.c in the bundled VMD molfile plugins"),
+    person("Miha", "Gunde", role = c("ctb", "cph"),
+           comment = "iralib_interf.h (IRA/SOFI C API) in src/seams")
     )
 Description: Structural analysis of water and ice in molecular dynamics
     trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh
@@ -26,8 +46,18 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
-Copyright: See file inst/AUTHORS for the bundled readcon-core, Rust
-    crates, and chemfiles; LICENSE.note gives their licences.
+License_restricts_use: yes
+Copyright: See file inst/AUTHORS for the copyright holders of the
+    bundled engine, readcon-core, Rust crates, the Rust standard library
+    and compiler-rt rustc links into that library, chemfiles, and the
+    libraries chemfiles bundles, including the VMD molfile plugins and
+    their ABINIT (Rob Lahaye), PLY (Greg Turk, Georgia Institute of
+    Technology) and VTF (Olaf Lenz and Henri Menke) sources, the BSD
+    tngplugin.cxx, and the Apache-2.0 iralib_interf.h (Miha Gunde) in
+    the engine. LICENSE.note gives their licences and quotes the ABINIT,
+    PLY and TNG terms. The MIT grant in file LICENSE does not remove
+    those restrictions: abinitplugin.c may not be part of a closed-source
+    project, and ply.c and ply.h may not be sold.
 URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core
@@ -45,7 +75,9 @@ LinkingTo:
     RcppEigen (>= 0.3.4.0.0)
 VignetteBuilder: knitr
 SystemRequirements: C++20, GNU make, Cargo (Rust's package manager),
-    rustc (>= 1.88), cmake (>= 3.15), objcopy (GNU binutils or LLVM)
+    rustc (>= 1.88; on Windows with the x86_64-pc-windows-gnu target),
+    cmake (>= 3.15), objcopy (GNU binutils or LLVM), SQLite3 (library and
+    headers)
 NeedsCompilation: yes
 Config/testthat/edition: 3
 X-schema.org-keywords: molecular-dynamics, trajectory-analysis, ice,

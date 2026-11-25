@@ -140,12 +140,24 @@ find "$dest/vendor" -name '.cargo-checksum.json' -exec sh -c \
 # Remove Cargo tool configuration and changelog directories from the
 # vendored crates. R CMD build omits changelog.d, and Cargo checks
 # every file recorded in the manifest during offline installation.
+# R CMD check notes a CITATION file outside inst/; the crates'
+# CITATION.cff authors are listed in inst/AUTHORS.
 find "$dest/vendor" -depth \( \
   -name '.cargo_vcs_info.json' -o -name '.github' -o -name '.ignore' \
   -o -name '.vim' -o -name '.reuse' -o -name '.travis.yml' \
   -o -name '.rustfmt.toml' -o -name '.codecov.yml' -o -name '.gitignore' \
   -o -name '.clippy.toml' -o -name '.tombi.toml' -o -name 'changelog.d' \
+  -o -name 'CITATION' -o -name 'CITATION.*' \
   \) -exec rm -rf {} +
+# R CMD build hides dotted paths and drops every path under src/ that ends
+# in .d (its exclude pattern ^src/.*\.d$). A vendored path of either kind
+# left here is missing from the tarball while the checksums still list it.
+left=$(find "$dest/vendor" \( -name '.*' -o -name '*.d' \
+  -o -name 'CITATION' -o -name 'CITATION.*' \) -print)
+if [ -n "$left" ]; then
+  printf 'vendor-readers.sh: vendored paths R CMD build or check would reject:\n%s\n' "$left" >&2
+  exit 1
+fi
 python3 - "$dest/vendor" << 'PY'
 import json
 import sys
@@ -172,8 +184,14 @@ PY
   echo "Crates are vendored for cargo --offline."
 } > "$dest/README"
 
-# chemfiles 0.10.4 with the seams-core patches (mmCIF, MOL2, frame visit,
-# Apple zlib, fmt/libc++). cmake builds this tree at install time.
+# chemfiles 0.10.4 with every seams-core patch (mmCIF, MOL2, frame visit,
+# LAMMPS Data sections, the VMD molfile readers, hostile-file bounds in
+# chemfiles and in its molfiles, TNG, mmtf-cpp and gemmi archives, span
+# under NDEBUG, Apple zlib, fmt/libc++), the MinGW flags and msgpack includes
+# from tools/chemfiles-molfiles.py, the CMake policy floor from
+# tools/chemfiles-cmake-floor.py, and LF line endings in the generated
+# headers from tools/chemfiles-lf-headers.py. cmake builds this tree at
+# install time.
 case "${DSEAMS_NO_DOWNLOAD:-}" in
   1|yes|true|TRUE)
     if [ -z "${CHEMFILES_TARBALL:-}" ]; then
@@ -205,25 +223,66 @@ if [ ! -d "$chem_src" ]; then
   echo "vendor-readers.sh: chemfiles archive did not contain chemfiles-0.10.4" >&2
   exit 1
 fi
+# Every patch and script in seams-core's cmake/patches, in the order
+# cmake/ChemfilesDep.cmake applies them. The tree is fresh, so each patch
+# must apply; external-sources.sh patches the sources inside
+# external/DIR.tar.gz and repacks the archive.
 patches=$root/cmake/patches
-for name in chemfiles-0.10.4-mmcif.patch chemfiles-0.10.4-mol2.patch \
-  chemfiles-0.10.4-frame-visit.patch; do
-  patch -p1 -d "$chem_src" -i "$patches/$name"
+patch_list="mmcif mol2 frame-visit lammpsdata-section molfiles"
+sources_list="molfiles:molfile-sources tng:tng-sources mmtf-cpp:mmtf-sources gemmi:gemmi-sources"
+for name in $patch_list; do
+  patch -p1 -d "$chem_src" -i "$patches/chemfiles-0.10.4-$name.patch"
+done
+(
+  cd "$chem_src"
+  for pair in $sources_list; do
+    sh "$patches/chemfiles-0.10.4-external-sources.sh" "${pair%%:*}" "${pair#*:}"
+  done
+)
+for name in hostile span-unused; do
+  patch -p1 -d "$chem_src" -i "$patches/chemfiles-0.10.4-$name.patch"
 done
 (
   cd "$chem_src"
   sh "$patches/chemfiles-0.10.4-zlib-apple.sh"
   sh "$patches/chemfiles-0.10.4-fmt-libcxx.sh"
 )
+# A seams-core pin that adds a patch or script must be applied above
+# before it ships.
+for f in "$patches"/chemfiles-0.10.4-*; do
+  base=$(basename "$f")
+  case "$base" in
+    chemfiles-0.10.4-external-sources.sh|chemfiles-0.10.4-zlib-apple.sh|\
+    chemfiles-0.10.4-fmt-libcxx.sh) continue ;;
+  esac
+  name=${base#chemfiles-0.10.4-}
+  name=${name%.patch}
+  case " $patch_list hostile span-unused $sources_list " in
+    *" $name "*|*":$name "*) ;;
+    *)
+      echo "vendor-readers.sh: $base is not applied; add it in ChemfilesDep.cmake order" >&2
+      exit 1
+      ;;
+  esac
+done
 rm -rf "$pkg/src/chemfiles"
 mv "$chem_src" "$pkg/src/chemfiles"
 if ! grep -q seams_with_frame "$pkg/src/chemfiles/src/Trajectory.cpp"; then
   echo "vendor-readers.sh: chemfiles frame-visit patch did not apply" >&2
   exit 1
 fi
-# Build every molfile plugin chemfiles lists as compilable and register
-# each one that reads atoms as a chemfiles format.
+# The MinGW C++ dialect, the type_traits include in the two sources that
+# reach msgpack-c, and a check that the molfiles patch builds every plugin
+# chemfiles lists as compilable except the ones excluded for a stated
+# reason.
 python3 "$pkg/tools/chemfiles-molfiles.py" "$pkg/src/chemfiles"
+# CMake 4 refuses cmake_minimum_required() below 3.5, which chemfiles and
+# the libraries in external/*.tar.gz ask for. Raise each one to
+# VERSION 3.5...3.10, then refuse a tree that still has one below.
+python3 "$pkg/tools/chemfiles-cmake-floor.py" "$pkg/src/chemfiles"
+# configure_file() writes config.h and exports.h through a text-mode
+# stream, which is CRLF on Windows, and they are installed under src/.
+python3 "$pkg/tools/chemfiles-lf-headers.py" "$pkg/src/chemfiles"
 # Tests and diagnostic pragmas are not part of the library the package
 # compiles, and R CMD check rejects both the pragmas and the hidden files.
 rm -rf "$pkg/src/chemfiles/tests"
@@ -281,6 +340,7 @@ cp "$con" "$extdata/tiny_multi_cuh2.con"
 cp "$pkg/tools/readers/tiny.pdb" "$pkg/tools/readers/tiny.gro" \
   "$pkg/tools/readers/tiny.xyz" "$pkg/tools/readers/tiny.pqr" \
   "$pkg/tools/readers/tiny.xsf" "$pkg/tools/readers/tiny.cube" \
-  "$pkg/tools/readers/tiny.rst7" "$extdata/"
+  "$pkg/tools/readers/tiny.rst7" "$pkg/tools/readers/tiny.mae" \
+  "$pkg/tools/readers/tiny.mmtf" "$extdata/"
 
 echo "vendor-readers.sh: readcon-core $readcon_rev and chemfiles 0.10.4"

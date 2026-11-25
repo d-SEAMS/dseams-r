@@ -45,14 +45,16 @@ test_that("VMD molfile readers enabled in chemfiles read their files", {
 })
 
 test_that("every extension of an enabled molfile reader reaches it", {
-  # tools/chemfiles-molfiles.py registers these. Only the molfile wrapper
-  # says "is empty", so an empty file proves the extension selects a
-  # molfile reader without running a plugin on it.
+  # seams-core's chemfiles molfiles patch registers these. Only the
+  # molfile wrapper says "is empty", so an empty file proves the extension
+  # selects a molfile reader without running a plugin on it. The Gaussian
+  # log reader has no extension of its own.
   enabled <- c(
     "bgf", "binpos", "car", "cor", "cpmd", "cube", "dlpolyconfig",
     "dlpolyhist", "dtr", "js", "log", "mae", "mdf", "coor", "parm",
     "parm7", "pqr", "rst7", "OUTCAR", "POSCAR", "XDATCAR",
-    "VASP_XDATCAR5", "xml", "vsf", "vtf", "xbgf", "xsf"
+    "VASP_XDATCAR5", "xml", "vsf", "vtf", "xbgf", "xsf",
+    "dms", "g96", "out"
   )
   dir <- tempfile("molfile-")
   dir.create(dir)

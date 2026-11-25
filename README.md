@@ -15,10 +15,13 @@ Steinhardt order parameters. The calculations are the
 
 ## Installation
 
-A C++20 compiler, GNU make, Cargo, rustc >= 1.88, cmake >= 3.15, and
-objcopy (from GNU binutils, or llvm-objcopy) are required. On macOS, put
-`llvm-objcopy` on `PATH`. On 64-bit Intel Windows, install Rtools and add
-the Rust target with `rustup target add x86_64-pc-windows-gnu`. The package
+A C++20 compiler, GNU make, Cargo, rustc >= 1.88, cmake >= 3.15,
+objcopy (from GNU binutils, or llvm-objcopy), and the SQLite3 library and
+headers (Debian and Ubuntu `libsqlite3-dev`; the macOS SDK and Rtools have
+them) are required. On macOS the build needs `llvm-objcopy`, from `PATH`
+or from Homebrew's `llvm` (`brew install llvm`). On 64-bit Intel Windows,
+install Rtools and add the Rust target with `rustup target add x86_64-pc-windows-gnu`; on ARM64
+Windows the target is `aarch64-pc-windows-gnullvm`. The package
 compiles the engine, readcon-core, and Chemfiles as it installs.
 
 ```r

@@ -3,14 +3,21 @@ Licences of the code in the dseams source package
 dseams itself, meaning the R code, the C and C++ glue in src/*.c and
 src/*.cpp, configure, cleanup and tools/, is under the MIT licence; see
 LICENSE. The d-SEAMS engine copied into src/seams is also MIT, by the
-d-SEAMS core team.
+d-SEAMS core team, except src/seams/include/iralib_interf.h, the C API
+header of Iterative Rotations and Assignments (IRA/SOFI): Apache-2.0,
+Copyright Miha Gunde and contributors, as its header states. The
+Apache-2.0 text is the same as src/readcon-core/vendor/cfg-if/LICENSE-APACHE.
 
 The source package also carries readcon-core, the Rust crates it builds
-with, and chemfiles with the libraries chemfiles bundles. Each keeps its
-own licence, listed below with the path of its licence text inside the
-source package. Where a part offers a choice ("A OR B"), dseams
-redistributes it under either. inst/AUTHORS names the authors of each
-part.
+with, and chemfiles with the libraries chemfiles bundles. rustc also
+links its standard library, compiler-rt, and the crates listed after the
+vendor set into libreadcon_core.a. Those sources ship with the compiler.
+Their licence texts are in inst/licenses/readcon-sysroot. Each part keeps
+its own licence, listed below with the path of its licence text inside
+the source package. Where a part offers a choice ("A OR B"), dseams
+redistributes it under either. Where a part requires every licence
+("A AND B"), dseams redistributes it under all of them. inst/AUTHORS
+names the authors of each part.
 
 Every licence here allows the source package to be copied and
 redistributed alongside MIT code, on these conditions:
@@ -24,9 +31,30 @@ redistributed alongside MIT code, on these conditions:
 - molfiles/src/abinitplugin.c: its author allows the code "for as long
   as it is part of an open source project" and does "not allow" it "to
   be part of any closed source project". The bundled build compiles it.
+  The text is quoted at the end of this file.
 - molfiles/src/ply.c and molfiles/src/ply.h: permission is given on
   condition "that you do not sell the software". They ship in the
-  archive but are not compiled.
+  archive but are not compiled. The text is quoted at the end of this
+  file.
+- molfiles/src/hoomdplugin.c and molfiles/src/plyplugin.cxx carry a
+  copyright header but no licence statement: hoomdplugin.c Copyright
+  2009 Axel Kohlmeyer; plyplugin.cxx Copyright 1995-2016 The Board of
+  Trustees of the University of Illinois. Both come from the VMD
+  molfile plugins as vendored by chemfiles
+  (https://github.com/chemfiles/molfiles) and are distributed under
+  molfiles/LICENSE (UIUC Open Source License). plyplugin.cxx includes
+  ply.c, so the ply.c "not sold" condition applies if plyplugin is
+  ever compiled. It is not in the compiled list today.
+- molfiles/src/tngplugin.cxx: BSD, as its header states; the terms are
+  those of the TNG library, quoted at the end of this file. It ships in
+  the archive and is not compiled.
+- tng/ci-scripts/copyright.py, tng/ci-scripts/copyright.sh and
+  tng/ci-scripts/clang-format.sh carry TNG's Revised BSD notice and also
+  the GROMACS header they were copied from, which is LGPL-2.1-or-later;
+  tng/ci-scripts/git-pre-commit carries only that GROMACS header.
+  Redistributing them under the LGPL means keeping that notice and the
+  licence text available. They are developer scripts
+  that ship in the archive and are not compiled or run.
 - molfiles/src/ReadPARM.h and molfiles/src/ReadPARM7.h: their notice is
   kept unmodified and any change to the rest of the file is noted in
   comments. The bundled build compiles them (parm and parm7 plugins).
@@ -62,6 +90,10 @@ rayon-core 1.13.0
 shlex 2.0.1
   Licence: MIT OR Apache-2.0
   Text: LICENSE-MIT and LICENSE-APACHE in each crate's vendor directory
+  either's LICENSE-MIT reads "Copyright (c) 2015" without a name, as it
+    does upstream; the holder is Ulrik Sverdrup, named in inst/AUTHORS.
+  vendor/shlex/src/bytes.rs and vendor/shlex/src/lib.rs: Copyright 2015
+    Nicholas Allegra (comex).
 
 adler2 2.0.1
   License: 0BSD OR MIT OR Apache-2.0
@@ -89,6 +121,7 @@ crunchy 0.2.4
 dlpk 0.1.5
   License: MIT OR Apache-2.0
   Text: vendor/dlpk/LICENSE-APACHE, vendor/dlpk/LICENSE-MIT
+  LICENSE-MIT: Copyright 2025 dlpk developers
 
 fast-float2 0.2.4
   License: MIT OR Apache-2.0
@@ -119,6 +152,9 @@ libc 0.2.191
 matrixmultiply 0.3.11
   License: MIT OR Apache-2.0
   Text: vendor/matrixmultiply/LICENSE-APACHE, vendor/matrixmultiply/LICENSE-MIT
+  vendor/matrixmultiply/src/constparse.rs: Copyright 2021 DutchGhost,
+    under the same licence (named in LICENSE-MIT). Other sources in
+    vendor/matrixmultiply are Copyright Ulrik Sverdrup.
 
 memchr 2.8.3
   License: Unlicense OR MIT
@@ -130,6 +166,7 @@ memchr 2.8.3
 memmap2 0.9.12
   License: MIT OR Apache-2.0
   Text: vendor/memmap2/LICENSE-APACHE, vendor/memmap2/LICENSE-MIT
+  vendor/memmap2/README.md names Dan Burkert and Yevhenii Reizner.
 
 miniz_oxide 0.9.1
   License: MIT OR Zlib OR Apache-2.0
@@ -138,12 +175,16 @@ miniz_oxide 0.9.1
     vendor/miniz_oxide/LICENSE-APACHE.md
     vendor/miniz_oxide/LICENSE-MIT.md
     vendor/miniz_oxide/LICENSE-ZLIB.md
+  Those texts name as holders Rich Geldreich and Tenacious Software LLC
+    (2010-2014), RAD Game Tools and Valve Software (2013-2014), Frommi
+    (2017, 2020) and oyvindln (2017-2024).
 
 ndarray 0.17.2
   License: MIT OR Apache-2.0
   Text: vendor/ndarray/LICENSE-APACHE, vendor/ndarray/LICENSE-MIT
   vendor/ndarray/src/doc/ndarray_for_numpy_users/rk_step.rs quotes
-    SciPy code under SciPy's BSD-3-Clause licence, text in the file
+    SciPy code under SciPy's BSD-3-Clause licence, text in the file,
+    and carries Copyright 2001, 2002 Enthought, Inc.
 
 num-complex 0.4.6
   License: MIT OR Apache-2.0
@@ -180,6 +221,8 @@ quote 1.0.47
 rawpointer 0.2.1
   License: MIT OR Apache-2.0
   Text: vendor/rawpointer/LICENSE-APACHE, vendor/rawpointer/LICENSE-MIT
+  LICENSE-MIT reads "Copyright (c) 2015" without a name; inst/AUTHORS
+    names the holder.
 
 rustc-hash 2.1.3
   License: Apache-2.0 OR MIT
@@ -201,7 +244,7 @@ serde_json 1.0.154
   License: MIT OR Apache-2.0
   Text: vendor/serde_json/LICENSE-APACHE, vendor/serde_json/LICENSE-MIT
   vendor/serde_json/src/lexical is derived from the lexical crate,
-    also MIT OR Apache-2.0
+    also MIT OR Apache-2.0. Its header names Alexander Huszagh.
 
 simd-adler32 0.3.10
   License: MIT
@@ -217,6 +260,7 @@ unicode-ident 1.0.27
     vendor/unicode-ident/LICENSE-APACHE
     vendor/unicode-ident/LICENSE-MIT
     vendor/unicode-ident/LICENSE-UNICODE
+  LICENSE-UNICODE: Copyright 1991-2023 Unicode, Inc.
 
 zlib-rs 0.6.8
   License: Zlib
@@ -227,9 +271,87 @@ zmij 1.0.23
   Text: vendor/zmij/LICENSE-MIT
 
 
+Code rustc links into libreadcon_core.a from its standard library
+(versions are those of rustc 1.100.0; texts are under
+inst/licenses/readcon-sysroot):
+
+Rust standard library (std, core, alloc, panic_unwind, unwind,
+std_detect, rustc_std_workspace_core, rustc_std_workspace_alloc), and
+windows-link on Windows
+  License: MIT OR Apache-2.0
+  Text:
+    inst/licenses/readcon-sysroot/rust-LICENSE-MIT
+    inst/licenses/readcon-sysroot/rust-LICENSE-APACHE
+  The copy of backtrace compiled into std is also Apache-2.0 OR MIT,
+    Copyright 2014 Alex Crichton and The Rust Project Developers.
+  std/src/sync/mpmc, which the Linux static library links, is also
+    Apache-2.0 OR MIT, Copyright 2019 The Crossbeam Project Developers
+    and The Rust Project Developers.
+  core's Unicode tables are Unicode-3.0, Copyright 1991-2024
+    Unicode, Inc.
+    Text: inst/licenses/readcon-sysroot/Unicode-3.0.txt
+
+compiler_builtins 0.1.160, including its libm
+  License: MIT AND Apache-2.0 WITH LLVM-exception AND (MIT OR Apache-2.0).
+    libm is MIT, and its text names the further copyright holders.
+  Text:
+    inst/licenses/readcon-sysroot/compiler-builtins-LICENSE.txt
+    inst/licenses/readcon-sysroot/libm-LICENSE.txt
+
+compiler-rt (LLVM, rust-lang/llvm-project tag rustc/23.1-2026-07-22)
+  License: Apache-2.0 WITH LLVM-exception, and the legacy University of
+    Illinois/NCSA licence and legacy MIT licence carried in the same text
+  Text:
+    inst/licenses/readcon-sysroot/compiler-rt-LICENSE.TXT
+    inst/licenses/readcon-sysroot/compiler-rt-CREDITS.TXT
+
+addr2line 0.27.1
+  License: Apache-2.0 OR MIT
+  Text:
+    inst/licenses/readcon-sysroot/addr2line-LICENSE-MIT
+    inst/licenses/readcon-sysroot/addr2line-LICENSE-APACHE
+
+gimli 0.34.0
+  License: MIT OR Apache-2.0
+  src/constants.rs is from rust-dwarf, Copyright 2016 The rust-dwarf
+    Developers, MIT OR Apache-2.0
+  Text:
+    inst/licenses/readcon-sysroot/gimli-LICENSE-MIT
+    inst/licenses/readcon-sysroot/gimli-LICENSE-APACHE
+
+hashbrown 0.17.1
+  License: MIT OR Apache-2.0
+  Text:
+    inst/licenses/readcon-sysroot/hashbrown-LICENSE-MIT
+    inst/licenses/readcon-sysroot/hashbrown-LICENSE-APACHE
+
+object 0.39.1
+  License: Apache-2.0 OR MIT
+  Text:
+    inst/licenses/readcon-sysroot/object-LICENSE-MIT
+    inst/licenses/readcon-sysroot/object-LICENSE-APACHE
+
+rustc-demangle 0.1.28
+  License: MIT OR Apache-2.0
+  Text:
+    inst/licenses/readcon-sysroot/rustc-demangle-LICENSE-MIT
+    inst/licenses/readcon-sysroot/rustc-demangle-LICENSE-APACHE
+
+rustc also links its own copies of crates already listed above:
+adler2 2.0.1, cfg-if 1.0.4 (the vendor tree has 1.0.5), libc 0.2.189
+(the vendor tree has 0.2.191), memchr 2.8.3, and miniz_oxide 0.9.1.
+Their licences are the ones named for those crates. cfg-if 1.0.4 and
+libc 0.2.189 use the same MIT copyright lines as the vendored texts.
+
+
 chemfiles 0.10.4 (src/chemfiles)
   License: BSD-3-Clause
   Text: src/chemfiles/LICENSE
+  Copyright Guillaume Fraux and contributors. The bundled external
+  headers name Andrzej Krzemienski (optional.hpp), Martin Moene,
+  Microsoft Corporation and Guillaume Fraux (span.hpp), and Martin Moene
+  (string_view.hpp). src/chemfiles/cmake/FindPythonLibsNew.cmake names
+  Kitware, Inc. and Continuum Analytics, Inc.
 
 src/chemfiles/include/chemfiles/external/optional.hpp
   License: BSL-1.0 (text at the end of this file)
@@ -251,6 +373,7 @@ Libraries in src/chemfiles/external (paths inside each archive):
 bzip2.tar.gz
   License: bzip2-1.0.6 (BSD-style), except the file below
   Text: bzip2/LICENSE
+  Copyright Julian Seward. bzip2/bzlib.h credits Yoshioka Tsuneo.
   bzip2/dlltest.c: public domain, by its author's statement in the file
 fmt.tar.gz
   License: MIT, except the files below
@@ -261,13 +384,18 @@ fmt.tar.gz
     fmt/support/docopt.py: MIT, text in the file
     fmt/doc/python-license.txt: Python Software Foundation License, for
       the parts of fmt's documentation taken from Python's; the file is
-      the text
+      the text. It names CNRI and Stichting Mathematisch Centrum
+      Amsterdam.
     fmt/doc/_static/bootstrap.min.js, fmt/doc/bootstrap,
       fmt/doc/_static/fonts (Bootstrap 3.3.4 with its Glyphicons
       Halflings fonts): MIT,
       https://github.com/twbs/bootstrap/blob/v3.3.4/LICENSE
     fmt/doc/basic-bootstrap/layout.html, fmt/doc/_templates/search.html
       (Sphinx templates): BSD, https://github.com/sphinx-doc/sphinx
+  Header copyright holders and credited authors: Victor Zverovich,
+  Paul Dreik, Remotion (Igor Schulz), Chris Foster, Vladimir Keleshev,
+  Zhanyong Wan, Marcus Boerger and Markus Heule. fmt/doc/_static names
+  Twitter, Inc.
 gemmi.tar.gz
   License: MPL-2.0, https://mozilla.org/MPL/2.0/
   The archive holds gemmi's headers only. Its third-party headers:
@@ -278,64 +406,125 @@ gemmi.tar.gz
     stb_sprintf.h: MIT or public domain (Unlicense), text at the end
       of the file
     tinydir.h: BSD-2-Clause, text in the file header
+  Two gemmi headers are derived from code under other terms, which
+  their headers name without quoting a text:
+    gemmi/include/gemmi/seqalign.hpp: from ksw2_gg.c and ksw2.h of
+      ksw2 (https://github.com/lh3/ksw2) by Heng Li, MIT
+    gemmi/include/gemmi/fprime.hpp: from the Fortran Cromer-Liberman
+      code in Larch (https://github.com/xraypy/xraylarch), which its
+      header gives as BSD; Larch's code is based on the Cowan-Brennan
+      routines and on Don T. Cromer's original code
+  Header copyright holders and credited authors: Global Phasing Ltd.,
+  Dr. Colin Hirsch and Daniel Frey (the tao headers), Chad Austin
+  (sajson.h), Sean Barrett and Jeff Roberts (stb_sprintf.h), and, in
+  pocketfft_hdronly.h, Martin Reinecke, Peter Bell, Matteo Frigo, the
+  Massachusetts Institute of Technology and the Max-Planck-Society.
 lzma.tar.gz
   License: public domain (liblzma)
   Text: lzma/COPYING
+  Header copyright holders and credited authors: Lasse Collin, Igor
+  Pavlov, Jean-loup Gailly, Charles Levert, Paul Eggert, Kevin Springle,
+  Wei Dai and Jonathan Nieder.
 mmtf-cpp.tar.gz
   License: MIT
   Text: mmtf-cpp/LICENSE
   mmtf-cpp/msgpack-c: BSL-1.0 (text at the end of this file), with its
     copies of Boost.Preprocessor and Boost.Predef, also BSL-1.0
+  Header copyright holders and credited authors: Paul Mensonides, Edward
+  Diener, FURUHASHI Sadayuki, KONDO Takatoshi, Takatoshi Kondo, Rene
+  Rivera, Charly Chevalier, Joel Falcou, Franz Detro, Jessica Hamilton,
+  MIZUKI Hirata, Vladimir Volodko, Daniel Farrell, Gabriel Studer,
+  Gerardo Tauriello, Thomas Holder and Julien Ferte.
 molfiles.tar.gz
   License: University of Illinois Open Source License (NCSA) for every
-    file not listed below
+    file not listed below; molfiles/src/tngplugin.cxx is BSD
   Text: molfiles/LICENSE
   Most files carry "(C) Copyright ... The Board of Trustees of the
   University of Illinois". Files with no notice of their own, such as
   molfiles/src/unit_conversion.h and molfiles/src/periodic_table.h, are
   covered by molfiles/LICENSE as part of the plugin distribution.
   Files under other terms, each with its text in its own header:
-    molfiles/src/abinitplugin.c: Rob Lahaye's terms. The code may be
-      included only while it is part of an open-source project, never
-      in a closed-source one. There is no other licence text.
+    molfiles/src/abinitplugin.c: Rob Lahaye, Sungkyunkwan University
+      (August 2010). The code may be included only while it is part of
+      an open-source project, never in a closed-source one. There is no
+      other licence text. Quoted at the end of this file.
     molfiles/src/dmsplugin.cxx, molfiles/src/dtrplugin.cxx,
     molfiles/src/dtrplugin.hxx, molfiles/src/maeffplugin.cxx:
       BSD-3-Clause, Copyright 2009 D. E. Shaw Research, LLC.
-    molfiles/src/ply.c, molfiles/src/ply.h: Copyright 1998 Georgia
-      Institute of Technology. Use, copying, modification and
+    molfiles/src/ply.c, molfiles/src/ply.h: by Greg Turk, Copyright 1998
+      Georgia Institute of Technology. Use, copying, modification and
       distribution are permitted without fee with the notice kept, on
-      condition that the software is not sold.
+      condition that the software is not sold. Quoted at the end of
+      this file.
     molfiles/src/ReadPARM.h, molfiles/src/ReadPARM7.h: Copyright 1992
       Regents of the University of California (Bill Ross, UCSF). They
       may be distributed if the notice is kept unmodified and changes
       to the rest of the file are noted in comments.
-    molfiles/src/hoomdplugin.c: Copyright 2009 Axel Kohlmeyer, with no
-      licence statement of its own; it is distributed as part of the
-      plugins under molfiles/LICENSE.
+    molfiles/src/tngplugin.cxx: BSD. Its header has no copyright line
+      and says "This software and the TNG library are made available
+      under the BSD license. For details, see the license information
+      associated with the Gromacs TNG library". That licence is TNG's
+      Revised BSD licence, Copyright 2012-2013 The GROMACS development
+      team, quoted in full at the end of this file. The plugin's author
+      field names Magnus Lundborg; its RCS header names John Stone
+      (johns) as the last committer. Not compiled.
+    molfiles/src/vtfplugin.c: by Olaf Lenz and Henri Menke. The bundled
+      build compiles it. Its licence is molfiles/LICENSE (University of
+      Illinois Open Source License).
+    molfiles/src/uhbdplugin.cxx credits Alexander Spaar.
+    molfiles/src/offplugin.cxx credits Francois-Xavier Coudert.
+    molfiles/src/hoomdplugin.c, molfiles/src/plyplugin.cxx: carry a
+      copyright header but no licence statement. hoomdplugin.c is
+      Copyright 2009 Axel Kohlmeyer. plyplugin.cxx is Copyright
+      1995-2016 The Board of Trustees of the University of Illinois.
+      Both come from the VMD molfile plugins as vendored by chemfiles
+      (https://github.com/chemfiles/molfiles) and are distributed under
+      molfiles/LICENSE (UIUC Open Source License). plyplugin.cxx
+      includes ply.c, so the ply.c "not sold" condition applies if
+      plyplugin is ever compiled. It is not in the compiled list today.
   Compiled by the bundled build (src/chemfiles/external/CMakeLists.txt,
-  set by tools/chemfiles-molfiles.py): abinitplugin, bgfplugin,
-  binposplugin, carplugin, corplugin, cpmdplugin, cubeplugin,
-  dlpolyplugin, dtrplugin, gamessplugin, gromacsplugin, jsplugin,
-  maeffplugin, mdfplugin, moldenplugin, namdbinplugin, parm7plugin,
-  parmplugin, pqrplugin, psfplugin, rst7plugin, tinkerplugin,
-  vasp5xdatcarplugin, vaspoutcarplugin, vaspposcarplugin,
-  vaspxdatcarplugin, vaspxmlplugin, vtfplugin, xbgfplugin and xsfplugin,
-  with the headers they include. The other files ship in the archive
+  set by seams-core's chemfiles-0.10.4-molfiles.patch and checked by
+  tools/chemfiles-molfiles.py): abinitplugin, bgfplugin, binposplugin,
+  carplugin, corplugin, cpmdlogplugin, cpmdplugin, cubeplugin,
+  dlpolyplugin, dmsplugin, dtrplugin, gamessplugin, gaussianplugin,
+  gromacsplugin, jsplugin, maeffplugin, mdfplugin, moldenplugin,
+  namdbinplugin, parm7plugin, parmplugin, pqrplugin, psfplugin,
+  rst7plugin, tinkerplugin, vasp5xdatcarplugin, vaspoutcarplugin,
+  vaspposcarplugin, vaspxdatcarplugin, vaspxmlplugin, vtfplugin,
+  xbgfplugin and xsfplugin, with the headers they include. dmsplugin
+  links the system SQLite3 library, which is not bundled. The other files ship in the archive
   and are not compiled.
 pugixml.tar.gz
   License: MIT
   Text: pugixml/LICENSE.md
+  Copyright Arseny Kapoulkine. pugixml is based on pugxml by Kristen
+  Wegner, named in the headers.
 tng.tar.gz
   License: BSD-3-Clause, except the files below
   Text: tng/COPYING
+  Header copyright holders and credited authors include Erik Lindahl,
+  David van der Spoel and Daniel Spangberg.
   tng/include/tng/md5.h, tng/src/lib/md5.c: the zlib-style licence of
     Aladdin Enterprises, text in each file header
+  tng/ci-scripts/copyright.py, tng/ci-scripts/copyright.sh,
+  tng/ci-scripts/clang-format.sh: TNG's Revised BSD notice (Copyright
+    2020 The GROMACS development team) and, from the GROMACS sources
+    they were copied from, LGPL-2.1-or-later (Copyright 2013-2020 The
+    GROMACS development team).
+  tng/ci-scripts/git-pre-commit: LGPL-2.1-or-later only (Copyright
+    2013-2020 The GROMACS development team).
+  None of the four is compiled or run. LGPL-2.1 text:
+    share/licenses/LGPL-2.1 in every R installation, and
+    https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
 toml11.tar.gz
   License: MIT
   Text: toml11/LICENSE
+  Copyright Toru Niina.
 zlib.tar.gz
   License: Zlib
   Text: zlib/README
+  Copyright Jean-loup Gailly and Mark Adler. The sources also credit
+  A.M. Kuchling, L. Peter Deutsch, Paul Marquess and Leonid Broukhis.
 
 
 The Boost Software License 1.0 text, for the BSL-1.0 parts above:
@@ -363,3 +552,71 @@ SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
 FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
+
+
+The terms of three molfile plugin sources, for the parts above that name
+them. abinitplugin.c and ply.c/ply.h carry their own text, copied
+unchanged from their file headers (trailing blanks removed);
+tngplugin.cxx refers to TNG's BSD licence, copied from tng/COPYING:
+
+molfiles/src/abinitplugin.c, by Rob Lahaye, Sungkyunkwan University,
+Korea. This is the start of the file's header comment, which holds all of
+its licence text (the comment goes on with build notes):
+
+    /*
+     *  ABINIT plugin for VMD
+     *  Rob Lahaye, Sungkyunkwan University, Korea
+     *  August 2010
+     *
+     *  LICENSE:
+     *    You can include my code for as long as it is part of an
+     *  open source project. Hence: I do not allow my code to be
+     *  part of any closed source project.
+     *
+
+molfiles/src/ply.c and molfiles/src/ply.h, by Greg Turk, Copyright 1998
+Georgia Institute of Technology. The two files carry the same notice,
+here as in ply.c (ply.h differs only in trailing blanks):
+
+    Copyright (c) 1998 Georgia Institute of Technology.  All rights reserved.
+
+    Permission to use, copy, modify and distribute this software and its
+    documentation for any purpose is hereby granted without fee, provided
+    that the above copyright notice and this permission notice appear in
+    all copies of this software and that you do not sell the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+    WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+molfiles/src/tngplugin.cxx says it is "made available under the BSD
+license" of the TNG library and points to that licence. This is TNG's
+licence as tng/COPYING gives it, copied unchanged (section 1 of that
+file; section 2 there is Google Test's BSD-3-Clause licence, for
+src/tests/googletest, which tng.tar.gz does not ship):
+
+    Copyright (c) 2012-2013, The GROMACS development team,
+    check out http://www.gromacs.org for more information.
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+        * Redistributions of source code must retain the above copyright
+          notice, this list of conditions and the following disclaimer.
+        * Redistributions in binary form must reproduce the above copyright
+          notice, this list of conditions and the following disclaimer in the
+          documentation and/or other materials provided with the distribution.
+        * Neither the name of the GROMACS development team nor the
+          names of its contributors may be used to endorse or promote products
+          derived from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+    DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

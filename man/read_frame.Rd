@@ -22,8 +22,8 @@ are read when the package is built with the bundled chemfiles library,
 which the source package does by default. That build also enables
 the VMD molfile readers chemfiles can compile, so files such as
 \code{.pqr}, \code{.xsf}, \code{.cube}, \code{.car}, \code{.cor}, \code{.rst7}, \code{.parm7}, \code{.mae},
-\code{.bgf}, \code{.vtf}, \code{.binpos}, \code{.dtr}, \code{.POSCAR} and \code{.OUTCAR} are read
-too. The format is chosen from the extension.}
+\code{.bgf}, \code{.vtf}, \code{.binpos}, \code{.dtr}, \code{.dms}, \code{.g96}, \code{.POSCAR} and
+\code{.OUTCAR} are read too. The format is chosen from the extension.}
 
 \item{frame}{1-based frame index.}
 

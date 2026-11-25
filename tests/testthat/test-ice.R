@@ -67,10 +67,17 @@ test_that("seeded cages under SEAMS_OFFLOAD match the host", {
     attr(host, "n_water")
   expect_identical(n, nrow(host))
   expect_gt(attr(host, "n_both"), 0L)
+})
 
-  # SEAMS_BIN is a seams CLI from the same engine version.
+test_that("seeded cages match the seams CLI", {
+  # SEAMS_BIN is a seams CLI from the same engine version. The bundled
+  # R CMD check does not build that binary; the linked job does.
   bin <- Sys.getenv("SEAMS_BIN", unset = "")
-  skip_if(bin == "" || !file.exists(bin), "SEAMS_BIN is not set")
+  if (bin == "" || !file.exists(bin)) {
+    skip("SEAMS_BIN is not set")
+  }
+  frame <- read_frame(nuc, type = 1L)
+  host <- cages(frame, graph = "seeded")
   line <- system2(bin, c("cages", nuc, "--graph", "seeded", "--cutoff", "3.5"),
                   stdout = TRUE)
   parts <- strsplit(line[[length(line)]], " +")[[1]]
@@ -82,11 +89,10 @@ test_that("seeded cages under SEAMS_OFFLOAD match the host", {
 })
 
 test_that("cubic ice is 4096 cubic and 4096 double-diamond", {
-  # mW_cubic.lammpstrj (1.4 MB) is not shipped; DSEAMS_ROOT is a
-  # seams-core checkout.
-  root <- Sys.getenv("DSEAMS_ROOT", unset = "")
-  cubic <- file.path(root, "input", "traj", "mW_cubic.lammpstrj")
-  skip_if(root == "" || !file.exists(cubic), "DSEAMS_ROOT is not set")
+  # mW_cubic.lammpstrj (1.4 MB) is not shipped. seams_input() uses a
+  # local copy or fetches the one pinned by seams-core v2.14.2, and checks
+  # its SHA-256; it skips only with no local copy and no network.
+  cubic <- seams_input("mW_cubic.lammpstrj")
   frame <- read_frame(cubic, type = 1L)
   ice <- chill_plus(frame)
   expect_identical(sum(ice$name == "cubic"), 4096L)

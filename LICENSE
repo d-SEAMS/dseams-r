@@ -1,2 +1,5 @@
 YEAR: 2018
-COPYRIGHT HOLDER: d-SEAMS core team
+COPYRIGHT HOLDER: d-SEAMS core team. Restricted components named in
+  LICENSE.note: molfiles/src/abinitplugin.c (Rob Lahaye; not part of a
+  closed-source project) and molfiles/src/ply.c and molfiles/src/ply.h
+  (Greg Turk, Georgia Institute of Technology; not sold).

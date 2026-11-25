@@ -2,13 +2,18 @@ CXX_STD = CXX20
 
 PKG_CPPFLAGS = -I. -Iseams -Iseams/include -Ireadcon-core/include -Ireadcon-core/vendor/linkcell/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_HAS_LINKCELL=1 -DSEAMS_LANG_VERSION='"2.14.2"' -DSEAMS_HAS_OPENMP=1 -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
-PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(READER_DEPS) -lws2_32 -luserenv -lbcrypt -lntdll -ldbghelp -lsynchronization -lpthread
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(READER_DEPS) -lsqlite3 -lws2_32 -luserenv -lbcrypt -lntdll -ldbghelp -lsynchronization -lpthread
 
-CARGO = cargo
-CMAKE = cmake
-OBJCOPY = objcopy
 CHEMFILES_BUILD = $(TEMP)/dseams-chemfiles-build
 # The Rust archive uses the same GNU ABI as the Rtools C++ objects.
+# configure.win writes rust-target.mk with the GNU target of the C
+# compiler, aarch64-pc-windows-gnullvm for an aarch64 compiler, and the
+# cargo, cmake and objcopy it found. R reads this file before Makeconf,
+# so $(CC) is not known here. A missing line keeps the default below.
+-include rust-target.mk
+CARGO ?= cargo
+CMAKE ?= cmake
+OBJCOPY ?= objcopy
 RUST_TARGET ?= x86_64-pc-windows-gnu
 READCON_ARCHIVE = readcon-core/target/$(RUST_TARGET)/release/libreadcon_core.a
 READER_DEPS = $(READCON_ARCHIVE) chemfiles-install/lib/libchemfiles.a
@@ -70,7 +75,19 @@ OBJECTS = cpp11.o dseams.o dseams_r_io.o seams_call.o $(SEAMS_OBJECTS)
 # This target is first so it stays the default goal. A target earlier
 # than `all` would be what `make` builds, and the shared library would
 # never be linked.
+#
+# The engine objects compile with R's -g, and their debug sections are
+# most of the installed size. The recipe removes only those sections,
+# with the command Makeconf names for that (strip --strip-debug; strip -S
+# on macOS). The symbol table stays, so R CMD check still reads it for
+# the compiled-code check; STRIP_SHARED_LIB (strip --strip-unneeded, what
+# R CMD INSTALL --strip runs) would remove it. DSEAMS_KEEP_DEBUG=1 in the
+# environment keeps the debug sections.
 all: $(SHLIB)
+	@if test -n "$(STRIP_STATIC_LIB)" && test "$${DSEAMS_KEEP_DEBUG:-0}" != 1; then \
+	  echo "$(STRIP_STATIC_LIB) $(SHLIB)"; \
+	  $(STRIP_STATIC_LIB) $(SHLIB); \
+	fi
 
 reader-stamp: $(READER_DEPS)
 	@touch reader-stamp
@@ -92,6 +109,10 @@ $(READCON_ARCHIVE): readcon-core/Cargo.toml readcon-core/Cargo.lock
 	  CC="$(firstword $(CC))" \
 	  LINKCELL_OPENMP=0 \
 	  CARGO_PROFILE_RELEASE_LTO=off CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 \
+	  CARGO_PROFILE_RELEASE_DEBUG=false \
+	  CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=false \
+	  CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=false \
+	  CFLAGS="$(CFLAGS) -DNDEBUG" CXXFLAGS="$(CXXFLAGS) -DNDEBUG" \
 	  RUSTFLAGS="-C relocation-model=pic -A non_camel_case_types" \
 	  "$(CARGO)" rustc -j 2 --offline --locked --release --lib --crate-type staticlib \
 	    --target "$(RUST_TARGET)" \
@@ -103,20 +124,25 @@ $(READCON_ARCHIVE): readcon-core/Cargo.toml readcon-core/Cargo.lock
 	sh ../tools/reader-symbols.sh "$(OBJCOPY)" "$@"
 	find readcon-core/vendor -name '.cargo-checksum.json' -delete
 
+# On Windows CMake's default generator is Visual Studio when that is
+# installed. The MinGW compilers named here need a Makefile generator.
 # The vendored LZMA headers use the Windows bit-scan intrinsic.
+# dmsplugin links SQLite3, which Rtools installs under the compiler's
+# prefix; CMAKE_PREFIX_PATH points find_package(SQLite3) there.
 chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
-	"$(CMAKE)" -S chemfiles -B "$(CHEMFILES_BUILD)" \
+	"$(CMAKE)" -G "Unix Makefiles" -S chemfiles -B "$(CHEMFILES_BUILD)" \
 	  -DCMAKE_BUILD_TYPE=Release \
+	  -DCMAKE_PREFIX_PATH="$$(dirname "$$(command -v $(firstword $(CC)))")/.." \
 	  -DCMAKE_POLICY_VERSION_MINIMUM=3.10 \
 	  -DCMAKE_INSTALL_PREFIX="$(CURDIR)/chemfiles-install" \
 	  -DCMAKE_INSTALL_LIBDIR=lib \
 	  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
 	  -DCMAKE_C_COMPILER="$(firstword $(CC))" \
 	  -DCMAKE_CXX_COMPILER="$(firstword $(CXX))" \
-	  -DCMAKE_C_FLAGS="-O2 -fPIC -w -include intrin.h" \
-	  -DCMAKE_CXX_FLAGS="-O2 -fPIC -w -DDESRES_WIN32" \
-	  -DCMAKE_C_FLAGS_RELEASE="-O2" \
-	  -DCMAKE_CXX_FLAGS_RELEASE="-O2" \
+	  -DCMAKE_C_FLAGS="-O2 -fPIC -w -include intrin.h -DNDEBUG" \
+	  -DCMAKE_CXX_FLAGS="-O2 -fPIC -w -DDESRES_WIN32 -DNDEBUG" \
+	  -DCMAKE_C_FLAGS_RELEASE="-O2 -DNDEBUG" \
+	  -DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG" \
 	  -DBUILD_SHARED_LIBS=OFF \
 	  -DCHFL_BUILD_TESTS=OFF \
 	  -DCHFL_BUILD_DOCUMENTATION=OFF \
@@ -126,4 +152,4 @@ chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	"$(CMAKE)" --build "$(CHEMFILES_BUILD)" --parallel 2
 	"$(CMAKE)" --install "$(CHEMFILES_BUILD)"
 	rm -rf "$(CHEMFILES_BUILD)"
-	sh ../tools/reader-symbols.sh "$(OBJCOPY)" $@
+	sh ../tools/reader-symbols.sh "$(OBJCOPY)" "$@"

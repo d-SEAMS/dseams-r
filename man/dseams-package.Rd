@@ -72,6 +72,15 @@ Other contributors:
 \itemize{
   \item Ruhila Goswami (\href{https://orcid.org/0000-0002-5443-9356}{ORCID}) [contributor]
   \item d-SEAMS core team (seams-core engine sources bundled in src/seams) [copyright holder]
+  \item The Board of Trustees of the University of Illinois (VMD molfile plugins bundled with chemfiles) [copyright holder]
+  \item Rob Lahaye (abinitplugin.c in the bundled VMD molfile plugins) [contributor, copyright holder]
+  \item Greg Turk (ply.c and ply.h in the bundled VMD molfile plugins) [contributor]
+  \item Georgia Institute of Technology (ply.c and ply.h in the bundled VMD molfile plugins) [copyright holder]
+  \item D. E. Shaw Research, LLC (dms, dtr and maeff plugins in the bundled VMD molfile plugins) [copyright holder]
+  \item The Regents of the University of California (ReadPARM.h and ReadPARM7.h in the bundled VMD molfile plugins) [copyright holder]
+  \item Axel Kohlmeyer (hoomdplugin.c in the bundled VMD molfile plugins) [contributor, copyright holder]
+  \item Henri Menke (vtfplugin.c in the bundled VMD molfile plugins) [contributor]
+  \item Miha Gunde (iralib_interf.h (IRA/SOFI C API) in src/seams) [contributor, copyright holder]
 }
 
 }

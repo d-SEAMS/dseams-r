@@ -40,3 +40,9 @@ rustc-hash = "2"
 [profile.release]
 lto = false
 codegen-units = 16
+# Release already leaves debug_assertions and overflow checks off. These
+# lines keep that if a toolchain default changes. -DNDEBUG on the cargo
+# command line covers a C file a build script compiles.
+debug = false
+debug-assertions = false
+overflow-checks = false

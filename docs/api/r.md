@@ -43,6 +43,17 @@ DSEAMS_ROOT=/path/to/seams-core \
 Use `--preclean` when changing between bundled and linked builds so R does not
 reuse objects compiled for the other mode.
 
+A linked engine reads only the formats its build enabled. The bundled copy
+always compiles the chemfiles readers (with the VMD molfile plugins) and the
+readcon `.con` readers. seams-core turns both on only when their dependencies
+are found (`with_chemfiles` and `with_readcon` default to `auto`), so build
+the engine you link with both required, as the linked CI job does:
+
+```bash
+meson setup build -Dwith_chemfiles=enabled -Dwith_readcon=enabled
+meson compile -C build
+```
+
 ## Read a frame
 
 ```r
