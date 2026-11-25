@@ -1,6 +1,7 @@
 # dseams 2.14.2 (2026-11-24)
 
 - The bundled engine uses Linkcell for neighbour lists. R source packages carry the Rust dependencies for offline installation.
+- `read_frame()` reports an error when an empty file yields a frame with zero atoms.
 
 * Register the C `.Call()` entry points under their `seams_r_*` symbol
   names so `cpp11::cpp_register()`, `pkgload::load_all()`, and

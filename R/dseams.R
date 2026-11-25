@@ -63,6 +63,9 @@ dseams_example <- function(name = NULL) {
 read_frame <- function(path, frame = 1L, type = 0L) {
   path <- normalizePath(path, mustWork = TRUE)
   ptr <- read_frame_(path, as.integer(frame), as.integer(type))
+  if (nop_(ptr) == 0L && isTRUE(file.size(path) == 0)) {
+    stop(sprintf("the file at '%s' is empty", path), call. = FALSE)
+  }
   structure(
     list(
       ptr = ptr,
