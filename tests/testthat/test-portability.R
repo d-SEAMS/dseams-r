@@ -191,6 +191,76 @@ is_cmake_file <- function(path) {
   base == "CMakeLists.txt" | endsWith(base, ".cmake")
 }
 
+# The regular files of a .tar.gz whose names pass keep(), as a named list
+# of raw vectors. utils::untar() runs the system tar, and Windows tar.exe
+# exits 1 on the UTF-8 member name tests/data/<Cyrillic>.xml in
+# pugixml.tar.gz; R's internal tar warns on every pax header. This reads
+# ustar headers, pax "x" path records and GNU "L" long names itself.
+tar_gz_members <- function(tarball, keep) {
+  con <- gzfile(tarball, "rb")
+  chunks <- list()
+  repeat {
+    chunk <- readBin(con, "raw", n = 1048576L)
+    if (length(chunk) == 0L) {
+      break
+    }
+    chunks[[length(chunks) + 1L]] <- chunk
+  }
+  close(con)
+  bytes <- do.call(c, chunks)
+  field <- function(block, from, len) {
+    x <- block[from:(from + len - 1L)]
+    end <- match(as.raw(0L), x, nomatch = len + 1L)
+    rawToChar(x[seq_len(end - 1L)])
+  }
+  utf8 <- function(x) {
+    Encoding(x) <- "UTF-8"
+    x
+  }
+  out <- list()
+  long_name <- NULL
+  pos <- 0L
+  while (pos + 512L <= length(bytes)) {
+    block <- bytes[pos + seq_len(512L)]
+    if (all(block == as.raw(0L))) {
+      break
+    }
+    size <- strtoi(trimws(field(block, 125L, 12L)), base = 8L)
+    stopifnot(!is.na(size))
+    type <- field(block, 157L, 1L)
+    data <- bytes[pos + 512L + seq_len(size)]
+    pos <- pos + 512L + 512L * ((size + 511L) %/% 512L)
+    if (type == "x") {
+      records <- strsplit(rawToChar(data), "\n", fixed = TRUE)[[1L]]
+      path <- grep("^[0-9]+ path=", records, value = TRUE, useBytes = TRUE)
+      if (length(path)) {
+        long_name <- utf8(sub("^[0-9]+ path=", "", path[[1L]], useBytes = TRUE))
+      }
+      next
+    }
+    if (type == "L") {
+      long_name <- utf8(field(data, 1L, size))
+      next
+    }
+    if (type == "g") {
+      next
+    }
+    name <- long_name
+    long_name <- NULL
+    if (is.null(name)) {
+      name <- utf8(field(block, 1L, 100L))
+      prefix <- field(block, 346L, 155L)
+      if (identical(field(block, 258L, 5L), "ustar") && nzchar(prefix)) {
+        name <- utf8(paste0(prefix, "/", name))
+      }
+    }
+    if (type %in% c("0", "", "7") && keep(name)) {
+      out[[name]] <- data
+    }
+  }
+  out
+}
+
 test_that("every vendored chemfiles CMake file meets the CMake 4 floor", {
   root <- portability_root()
   expect_false(is.null(root))
@@ -211,22 +281,15 @@ test_that("every vendored chemfiles CMake file meets the CMake 4 floor", {
   tarballs <- list.files(file.path(chem, "external"), "\\.tar\\.gz$", full.names = TRUE)
   expect_gt(length(tarballs), 0L)
   for (tarball in tarballs) {
-    members <- utils::untar(tarball, list = TRUE)
-    members <- members[is_cmake_file(members)]
-    if (length(members) == 0L) {
-      next
-    }
-    dir <- tempfile("cmake-floor-")
-    utils::untar(tarball, files = members, exdir = dir)
-    for (member in members) {
-      got <- cmake_floor_problems(
-        paste(readLines(file.path(dir, member), warn = FALSE), collapse = "\n"),
-        paste0(basename(tarball), ":", member)
-      )
+    members <- tar_gz_members(tarball, is_cmake_file)
+    for (member in names(members)) {
+      con <- rawConnection(members[[member]])
+      text <- paste(readLines(con, warn = FALSE), collapse = "\n")
+      close(con)
+      got <- cmake_floor_problems(text, paste0(basename(tarball), ":", member))
       seen <- seen + got$n
       bad <- c(bad, got$bad)
     }
-    unlink(dir, recursive = TRUE)
   }
   expect_gt(seen, 0L)
   expect_identical(bad, character(), info = paste(bad, collapse = "\n"))
