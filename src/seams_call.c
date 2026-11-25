@@ -46,7 +46,7 @@ static void copy_error(const void *handle, char *saved, size_t cap) {
 
 static SEXP real_n(R_xlen_t n) { return allocVector(REALSXP, n); }
 
-const char *seams_r_con_frames(const char *path, int *frames) {
+const char *dseams_count_con_frames(const char *path, int *frames) {
   size_t count = 0;
 #ifdef SEAMS_STATIC
   const seams_status status = seams_path_nframes(path, &count);

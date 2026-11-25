@@ -17,7 +17,7 @@ using namespace cpp11::literals;
 
 using frame_ptr = cpp11::external_pointer<seams_frame, seams_frame_free>;
 
-extern "C" const char *seams_r_con_frames(const char *path, int *frames);
+extern "C" const char *dseams_count_con_frames(const char *path, int *frames);
 
 namespace {
 
@@ -55,7 +55,7 @@ cpp11::sexp read_frame_(std::string path, int frame, int type_filter) {
 int nframes_(std::string path) {
   if (path.ends_with(".con")) {
     int count = 0;
-    if (const char *message = seams_r_con_frames(path.c_str(), &count)) {
+    if (const char *message = dseams_count_con_frames(path.c_str(), &count)) {
       cpp11::stop("%s", message);
     }
     return count;
