@@ -47,7 +47,8 @@ LinkingTo:
 VignetteBuilder: knitr
 SystemRequirements: C++20, GNU make, Cargo (Rust's package manager),
     rustc (>= 1.88; on Windows with the x86_64-pc-windows-gnu target),
-    cmake (>= 3.15), objcopy (GNU binutils or LLVM)
+    cmake (>= 3.15), objcopy (GNU binutils or LLVM), SQLite3 (library and
+    headers)
 NeedsCompilation: yes
 Config/testthat/edition: 3
 X-schema.org-keywords: molecular-dynamics, trajectory-analysis, ice,

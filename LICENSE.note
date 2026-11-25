@@ -405,14 +405,16 @@ molfiles.tar.gz
       includes ply.c, so the ply.c "not sold" condition applies if
       plyplugin is ever compiled. It is not in the compiled list today.
   Compiled by the bundled build (src/chemfiles/external/CMakeLists.txt,
-  set by tools/chemfiles-molfiles.py): abinitplugin, bgfplugin,
-  binposplugin, carplugin, corplugin, cpmdplugin, cubeplugin,
-  dlpolyplugin, dtrplugin, gamessplugin, gromacsplugin, jsplugin,
-  maeffplugin, mdfplugin, moldenplugin, namdbinplugin, parm7plugin,
-  parmplugin, pqrplugin, psfplugin, rst7plugin, tinkerplugin,
-  vasp5xdatcarplugin, vaspoutcarplugin, vaspposcarplugin,
-  vaspxdatcarplugin, vaspxmlplugin, vtfplugin, xbgfplugin and xsfplugin,
-  with the headers they include. The other files ship in the archive
+  set by seams-core's chemfiles-0.10.4-molfiles.patch and checked by
+  tools/chemfiles-molfiles.py): abinitplugin, bgfplugin, binposplugin,
+  carplugin, corplugin, cpmdlogplugin, cpmdplugin, cubeplugin,
+  dlpolyplugin, dmsplugin, dtrplugin, gamessplugin, gaussianplugin,
+  gromacsplugin, jsplugin, maeffplugin, mdfplugin, moldenplugin,
+  namdbinplugin, parm7plugin, parmplugin, pqrplugin, psfplugin,
+  rst7plugin, tinkerplugin, vasp5xdatcarplugin, vaspoutcarplugin,
+  vaspposcarplugin, vaspxdatcarplugin, vaspxmlplugin, vtfplugin,
+  xbgfplugin and xsfplugin, with the headers they include. dmsplugin
+  links the system SQLite3 library, which is not bundled. The other files ship in the archive
   and are not compiled.
 pugixml.tar.gz
   License: MIT

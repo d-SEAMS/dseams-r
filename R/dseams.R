@@ -42,8 +42,8 @@ dseams_example <- function(name = NULL) {
 #'   which the source package does by default. That build also enables
 #'   the VMD molfile readers chemfiles can compile, so files such as
 #'   `.pqr`, `.xsf`, `.cube`, `.car`, `.cor`, `.rst7`, `.parm7`, `.mae`,
-#'   `.bgf`, `.vtf`, `.binpos`, `.dtr`, `.POSCAR` and `.OUTCAR` are read
-#'   too. The format is chosen from the extension.
+#'   `.bgf`, `.vtf`, `.binpos`, `.dtr`, `.dms`, `.g96`, `.POSCAR` and
+#'   `.OUTCAR` are read too. The format is chosen from the extension.
 #' @param frame 1-based frame index.
 #' @param type LAMMPS type filter.
 #' @param x A `dseams_frame`, for `print()`.

@@ -20,6 +20,7 @@ r-rmarkdown = ">=2.25"
 r-covr = "*"
 qpdf = "*"
 ca-certificates = "*"
+libsqlite = ">=3.40"
 
 [tasks]
 # SEAMS_CORE_SRC, when set, is copied instead of downloading the pin.

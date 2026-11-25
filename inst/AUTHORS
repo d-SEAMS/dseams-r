@@ -316,7 +316,9 @@ Crichton, the same notice as the vendored 1.0.5 text. libc 0.2.189's
 MIT notice names The Rust Project Developers, as the vendored text does.
 
 
-5. chemfiles 0.10.4 (src/chemfiles), with the seams-core patches; each
+5. chemfiles 0.10.4 (src/chemfiles), with every seams-core patch in
+   cmake/patches at the pinned revision, which also edit the molfiles,
+   tng, mmtf-cpp and gemmi sources inside external/*.tar.gz; each
    cmake_minimum_required() in it and in external/*.tar.gz below 3.5 reads
    VERSION 3.5...3.10 (tools/chemfiles-cmake-floor.py)
 

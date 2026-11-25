@@ -184,9 +184,11 @@ PY
   echo "Crates are vendored for cargo --offline."
 } > "$dest/README"
 
-# chemfiles 0.10.4 with the seams-core patches (mmCIF, MOL2, frame visit,
-# Apple zlib, fmt/libc++), the VMD molfile readers from
-# tools/chemfiles-molfiles.py, the CMake policy floor from
+# chemfiles 0.10.4 with every seams-core patch (mmCIF, MOL2, frame visit,
+# LAMMPS Data sections, the VMD molfile readers, hostile-file bounds in
+# chemfiles and in its molfiles, TNG, mmtf-cpp and gemmi archives, span
+# under NDEBUG, Apple zlib, fmt/libc++), the MinGW flags and MMTF include
+# from tools/chemfiles-molfiles.py, the CMake policy floor from
 # tools/chemfiles-cmake-floor.py, and LF line endings in the generated
 # headers from tools/chemfiles-lf-headers.py. cmake builds this tree at
 # install time.
@@ -221,24 +223,57 @@ if [ ! -d "$chem_src" ]; then
   echo "vendor-readers.sh: chemfiles archive did not contain chemfiles-0.10.4" >&2
   exit 1
 fi
+# Every patch and script in seams-core's cmake/patches, in the order
+# cmake/ChemfilesDep.cmake applies them. The tree is fresh, so each patch
+# must apply; external-sources.sh patches the sources inside
+# external/DIR.tar.gz and repacks the archive.
 patches=$root/cmake/patches
-for name in chemfiles-0.10.4-mmcif.patch chemfiles-0.10.4-mol2.patch \
-  chemfiles-0.10.4-frame-visit.patch; do
-  patch -p1 -d "$chem_src" -i "$patches/$name"
+patch_list="mmcif mol2 frame-visit lammpsdata-section molfiles"
+sources_list="molfiles:molfile-sources tng:tng-sources mmtf-cpp:mmtf-sources gemmi:gemmi-sources"
+for name in $patch_list; do
+  patch -p1 -d "$chem_src" -i "$patches/chemfiles-0.10.4-$name.patch"
+done
+(
+  cd "$chem_src"
+  for pair in $sources_list; do
+    sh "$patches/chemfiles-0.10.4-external-sources.sh" "${pair%%:*}" "${pair#*:}"
+  done
+)
+for name in hostile span-unused; do
+  patch -p1 -d "$chem_src" -i "$patches/chemfiles-0.10.4-$name.patch"
 done
 (
   cd "$chem_src"
   sh "$patches/chemfiles-0.10.4-zlib-apple.sh"
   sh "$patches/chemfiles-0.10.4-fmt-libcxx.sh"
 )
+# A seams-core pin that adds a patch or script must be applied above
+# before it ships.
+for f in "$patches"/chemfiles-0.10.4-*; do
+  base=$(basename "$f")
+  case "$base" in
+    chemfiles-0.10.4-external-sources.sh|chemfiles-0.10.4-zlib-apple.sh|\
+    chemfiles-0.10.4-fmt-libcxx.sh) continue ;;
+  esac
+  name=${base#chemfiles-0.10.4-}
+  name=${name%.patch}
+  case " $patch_list hostile span-unused $sources_list " in
+    *" $name "*|*":$name "*) ;;
+    *)
+      echo "vendor-readers.sh: $base is not applied; add it in ChemfilesDep.cmake order" >&2
+      exit 1
+      ;;
+  esac
+done
 rm -rf "$pkg/src/chemfiles"
 mv "$chem_src" "$pkg/src/chemfiles"
 if ! grep -q seams_with_frame "$pkg/src/chemfiles/src/Trajectory.cpp"; then
   echo "vendor-readers.sh: chemfiles frame-visit patch did not apply" >&2
   exit 1
 fi
-# Build every molfile plugin chemfiles lists as compilable and register
-# each one that reads atoms as a chemfiles format.
+# The MinGW C++ dialect and the MMTF type_traits include, and a check
+# that the molfiles patch builds every plugin chemfiles lists as
+# compilable except the ones excluded for a stated reason.
 python3 "$pkg/tools/chemfiles-molfiles.py" "$pkg/src/chemfiles"
 # CMake 4 refuses cmake_minimum_required() below 3.5, which chemfiles and
 # the libraries in external/*.tar.gz ask for. Raise each one to

@@ -60,9 +60,10 @@ jobs:
         with:
           use-public-rspm: true
       # R CMD check --as-cran runs checkbashisms on configure and cleanup,
-      # and qpdf on the built vignette PDFs.
-      - name: Install checkbashisms and qpdf
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts qpdf
+      # and qpdf on the built vignette PDFs. The bundled chemfiles links
+      # SQLite3 for its DESRES .dms reader.
+      - name: Install checkbashisms, qpdf and SQLite3
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends binutils devscripts qpdf libsqlite3-dev
       - name: Rewrite a reader archive with objcopy
         working-directory: dseams
         run: sh tools/check-reader-symbols.sh

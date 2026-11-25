@@ -9,8 +9,8 @@ the source package is built. The tarball carries the engine, the vendored
 readcon-core crates, and chemfiles, so installing it does not use the
 network. Building the bundled copy needs GNU make, Cargo, rustc >= 1.88
 (on Windows with the `x86_64-pc-windows-gnu` target, which R's MinGW
-toolchain links), cmake >= 3.15, and objcopy (or llvm-objcopy), as
-`SystemRequirements` states. Cargo and CMake run with at most two jobs, and Cargo's home is a
+toolchain links), cmake >= 3.15, objcopy (or llvm-objcopy), and SQLite3,
+which chemfiles' DESRES `.dms` reader links, as `SystemRequirements` states. Cargo and CMake run with at most two jobs, and Cargo's home is a
 directory inside the package build, removed afterwards. In the copy, `[[nodiscard]]` is removed (the upstream build
 silences those warnings with `-Wno-unused-result`) and the engine's
 console output and `exit` go through `src/dseams_r_io.cpp` to

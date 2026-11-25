@@ -2,7 +2,7 @@ CXX_STD = CXX20
 
 PKG_CPPFLAGS = -I. -Iseams -Iseams/include -Ireadcon-core/include -Ireadcon-core/vendor/linkcell/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_HAS_LINKCELL=1 -DSEAMS_LANG_VERSION='"2.14.2"' -DSEAMS_HAS_OPENMP=1 -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
-PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(READER_DEPS) -lws2_32 -luserenv -lbcrypt -lntdll -ldbghelp -lsynchronization -lpthread
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(READER_DEPS) -lsqlite3 -lws2_32 -luserenv -lbcrypt -lntdll -ldbghelp -lsynchronization -lpthread
 
 CARGO = cargo
 CMAKE = cmake
@@ -114,9 +114,12 @@ $(READCON_ARCHIVE): readcon-core/Cargo.toml readcon-core/Cargo.lock
 # On Windows CMake's default generator is Visual Studio when that is
 # installed. The MinGW compilers named here need a Makefile generator.
 # The vendored LZMA headers use the Windows bit-scan intrinsic.
+# dmsplugin links SQLite3, which Rtools installs under the compiler's
+# prefix; CMAKE_PREFIX_PATH points find_package(SQLite3) there.
 chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	"$(CMAKE)" -G "Unix Makefiles" -S chemfiles -B "$(CHEMFILES_BUILD)" \
 	  -DCMAKE_BUILD_TYPE=Release \
+	  -DCMAKE_PREFIX_PATH="$$(dirname "$$(command -v $(firstword $(CC)))")/.." \
 	  -DCMAKE_POLICY_VERSION_MINIMUM=3.10 \
 	  -DCMAKE_INSTALL_PREFIX="$(CURDIR)/chemfiles-install" \
 	  -DCMAKE_INSTALL_LIBDIR=lib \

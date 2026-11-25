@@ -1,5 +1,18 @@
 # dseams (development version)
 
+* The bundled chemfiles carries every seams-core chemfiles patch, not
+  only the mmCIF, MOL2 and frame-visit ones. `tools/vendor-readers.sh`
+  applies them in the order seams-core's `ChemfilesDep.cmake` uses and
+  stops when the pinned seams-core has a patch it does not apply. The
+  LAMMPS Data reader reports an unknown header line instead of looping,
+  readers of hostile files check their sizes, counts and indices (in
+  chemfiles and in its molfiles, TNG, mmtf-cpp and gemmi sources), and
+  `span` builds under `NDEBUG`. The molfile readers come from seams-core's
+  molfiles patch, which registers the same 33 formats as before plus the
+  DESRES `.dms`, Gromacs `.g96`, CPMD 3.x output (`.out`) and Gaussian
+  log readers. `tools/chemfiles-molfiles.py` now checks that plugin list
+  and keeps the MinGW and MMTF edits. The DESRES reader links SQLite3,
+  which `SystemRequirements` names.
 * The cubic-ice test runs on every check instead of skipping when
   `DSEAMS_ROOT` has no `input/traj/mW_cubic.lammpstrj` (seams-core moved
   that file out of git into the Hugging Face dataset

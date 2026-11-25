@@ -10,6 +10,7 @@ CARGO = @CARGO@
 CMAKE = @CMAKE@
 OBJCOPY = @OBJCOPY@
 CHEMFILES_BUILD = @CHEMFILES_BUILD@
+CHEMFILES_CMAKE_ARGS = @CHEMFILES_CMAKE_ARGS@
 READER_DEPS = @READER_DEPS@
 
 # Engine translation units copied by tools/vendor.sh. Keep one per line:
@@ -125,7 +126,8 @@ chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	  -DCHFL_BUILD_DOCUMENTATION=OFF \
 	  -DCHFL_SYSTEM_ZLIB=OFF \
 	  -DCHFL_SYSTEM_LZMA=OFF \
-	  -DCHFL_SYSTEM_BZIP2=OFF
+	  -DCHFL_SYSTEM_BZIP2=OFF \
+	  $(CHEMFILES_CMAKE_ARGS)
 	"$(CMAKE)" --build "$(CHEMFILES_BUILD)" --parallel 2
 	"$(CMAKE)" --install "$(CHEMFILES_BUILD)"
 	rm -rf "$(CHEMFILES_BUILD)"

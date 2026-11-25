@@ -85,6 +85,7 @@ if [ "$(uname -s)" = Darwin ]; then
   OBJCOPY=$(find_tool llvm-objcopy)
 fi
 CHEMFILES_BUILD=""
+CHEMFILES_CMAKE_ARGS=""
 READER_DEPS=""
 
 if [ "${link_mode}" = pkg-config ]; then
@@ -188,6 +189,21 @@ else
   case "$(uname -s)" in
     Darwin) reader_syslibs="-lpthread" ;;
   esac
+  # chemfiles' dmsplugin links SQLite3. A pkg-config module names the
+  # prefix for CMake and the link flags; without one, CMake searches its
+  # default paths (the macOS SDK has SQLite3) and -lsqlite3 is linked.
+  PKG_CONFIG=${PKG_CONFIG:-pkg-config}
+  if command -v "${PKG_CONFIG}" > /dev/null 2>&1 \
+    && ${PKG_CONFIG} --exists sqlite3; then
+    sqlite_prefix=$(${PKG_CONFIG} --variable=prefix sqlite3)
+    CHEMFILES_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${sqlite_prefix}"
+    sqlite_libs=$(${PKG_CONFIG} --libs sqlite3)
+    echo "configure: SQLite3 $(${PKG_CONFIG} --modversion sqlite3) under ${sqlite_prefix}"
+  else
+    sqlite_libs="-lsqlite3"
+    echo "configure: no sqlite3 pkg-config module; CMake looks for SQLite3 in its default paths"
+  fi
+  reader_syslibs="${sqlite_libs} ${reader_syslibs}"
   SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -Ireadcon-core/include -Ireadcon-core/vendor/linkcell/include -Ichemfiles-install/include -DSEAMS_STATIC -DSEAMS_HAS_LINKCELL=1 -DSEAMS_HAS_READCON=1 -DSEAMS_HAS_CHEMFILES=1 -DSEAMS_CHEMFILES_PATCHED=1 -DSEAMS_LANG_VERSION='\"${version}\"'"
   SEAMS_LIBS="readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a ${reader_syslibs}"
   READER_DEPS="readcon-core/target/release/libreadcon_core.a chemfiles-install/lib/libchemfiles.a"
@@ -218,5 +234,6 @@ sed -e "s|@SEAMS_CPPFLAGS@|${SEAMS_CPPFLAGS}|" \
   -e "s|@CMAKE@|${CMAKE}|" \
   -e "s|@OBJCOPY@|${OBJCOPY}|" \
   -e "s|@CHEMFILES_BUILD@|${CHEMFILES_BUILD}|" \
+  -e "s|@CHEMFILES_CMAKE_ARGS@|${CHEMFILES_CMAKE_ARGS}|" \
   -e "s|@READER_DEPS@|${READER_DEPS}|" \
   src/Makevars.in > src/Makevars
