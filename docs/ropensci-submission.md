@@ -408,7 +408,7 @@ Maintainer: 'Rohit Goswami <rgoswami@ieee.org>'
 
 New submission
 
-Size of tarball: 9479436 bytes
+Size of tarball: 9480802 bytes
 * checking installed package size ... NOTE
   installed size is 14.4Mb
   sub-directories of 1Mb or more:
@@ -449,7 +449,7 @@ that comes from the host, not the package.
 
 The check linked against a seams-core v2.14.2 build (`SEAMS_LIBDIR`)
 finished with `Status: 3 NOTEs`: the same incoming feasibility note
-(`Size of tarball: 9479168 bytes`), the same timestamp note and the
+(`Size of tarball: 9481298 bytes`), the same timestamp note and the
 same compilation flag note. Its installed size check is OK.
 
 The testthat run inside the bundled check printed:
