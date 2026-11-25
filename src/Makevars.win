@@ -4,15 +4,16 @@ PKG_CPPFLAGS = -I. -Iseams -Iseams/include -Ireadcon-core/include -Ireadcon-core
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(READER_DEPS) -lsqlite3 -lws2_32 -luserenv -lbcrypt -lntdll -ldbghelp -lsynchronization -lpthread
 
-CARGO = cargo
-CMAKE = cmake
-OBJCOPY = objcopy
 CHEMFILES_BUILD = $(TEMP)/dseams-chemfiles-build
 # The Rust archive uses the same GNU ABI as the Rtools C++ objects.
 # configure.win writes rust-target.mk with the GNU target of the C
-# compiler, aarch64-pc-windows-gnullvm for an aarch64 compiler. R reads
-# this file before Makeconf, so $(CC) is not known here.
+# compiler, aarch64-pc-windows-gnullvm for an aarch64 compiler, and the
+# cargo, cmake and objcopy it found. R reads this file before Makeconf,
+# so $(CC) is not known here. A missing line keeps the default below.
 -include rust-target.mk
+CARGO ?= cargo
+CMAKE ?= cmake
+OBJCOPY ?= objcopy
 RUST_TARGET ?= x86_64-pc-windows-gnu
 READCON_ARCHIVE = readcon-core/target/$(RUST_TARGET)/release/libreadcon_core.a
 READER_DEPS = $(READCON_ARCHIVE) chemfiles-install/lib/libchemfiles.a
@@ -151,4 +152,4 @@ chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	"$(CMAKE)" --build "$(CHEMFILES_BUILD)" --parallel 2
 	"$(CMAKE)" --install "$(CHEMFILES_BUILD)"
 	rm -rf "$(CHEMFILES_BUILD)"
-	sh ../tools/reader-symbols.sh "$(OBJCOPY)" $@
+	sh ../tools/reader-symbols.sh "$(OBJCOPY)" "$@"

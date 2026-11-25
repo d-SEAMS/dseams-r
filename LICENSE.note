@@ -91,7 +91,9 @@ shlex 2.0.1
   Licence: MIT OR Apache-2.0
   Text: LICENSE-MIT and LICENSE-APACHE in each crate's vendor directory
   either's LICENSE-MIT reads "Copyright (c) 2015" without a name, as it
-    does upstream; inst/AUTHORS names the holder.
+    does upstream; the holder is Ulrik Sverdrup, named in inst/AUTHORS.
+  vendor/shlex/src/bytes.rs and vendor/shlex/src/lib.rs: Copyright 2015
+    Nicholas Allegra (comex).
 
 adler2 2.0.1
   License: 0BSD OR MIT OR Apache-2.0
@@ -151,7 +153,8 @@ matrixmultiply 0.3.11
   License: MIT OR Apache-2.0
   Text: vendor/matrixmultiply/LICENSE-APACHE, vendor/matrixmultiply/LICENSE-MIT
   vendor/matrixmultiply/src/constparse.rs: Copyright 2021 DutchGhost,
-    under the same licence (named in LICENSE-MIT)
+    under the same licence (named in LICENSE-MIT). Other sources in
+    vendor/matrixmultiply are Copyright Ulrik Sverdrup.
 
 memchr 2.8.3
   License: Unlicense OR MIT
@@ -163,6 +166,7 @@ memchr 2.8.3
 memmap2 0.9.12
   License: MIT OR Apache-2.0
   Text: vendor/memmap2/LICENSE-APACHE, vendor/memmap2/LICENSE-MIT
+  vendor/memmap2/README.md names Dan Burkert and Yevhenii Reizner.
 
 miniz_oxide 0.9.1
   License: MIT OR Zlib OR Apache-2.0
@@ -179,7 +183,8 @@ ndarray 0.17.2
   License: MIT OR Apache-2.0
   Text: vendor/ndarray/LICENSE-APACHE, vendor/ndarray/LICENSE-MIT
   vendor/ndarray/src/doc/ndarray_for_numpy_users/rk_step.rs quotes
-    SciPy code under SciPy's BSD-3-Clause licence, text in the file
+    SciPy code under SciPy's BSD-3-Clause licence, text in the file,
+    and carries Copyright 2001, 2002 Enthought, Inc.
 
 num-complex 0.4.6
   License: MIT OR Apache-2.0
@@ -239,7 +244,7 @@ serde_json 1.0.154
   License: MIT OR Apache-2.0
   Text: vendor/serde_json/LICENSE-APACHE, vendor/serde_json/LICENSE-MIT
   vendor/serde_json/src/lexical is derived from the lexical crate,
-    also MIT OR Apache-2.0
+    also MIT OR Apache-2.0. Its header names Alexander Huszagh.
 
 simd-adler32 0.3.10
   License: MIT
@@ -342,6 +347,11 @@ libc 0.2.189 use the same MIT copyright lines as the vendored texts.
 chemfiles 0.10.4 (src/chemfiles)
   License: BSD-3-Clause
   Text: src/chemfiles/LICENSE
+  Copyright Guillaume Fraux and contributors. The bundled external
+  headers name Andrzej Krzemienski (optional.hpp), Martin Moene,
+  Microsoft Corporation and Guillaume Fraux (span.hpp), and Martin Moene
+  (string_view.hpp). src/chemfiles/cmake/FindPythonLibsNew.cmake names
+  Kitware, Inc. and Continuum Analytics, Inc.
 
 src/chemfiles/include/chemfiles/external/optional.hpp
   License: BSL-1.0 (text at the end of this file)
@@ -363,6 +373,7 @@ Libraries in src/chemfiles/external (paths inside each archive):
 bzip2.tar.gz
   License: bzip2-1.0.6 (BSD-style), except the file below
   Text: bzip2/LICENSE
+  Copyright Julian Seward. bzip2/bzlib.h credits Yoshioka Tsuneo.
   bzip2/dlltest.c: public domain, by its author's statement in the file
 fmt.tar.gz
   License: MIT, except the files below
@@ -373,13 +384,18 @@ fmt.tar.gz
     fmt/support/docopt.py: MIT, text in the file
     fmt/doc/python-license.txt: Python Software Foundation License, for
       the parts of fmt's documentation taken from Python's; the file is
-      the text
+      the text. It names CNRI and Stichting Mathematisch Centrum
+      Amsterdam.
     fmt/doc/_static/bootstrap.min.js, fmt/doc/bootstrap,
       fmt/doc/_static/fonts (Bootstrap 3.3.4 with its Glyphicons
       Halflings fonts): MIT,
       https://github.com/twbs/bootstrap/blob/v3.3.4/LICENSE
     fmt/doc/basic-bootstrap/layout.html, fmt/doc/_templates/search.html
       (Sphinx templates): BSD, https://github.com/sphinx-doc/sphinx
+  Header copyright holders and credited authors: Victor Zverovich,
+  Paul Dreik, Remotion (Igor Schulz), Chris Foster, Vladimir Keleshev,
+  Zhanyong Wan, Marcus Boerger and Markus Heule. fmt/doc/_static names
+  Twitter, Inc.
 gemmi.tar.gz
   License: MPL-2.0, https://mozilla.org/MPL/2.0/
   The archive holds gemmi's headers only. Its third-party headers:
@@ -398,14 +414,27 @@ gemmi.tar.gz
       code in Larch (https://github.com/xraypy/xraylarch), which its
       header gives as BSD; Larch's code is based on the Cowan-Brennan
       routines and on Don T. Cromer's original code
+  Header copyright holders and credited authors: Global Phasing Ltd.,
+  Dr. Colin Hirsch and Daniel Frey (the tao headers), Chad Austin
+  (sajson.h), Sean Barrett and Jeff Roberts (stb_sprintf.h), and, in
+  pocketfft_hdronly.h, Martin Reinecke, Peter Bell, Matteo Frigo, the
+  Massachusetts Institute of Technology and the Max-Planck-Society.
 lzma.tar.gz
   License: public domain (liblzma)
   Text: lzma/COPYING
+  Header copyright holders and credited authors: Lasse Collin, Igor
+  Pavlov, Jean-loup Gailly, Charles Levert, Paul Eggert, Kevin Springle,
+  Wei Dai and Jonathan Nieder.
 mmtf-cpp.tar.gz
   License: MIT
   Text: mmtf-cpp/LICENSE
   mmtf-cpp/msgpack-c: BSL-1.0 (text at the end of this file), with its
     copies of Boost.Preprocessor and Boost.Predef, also BSL-1.0
+  Header copyright holders and credited authors: Paul Mensonides, Edward
+  Diener, FURUHASHI Sadayuki, KONDO Takatoshi, Takatoshi Kondo, Rene
+  Rivera, Charly Chevalier, Joel Falcou, Franz Detro, Jessica Hamilton,
+  MIZUKI Hirata, Vladimir Volodko, Daniel Farrell, Gabriel Studer,
+  Gerardo Tauriello, Thomas Holder and Julien Ferte.
 molfiles.tar.gz
   License: University of Illinois Open Source License (NCSA) for every
     file not listed below; molfiles/src/tngplugin.cxx is BSD
@@ -439,6 +468,11 @@ molfiles.tar.gz
       team, quoted in full at the end of this file. The plugin's author
       field names Magnus Lundborg; its RCS header names John Stone
       (johns) as the last committer. Not compiled.
+    molfiles/src/vtfplugin.c: by Olaf Lenz and Henri Menke. The bundled
+      build compiles it. Its licence is molfiles/LICENSE (University of
+      Illinois Open Source License).
+    molfiles/src/uhbdplugin.cxx credits Alexander Spaar.
+    molfiles/src/offplugin.cxx credits Francois-Xavier Coudert.
     molfiles/src/hoomdplugin.c, molfiles/src/plyplugin.cxx: carry a
       copyright header but no licence statement. hoomdplugin.c is
       Copyright 2009 Axel Kohlmeyer. plyplugin.cxx is Copyright
@@ -463,9 +497,13 @@ molfiles.tar.gz
 pugixml.tar.gz
   License: MIT
   Text: pugixml/LICENSE.md
+  Copyright Arseny Kapoulkine. pugixml is based on pugxml by Kristen
+  Wegner, named in the headers.
 tng.tar.gz
   License: BSD-3-Clause, except the files below
   Text: tng/COPYING
+  Header copyright holders and credited authors include Erik Lindahl,
+  David van der Spoel and Daniel Spangberg.
   tng/include/tng/md5.h, tng/src/lib/md5.c: the zlib-style licence of
     Aladdin Enterprises, text in each file header
   tng/ci-scripts/copyright.py, tng/ci-scripts/copyright.sh,
@@ -481,9 +519,12 @@ tng.tar.gz
 toml11.tar.gz
   License: MIT
   Text: toml11/LICENSE
+  Copyright Toru Niina.
 zlib.tar.gz
   License: Zlib
   Text: zlib/README
+  Copyright Jean-loup Gailly and Mark Adler. The sources also credit
+  A.M. Kuchling, L. Peter Deutsch, Paul Marquess and Leonid Broukhis.
 
 
 The Boost Software License 1.0 text, for the BSL-1.0 parts above:

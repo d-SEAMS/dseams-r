@@ -633,6 +633,233 @@ test_that("rustc's staticlib licences are listed", {
   }
 })
 
+engine_object_names <- function(path) {
+  lines <- readLines(path, warn = FALSE)
+  hits <- grep("^[[:space:]]*seams/[A-Za-z0-9_]+\\.o", lines, value = TRUE)
+  sub("^[[:space:]]*seams/([A-Za-z0-9_]+)\\.o.*", "\\1", hits)
+}
+
+vendored_sentinel_lines <- function(root) {
+  got <- run_capture("sh", c(file.path(root, "tools", "vendored-tree.sh"), "--list"))
+  expect_identical(got$status, 0L, info = paste(got$out, collapse = "\n"))
+  raw <- readLines(file.path(root, "tools", "vendored-sentinels"), warn = FALSE)
+  raw <- sub("\r$", "", raw)
+  raw <- raw[nzchar(raw) & !startsWith(raw, "#")]
+  expect_identical(got$out, raw)
+  raw
+}
+
+run_in <- function(dir, script) {
+  log <- tempfile("dseams-cfg-")
+  old <- getwd()
+  # The temp tree is a bundled configure. A linked R CMD check exports
+  # SEAMS_LIBDIR and DSEAMS_ROOT, and configure would then link instead
+  # of applying the bundled checksum rule this test reads.
+  link_vars <- c(
+    "SEAMS_LIBDIR", "SEAMS_INCLUDE", "SEAMS_H_DIR", "SEAMS_SO_DIR",
+    "DSEAMS_SYSTEM_ENGINE", "DSEAMS_ROOT"
+  )
+  saved <- Sys.getenv(link_vars, unset = NA_character_)
+  Sys.unsetenv(link_vars)
+  on.exit(
+    {
+      setwd(old)
+      unlink(log)
+      missing <- is.na(saved)
+      if (any(!missing)) {
+        do.call(Sys.setenv, as.list(saved[!missing]))
+      }
+      if (any(missing)) {
+        Sys.unsetenv(link_vars[missing])
+      }
+    },
+    add = TRUE
+  )
+  setwd(dir)
+  # system2 passes each argument as one word. A shell command string
+  # would split, so the script is named and the working directory is
+  # the tree under test.
+  status <- system2("sh", script, stdout = log, stderr = log)
+  out <- if (file.exists(log)) readLines(log, warn = FALSE) else character()
+  list(status = as.integer(status), out = out)
+}
+
+plant_sentinels <- function(base, listed) {
+  for (path in listed) {
+    rel <- sub("/$", "", path)
+    dest <- file.path(base, rel)
+    unlink(dest, recursive = TRUE)
+    dir.create(dirname(dest), recursive = TRUE, showWarnings = FALSE)
+    if (endsWith(path, "/")) {
+      dir.create(dest, recursive = TRUE, showWarnings = FALSE)
+    } else {
+      writeLines("x", dest)
+    }
+  }
+}
+
+write_vendor_stub <- function(base) {
+  writeLines(
+    c(
+      "#!/bin/sh",
+      "printf '%s\\n' invoked >> tools/vendor-invoked",
+      "exit 0"
+    ),
+    file.path(base, "tools", "vendor.sh")
+  )
+}
+
+vendor_was_invoked <- function(base) {
+  file.exists(file.path(base, "tools", "vendor-invoked"))
+}
+
+clear_vendor_marker <- function(base) {
+  unlink(file.path(base, "tools", "vendor-invoked"))
+}
+
+copy_configure_scripts <- function(root, base) {
+  dir.create(file.path(base, "tools"), recursive = TRUE, showWarnings = FALSE)
+  rels <- c(
+    "configure",
+    "configure.win",
+    "tools/ensure-vendored.sh",
+    "tools/vendored-tree.sh",
+    "tools/vendored-sentinels",
+    "tools/bundled-tools.sh"
+  )
+  for (rel in rels) {
+    ok <- file.copy(file.path(root, rel), file.path(base, rel), overwrite = TRUE)
+    expect_true(ok, info = rel)
+  }
+  writeLines(c("Package: dseams", "Version: 0.0.0"), file.path(base, "DESCRIPTION"))
+}
+
+test_that("configure and configure.win read one vendored sentinel list", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  listed <- vendored_sentinel_lines(root)
+  expect_gt(length(listed), 0L)
+  expect_true(any(endsWith(listed, "/")))
+  expect_true("src/readcon-core/Cargo.toml" %in% listed)
+  expect_true("src/chemfiles/src/Trajectory.cpp" %in% listed)
+  expect_true("inst/extdata/tiny.pdb" %in% listed)
+  unix <- readLines(file.path(root, "configure"), warn = FALSE)
+  win <- readLines(file.path(root, "configure.win"), warn = FALSE)
+  expect_true(any(grepl(
+    "sh tools/ensure-vendored.sh configure",
+    unix,
+    fixed = TRUE
+  )))
+  expect_true(any(grepl(
+    "sh tools/ensure-vendored.sh configure.win",
+    win,
+    fixed = TRUE
+  )))
+  expect_true(any(grepl(
+    "sh tools/vendored-tree.sh --require-checksum configure",
+    unix,
+    fixed = TRUE
+  )))
+  expect_true(any(grepl(
+    "sh tools/vendored-tree.sh --require-checksum configure.win",
+    win,
+    fixed = TRUE
+  )))
+  for (path in listed) {
+    expect_false(any(grepl(path, unix, fixed = TRUE)), info = path)
+    expect_false(any(grepl(path, win, fixed = TRUE)), info = path)
+  }
+  in_objs <- engine_object_names(file.path(root, "src", "Makevars.in"))
+  win_objs <- engine_object_names(file.path(root, "src", "Makevars.win"))
+  expect_gt(length(in_objs), 0L)
+  expect_identical(in_objs, win_objs)
+  quoted <- 'reader-symbols.sh "$(OBJCOPY)" "$@"'
+  for (name in c("Makevars.in", "Makevars.win")) {
+    lines <- readLines(file.path(root, "src", name), warn = FALSE)
+    expect_identical(sum(grepl(quoted, lines, fixed = TRUE)), 2L, info = name)
+  }
+})
+
+test_that("each missing vendored sentinel makes both configure scripts vendor", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  listed <- vendored_sentinel_lines(root)
+  base <- tempfile("dseams-vendor-")
+  dir.create(base)
+  on.exit(unlink(base, recursive = TRUE), add = TRUE)
+  copy_configure_scripts(root, base)
+  write_vendor_stub(base)
+  plant_sentinels(base, listed)
+
+  for (script in c("configure", "configure.win")) {
+    clear_vendor_marker(base)
+    got <- run_in(base, script)
+    expect_false(any(grepl("cannot open", got$out, fixed = TRUE)), info = script)
+    expect_false(vendor_was_invoked(base), info = paste(script, paste(got$out, collapse = "\n")))
+    expect_false(any(listed %in% got$out), info = script)
+  }
+  expect_true(any(grepl(
+    "configure: src/readcon-core/vendor is missing; the source package has no vendored crates",
+    run_in(base, "configure")$out,
+    fixed = TRUE
+  )))
+
+  for (path in listed) {
+    plant_sentinels(base, listed)
+    unlink(file.path(base, sub("/$", "", path)), recursive = TRUE)
+    expect_false(file.exists(file.path(base, sub("/$", "", path))))
+    for (script in c("configure", "configure.win")) {
+      write_vendor_stub(base)
+      clear_vendor_marker(base)
+      got <- run_in(base, script)
+      others <- setdiff(listed, path)
+      expect_true(vendor_was_invoked(base), info = paste(script, path, paste(got$out, collapse = "\n")))
+      expect_true(path %in% got$out, info = paste(script, path, paste(got$out, collapse = "\n")))
+      expect_false(any(others %in% got$out), info = paste(script, path))
+    }
+  }
+
+  dirs <- listed[endsWith(listed, "/")]
+  expect_gt(length(dirs), 0L)
+  for (path in dirs) {
+    plant_sentinels(base, listed)
+    rel <- sub("/$", "", path)
+    unlink(file.path(base, rel), recursive = TRUE)
+    writeLines("not-a-directory", file.path(base, rel))
+    for (script in c("configure", "configure.win")) {
+      write_vendor_stub(base)
+      clear_vendor_marker(base)
+      got <- run_in(base, script)
+      expect_true(vendor_was_invoked(base), info = paste(script, path))
+      expect_true(path %in% got$out, info = paste(script, path, paste(got$out, collapse = "\n")))
+    }
+  }
+
+  plant_sentinels(base, listed)
+  dir.create(file.path(base, "src"), showWarnings = FALSE)
+  writeLines(
+    "SEAMS_LANG_VERSION='\"9.9.9\"'",
+    file.path(base, "src", "Makevars.win")
+  )
+  clear_vendor_marker(base)
+  bad <- run_in(base, "configure.win")
+  expect_false(vendor_was_invoked(base))
+  expect_true(any(grepl(
+    "configure.win: src/Makevars.win does not carry version 0.0.0",
+    bad$out,
+    fixed = TRUE
+  )), info = paste(bad$out, collapse = "\n"))
+
+  writeLines(
+    "SEAMS_LANG_VERSION='\"0.0.0\"'",
+    file.path(base, "src", "Makevars.win")
+  )
+  clear_vendor_marker(base)
+  good <- run_in(base, "configure.win")
+  expect_false(vendor_was_invoked(base))
+  expect_false(any(grepl("does not carry version", good$out, fixed = TRUE)))
+})
+
 test_that("the CMake floor check rejects the minimums chemfiles shipped", {
   for (call in c(
     "cmake_minimum_required(VERSION 2.8.12)",
@@ -650,4 +877,106 @@ test_that("the CMake floor check rejects the minimums chemfiles shipped", {
   )) {
     expect_length(cmake_floor_problems(call, "x")$bad, 0L)
   }
+})
+
+plant_header_package <- function(authors, note, header) {
+  base <- tempfile("dseams-authors-")
+  dir.create(file.path(base, "src", "chemfiles", "external"), recursive = TRUE)
+  dir.create(file.path(base, "src", "readcon-core", "vendor"), recursive = TRUE)
+  dir.create(file.path(base, "src", "seams"), recursive = TRUE)
+  writeLines(
+    c(
+      "Package: toy",
+      "Authors@R: c(",
+      authors,
+      "    )",
+      "Description: toy"
+    ),
+    file.path(base, "DESCRIPTION")
+  )
+  writeLines(note, file.path(base, "LICENSE.note"))
+  writeLines(header, file.path(base, "src", "seams", "sample.c"))
+  base
+}
+
+test_that("a header author missing from Authors@R and LICENSE.note fails the check", {
+  python <- Sys.which("python3")
+  expect_true(nzchar(python))
+  root <- portability_root()
+  expect_false(is.null(root))
+  script <- file.path(root, "tools", "check-header-authors.py")
+  header <- "/* VTF plugin by Zora Quill */"
+  covered <- plant_header_package(
+    "    person(\"Zora\", \"Quill\", role = \"ctb\")",
+    "nothing else",
+    header
+  )
+  got <- run_capture(python, c(script, covered))
+  expect_identical(got$status, 0L, info = paste(got$out, collapse = "\n"))
+
+  noted <- plant_header_package(
+    "    person(\"Other\", \"Person\", role = \"ctb\")",
+    "The sample is by Zora Quill.",
+    header
+  )
+  got <- run_capture(python, c(script, noted))
+  expect_identical(got$status, 0L, info = paste(got$out, collapse = "\n"))
+
+  bare <- plant_header_package(
+    "    person(\"Other\", \"Person\", role = \"ctb\")",
+    "no author of the sample is named here",
+    header
+  )
+  got <- run_capture(python, c(script, bare))
+  expect_identical(got$status, 1L, info = paste(got$out, collapse = "\n"))
+  text <- paste(got$out, collapse = "\n")
+  expect_true(grepl("sample.c", text, fixed = TRUE))
+  expect_true(grepl("Zora", text, fixed = TRUE))
+  expect_true(grepl("Quill", text, fixed = TRUE))
+
+  empty <- tempfile("dseams-authors-empty-")
+  dir.create(empty)
+  got <- run_capture(python, c(script, empty))
+  expect_identical(got$status, 2L, info = paste(got$out, collapse = "\n"))
+
+  real <- run_capture(python, c(script, root))
+  expect_identical(real$status, 0L, info = paste(real$out, collapse = "\n"))
+  expect_true(any(grepl(
+    "header authors are named in Authors@R or LICENSE.note",
+    real$out,
+    fixed = TRUE
+  )))
+})
+
+test_that("the license field names the vendored restrictions", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  desc <- read.dcf(file.path(root, "DESCRIPTION"))
+  expect_identical(unname(desc[, "License"]), "MIT + file LICENSE")
+  expect_identical(unname(desc[, "License_restricts_use"]), "yes")
+  expect_true(grepl("Olaf", desc[, "Authors@R"], fixed = TRUE))
+  expect_true(grepl("Lenz", desc[, "Authors@R"], fixed = TRUE))
+  expect_true(grepl("Henri", desc[, "Authors@R"], fixed = TRUE))
+  expect_true(grepl("Menke", desc[, "Authors@R"], fixed = TRUE))
+  licence <- paste(readLines(file.path(root, "LICENSE"), warn = FALSE), collapse = "\n")
+  expect_true(grepl("abinitplugin.c", licence, fixed = TRUE))
+  expect_true(grepl("ply.c", licence, fixed = TRUE))
+  expect_true(grepl("ply.h", licence, fixed = TRUE))
+  expect_true(grepl("closed-source", licence, fixed = TRUE))
+  expect_true(grepl("not sold", licence, fixed = TRUE))
+  expect_true(grepl("LICENSE.note", licence, fixed = TRUE))
+  info <- tools:::analyze_license(desc[, "License"])
+  expect_true(info$is_canonical)
+  expect_true(info$is_standardizable)
+  expect_identical(
+    tools:::`.license_component_is_for_stub_and_ok`(
+      "MIT + file LICENSE",
+      root
+    ),
+    0L
+  )
+  expect_length(tools:::.check_package_license(file.path(root, "DESCRIPTION")), 0L)
+  parsed <- utils:::.read_authors_at_R_field(desc[, "Authors@R"])
+  expect_true(any(grepl("Olaf", parsed$given, fixed = TRUE)))
+  expect_true(any(grepl("Lenz", parsed$family, fixed = TRUE)))
 })

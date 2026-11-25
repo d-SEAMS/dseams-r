@@ -1,17 +1,20 @@
 #!/bin/sh
-# src/Makevars.win is static. A source package carries src/seams. In a git
-# checkout tools/vendor.sh makes it from SEAMS_CORE_SRC (or DSEAMS_ROOT),
-# else from the revision pinned in tools/seams-core.ref, as for configure.
-if [ ! -f src/seams/seams_lang.cpp ] || [ ! -f inst/extdata/ice1h.lammpstrj ] \
-  || [ ! -f src/readcon-core/Cargo.lock ] || [ ! -d src/readcon-core/vendor ] \
-  || [ ! -f src/chemfiles/CMakeLists.txt ] \
-  || [ ! -f inst/extdata/tiny_multi_cuh2.con ]; then
-  if [ ! -f tools/vendor.sh ]; then
-    echo "configure.win: src/seams is missing and there is no tools/vendor.sh to make it" >&2
-    exit 1
-  fi
-  sh tools/vendor.sh || exit 1
+# src/Makevars.win is static. A source package carries the vendored tree.
+# In a git checkout tools/vendor.sh makes whatever tools/vendored-sentinels
+# is missing, the same list configure reads.
+: "${R_HOME:=$(R RHOME)}"
+if [ ! -x "${R_HOME}/bin/R" ]; then
+  echo "configure.win: could not find R under R_HOME=${R_HOME}" >&2
+  exit 1
 fi
+
+version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+sh tools/ensure-vendored.sh configure.win || exit 1
+. ./tools/bundled-tools.sh
+require_makevars_win_version . "${version}" configure.win || exit 1
+discover_reader_tools
+require_reader_tools configure.win
+sh tools/vendored-tree.sh --require-checksum configure.win || exit 1
 
 # readcon-core is built for RUST_TARGET when it is set, else for the GNU
 # target of the C compiler. src/Makevars.win reads the choice from
@@ -20,16 +23,11 @@ fi
 if [ -n "${RUST_TARGET:-}" ]; then
   rust_target=${RUST_TARGET}
 else
-  : "${R_HOME:=$(R RHOME)}"
   cc=$("${R_HOME}/bin/R" CMD config CC)
   case "$(${cc} -dumpmachine 2>/dev/null)" in
     aarch64*) rust_target=aarch64-pc-windows-gnullvm ;;
     *) rust_target=x86_64-pc-windows-gnu ;;
   esac
-fi
-if ! command -v rustc >/dev/null 2>&1; then
-  echo "configure.win: rustc >= 1.88 and cargo are required to build readcon-core" >&2
-  exit 1
 fi
 libdir=$(rustc --print target-libdir --target "${rust_target}" 2>/dev/null)
 found=
@@ -44,5 +42,13 @@ if [ -z "${found}" ]; then
   echo "configure.win: the Rust standard library for ${rust_target} is not installed; run: rustup target add ${rust_target}" >&2
   exit 1
 fi
-echo "RUST_TARGET ?= ${rust_target}" > src/rust-target.mk
+cargo_name=$(make_tool_name "${CARGO}" configure.win) || exit 1
+cmake_name=$(make_tool_name "${CMAKE}" configure.win) || exit 1
+objcopy_name=$(make_tool_name "${OBJCOPY}" configure.win) || exit 1
+{
+  printf 'RUST_TARGET ?= %s\n' "${rust_target}"
+  printf 'CARGO ?= %s\n' "${cargo_name}"
+  printf 'CMAKE ?= %s\n' "${cmake_name}"
+  printf 'OBJCOPY ?= %s\n' "${objcopy_name}"
+} > src/rust-target.mk
 echo "configure.win: readcon-core builds for ${rust_target}"

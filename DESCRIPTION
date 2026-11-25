@@ -29,6 +29,8 @@ Authors@R: c(
            comment = "hoomdplugin.c in the bundled VMD molfile plugins"),
     person("Henri", "Menke", role = "ctb",
            comment = "vtfplugin.c in the bundled VMD molfile plugins"),
+    person("Olaf", "Lenz", role = "ctb",
+           comment = "vtfplugin.c in the bundled VMD molfile plugins"),
     person("Miha", "Gunde", role = c("ctb", "cph"),
            comment = "iralib_interf.h (IRA/SOFI C API) in src/seams")
     )
@@ -44,14 +46,18 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
+License_restricts_use: yes
 Copyright: See file inst/AUTHORS for the copyright holders of the
     bundled engine, readcon-core, Rust crates, the Rust standard library
     and compiler-rt rustc links into that library, chemfiles, and the
     libraries chemfiles bundles, including the VMD molfile plugins and
-    their ABINIT (Rob Lahaye) and PLY (Greg Turk, Georgia Institute of
-    Technology) sources, the BSD tngplugin.cxx, and the Apache-2.0
-    iralib_interf.h (Miha Gunde) in the engine. LICENSE.note gives their
-    licences and quotes the ABINIT, PLY and TNG terms.
+    their ABINIT (Rob Lahaye), PLY (Greg Turk, Georgia Institute of
+    Technology) and VTF (Olaf Lenz and Henri Menke) sources, the BSD
+    tngplugin.cxx, and the Apache-2.0 iralib_interf.h (Miha Gunde) in
+    the engine. LICENSE.note gives their licences and quotes the ABINIT,
+    PLY and TNG terms. The MIT grant in file LICENSE does not remove
+    those restrictions: abinitplugin.c may not be part of a closed-source
+    project, and ply.c and ply.h may not be sold.
 URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core

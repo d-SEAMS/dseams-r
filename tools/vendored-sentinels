@@ -1,0 +1,13 @@
+# Required pieces of the vendored tree. configure and configure.win both
+# read this file through tools/vendored-tree.sh, so the two checks cannot
+# drift. A trailing slash marks a directory. Every other entry is a
+# regular file. A missing entry is vendored again.
+src/seams/seams_lang.cpp
+inst/extdata/ice1h.lammpstrj
+src/readcon-core/Cargo.toml
+src/readcon-core/Cargo.lock
+src/readcon-core/vendor/
+src/chemfiles/CMakeLists.txt
+src/chemfiles/src/Trajectory.cpp
+inst/extdata/tiny_multi_cuh2.con
+inst/extdata/tiny.pdb

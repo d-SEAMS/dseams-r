@@ -1,5 +1,22 @@
 # dseams (development version)
 
+* `License` stays `MIT + file LICENSE`, and `License_restricts_use` is
+  `yes`. File `LICENSE` names the restricted components whose terms
+  `LICENSE.note` quotes: `abinitplugin.c` may not be part of a
+  closed-source project, and `ply.c` and `ply.h` may not be sold.
+* `Authors@R` credits Olaf Lenz for `vtfplugin.c`, beside Henri Menke.
+  `LICENSE.note` names the copyright holders and credited authors that
+  vendored source headers name. `tools/check-header-authors.py` fails
+  when one of those names is absent from `Authors@R` and from
+  `LICENSE.note`.
+* `configure` and `configure.win` read one list, `tools/vendored-sentinels`,
+  and run `tools/vendor.sh` when any entry is missing, including
+  `src/readcon-core/Cargo.toml`, `src/chemfiles/src/Trajectory.cpp` and
+  `inst/extdata/tiny.pdb`. `configure.win` applies the bundled requirements
+  on rustc >= 1.88, cargo, cmake >= 3.15 and objcopy, stops when the
+  readcon crate checksum is absent, stops when `src/Makevars.win` does
+  not carry `Version` from DESCRIPTION, and records the cargo, cmake and
+  objcopy it found in `src/rust-target.mk`.
 * The R API page says a linked engine reads only the formats its seams-core
   build enabled, and gives the `meson setup` line with the chemfiles and
   readcon readers required, as the linked CI job builds it.

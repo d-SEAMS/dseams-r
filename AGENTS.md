@@ -53,9 +53,14 @@ and the C++ reference `binding_oracle` live in
 3. Otherwise compile the bundled copy in `src/seams`.
 
 In every mode `src/seams`, `src/readcon-core`, `src/chemfiles`, and
-`inst/extdata` must exist. When they do not, `tools/vendor.sh` writes them
-from `SEAMS_CORE_SRC` or `DSEAMS_ROOT`, else from the revision in
-`tools/seams-core.ref`, which it downloads unless `DSEAMS_NO_DOWNLOAD=1`.
+`inst/extdata` must exist. `configure` and `configure.win` read
+`tools/vendored-sentinels` and run `tools/vendor.sh` when any entry is
+missing. `tools/vendor.sh` writes them from `SEAMS_CORE_SRC` or
+`DSEAMS_ROOT`, else from the revision in `tools/seams-core.ref`, which
+it downloads unless `DSEAMS_NO_DOWNLOAD=1`. `configure.win` applies the
+same rustc, cargo, cmake and objcopy requirements as a bundled Unix
+build, and it refuses a `Makevars.win` whose `SEAMS_LANG_VERSION` is
+not `Version` from DESCRIPTION.
 The same step vendors readcon-core (the wrap revision in that seams-core
 tree, crates included) and patched chemfiles 0.10.4. A tarball from
 `R CMD build` carries those copies and installs with no network. The

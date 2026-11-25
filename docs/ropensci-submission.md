@@ -74,6 +74,8 @@ Authors@R: c(
            comment = "hoomdplugin.c in the bundled VMD molfile plugins"),
     person("Henri", "Menke", role = "ctb",
            comment = "vtfplugin.c in the bundled VMD molfile plugins"),
+    person("Olaf", "Lenz", role = "ctb",
+           comment = "vtfplugin.c in the bundled VMD molfile plugins"),
     person("Miha", "Gunde", role = c("ctb", "cph"),
            comment = "iralib_interf.h (IRA/SOFI C API) in src/seams")
     )
@@ -89,14 +91,18 @@ Description: Structural analysis of water and ice in molecular dynamics
     <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
     C++ sources.
 License: MIT + file LICENSE
+License_restricts_use: yes
 Copyright: See file inst/AUTHORS for the copyright holders of the
     bundled engine, readcon-core, Rust crates, the Rust standard library
     and compiler-rt rustc links into that library, chemfiles, and the
     libraries chemfiles bundles, including the VMD molfile plugins and
-    their ABINIT (Rob Lahaye) and PLY (Greg Turk, Georgia Institute of
-    Technology) sources, the BSD tngplugin.cxx, and the Apache-2.0
-    iralib_interf.h (Miha Gunde) in the engine. LICENSE.note gives their
-    licences and quotes the ABINIT, PLY and TNG terms.
+    their ABINIT (Rob Lahaye), PLY (Greg Turk, Georgia Institute of
+    Technology) and VTF (Olaf Lenz and Henri Menke) sources, the BSD
+    tngplugin.cxx, and the Apache-2.0 iralib_interf.h (Miha Gunde) in
+    the engine. LICENSE.note gives their licences and quotes the ABINIT,
+    PLY and TNG terms. The MIT grant in file LICENSE does not remove
+    those restrictions: abinitplugin.c may not be part of a closed-source
+    project, and ply.c and ply.h may not be sold.
 URL: https://r.dseams.info/, https://docs.dseams.info,
     https://github.com/d-SEAMS/dseams-r,
     https://github.com/d-SEAMS/seams-core
@@ -385,7 +391,10 @@ Technology, 1998) permit use, copying, modification, and distribution
 on condition that the software is not sold. They are shipped and are
 not compiled. `molfiles/src/plyplugin.cxx` includes `ply.c`, so that
 condition would apply if plyplugin were compiled. plyplugin is not in
-the compiled list. `LICENSE.note` states this.
+the compiled list. `LICENSE.note` states this. DESCRIPTION keeps
+`License: MIT + file LICENSE` and sets `License_restricts_use: yes`.
+File `LICENSE` names those restricted components. `Authors@R` credits
+Olaf Lenz for `vtfplugin.c` as well as Henri Menke.
 
 `pkgcheck` was not run for this revision.
 
@@ -396,7 +405,7 @@ were on, and no `_R_CHECK_*` variable was set except
 `_R_CHECK_FORCE_SUGGESTS_=true`. `DSEAMS_ROOT` was a seams-core v2.14.2
 tree and `DSEAMS_REQUIRE_DATA=1`. The install printed
 `rustc 1.100.0 (0ef1bc386 2026-11-09)`,
-`cargo 1.100.0 (3acc79c0c 2026-11-05)` and cmake 4.4.5. R prints curly
+`cargo 1.100.0 (3acc79c0c 2026-11-05)` and cmake 3.28.3. R prints curly
 quotes; they are written as ASCII apostrophes below.
 
 The bundled check, which compiles the engine copy as CRAN does, finished:
@@ -413,7 +422,7 @@ Maintainer: 'Rohit Goswami <rgoswami@ieee.org>'
 
 New submission
 
-Size of tarball: 9491241 bytes
+Size of tarball: 9498395 bytes
 * checking installed package size ... NOTE
   installed size is 14.4Mb
   sub-directories of 1Mb or more:
@@ -431,9 +440,9 @@ Where each note comes from:
   carries the engine, readcon-core with its vendored crates, and
   chemfiles with every reader and format it builds, so installing needs
   no network. No reader, format or licence file is left out to make it
-  smaller. Two builds of the same tree differ by a few hundred bytes,
-  because the tarball records when it was built; the bundled and linked
-  checks here built the tarball separately.
+  smaller. Both checks in this run read one tarball, so both incoming
+  notes quote the same size. A second build of the same tree differs by
+  a few hundred bytes, because the tarball records when it was built.
 - Installed size: the package. `libs` is the one shared library, which
   holds the engine and the chemfiles and readcon-core readers. After
   linking, `src/Makevars` removes its debug sections with the debug-only
@@ -455,13 +464,13 @@ that comes from the host, not the package.
 
 The check linked against a seams-core v2.14.2 build (`SEAMS_LIBDIR`)
 finished with `Status: 3 NOTEs`: the same incoming feasibility note
-(`Size of tarball: 9491123 bytes`), the same timestamp note and the
+(`Size of tarball: 9498395 bytes`), the same timestamp note and the
 same compilation flag note. Its installed size check is OK.
 
 The testthat run inside the bundled check printed:
 
 ```
-[ FAIL 0 | WARN 0 | SKIP 2 | PASS 473 ]
+[ FAIL 0 | WARN 0 | SKIP 2 | PASS 625 ]
 ```
 
 The two skips are `SEAMS_BIN is not set` (`test-ice.R` line 77) and
@@ -471,7 +480,7 @@ the build the package links, and a bundled build links none. The linked
 check, with `SEAMS_BIN` and `SEAMS_CPP_ORACLE` from that build, printed:
 
 ```
-[ FAIL 0 | WARN 0 | SKIP 0 | PASS 477 ]
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 629 ]
 ```
 
 In both, the cubic-ice test read `mW_cubic.lammpstrj` with SHA-256
