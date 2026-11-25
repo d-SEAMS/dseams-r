@@ -9,6 +9,10 @@ CMAKE = cmake
 OBJCOPY = objcopy
 CHEMFILES_BUILD = $(TEMP)/dseams-chemfiles-build
 # The Rust archive uses the same GNU ABI as the Rtools C++ objects.
+# configure.win writes rust-target.mk with the GNU target of the C
+# compiler, aarch64-pc-windows-gnullvm for an aarch64 compiler. R reads
+# this file before Makeconf, so $(CC) is not known here.
+-include rust-target.mk
 RUST_TARGET ?= x86_64-pc-windows-gnu
 READCON_ARCHIVE = readcon-core/target/$(RUST_TARGET)/release/libreadcon_core.a
 READER_DEPS = $(READCON_ARCHIVE) chemfiles-install/lib/libchemfiles.a
@@ -103,9 +107,11 @@ $(READCON_ARCHIVE): readcon-core/Cargo.toml readcon-core/Cargo.lock
 	sh ../tools/reader-symbols.sh "$(OBJCOPY)" "$@"
 	find readcon-core/vendor -name '.cargo-checksum.json' -delete
 
+# On Windows CMake's default generator is Visual Studio when that is
+# installed. The MinGW compilers named here need a Makefile generator.
 # The vendored LZMA headers use the Windows bit-scan intrinsic.
 chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
-	"$(CMAKE)" -S chemfiles -B "$(CHEMFILES_BUILD)" \
+	"$(CMAKE)" -G "Unix Makefiles" -S chemfiles -B "$(CHEMFILES_BUILD)" \
 	  -DCMAKE_BUILD_TYPE=Release \
 	  -DCMAKE_POLICY_VERSION_MINIMUM=3.10 \
 	  -DCMAKE_INSTALL_PREFIX="$(CURDIR)/chemfiles-install" \

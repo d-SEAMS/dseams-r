@@ -1,5 +1,12 @@
 # dseams (development version)
 
+* On Windows, readcon-core is built for the Rust GNU target of the
+  Rtools compiler: `aarch64-pc-windows-gnullvm` when the compiler's
+  `-dumpmachine` names aarch64, else `x86_64-pc-windows-gnu`.
+  `RUST_TARGET` still overrides it. `configure.win` stops with the
+  `rustup target add` command to run when that target's standard
+  library is missing, and CMake is run with the "Unix Makefiles"
+  generator so it uses the MinGW compilers instead of Visual Studio.
 * The bundled chemfiles builds with CMake 4. CMake 4 refuses a
   `cmake_minimum_required()` below 3.5, and chemfiles 0.10.4 and the
   libraries it unpacks from `external/*.tar.gz` (zlib, lzma, bzip2, fmt,

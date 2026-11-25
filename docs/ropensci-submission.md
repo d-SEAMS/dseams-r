@@ -90,7 +90,8 @@ LinkingTo:
     RcppEigen (>= 0.3.4.0.0)
 VignetteBuilder: knitr
 SystemRequirements: C++20, GNU make, Cargo (Rust's package manager),
-    rustc (>= 1.88), cmake (>= 3.15), objcopy (GNU binutils or LLVM)
+    rustc (>= 1.88; on Windows with the x86_64-pc-windows-gnu target),
+    cmake (>= 3.15), objcopy (GNU binutils or LLVM)
 NeedsCompilation: yes
 Config/testthat/edition: 3
 X-schema.org-keywords: molecular-dynamics, trajectory-analysis, ice,

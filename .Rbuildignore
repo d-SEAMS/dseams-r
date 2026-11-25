@@ -32,3 +32,4 @@
 ^llms\.txt$
 ^\.lycheeignore$
 ^pkgdown$
+^src/rust-target\.mk$

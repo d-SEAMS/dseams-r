@@ -2,14 +2,47 @@
 # src/Makevars.win is static. A source package carries src/seams. In a git
 # checkout tools/vendor.sh makes it from SEAMS_CORE_SRC (or DSEAMS_ROOT),
 # else from the revision pinned in tools/seams-core.ref, as for configure.
-if [ -f src/seams/seams_lang.cpp ] && [ -f inst/extdata/ice1h.lammpstrj ] \
-  && [ -f src/readcon-core/Cargo.lock ] && [ -d src/readcon-core/vendor ] \
-  && [ -f src/chemfiles/CMakeLists.txt ] \
-  && [ -f inst/extdata/tiny_multi_cuh2.con ]; then
-  exit 0
+if [ ! -f src/seams/seams_lang.cpp ] || [ ! -f inst/extdata/ice1h.lammpstrj ] \
+  || [ ! -f src/readcon-core/Cargo.lock ] || [ ! -d src/readcon-core/vendor ] \
+  || [ ! -f src/chemfiles/CMakeLists.txt ] \
+  || [ ! -f inst/extdata/tiny_multi_cuh2.con ]; then
+  if [ ! -f tools/vendor.sh ]; then
+    echo "configure.win: src/seams is missing and there is no tools/vendor.sh to make it" >&2
+    exit 1
+  fi
+  sh tools/vendor.sh || exit 1
 fi
-if [ ! -f tools/vendor.sh ]; then
-  echo "configure.win: src/seams is missing and there is no tools/vendor.sh to make it" >&2
+
+# readcon-core is built for RUST_TARGET when it is set, else for the GNU
+# target of the C compiler. src/Makevars.win reads the choice from
+# src/rust-target.mk, and that target's standard library has to be
+# installed beside rustc.
+if [ -n "${RUST_TARGET:-}" ]; then
+  rust_target=${RUST_TARGET}
+else
+  : "${R_HOME:=$(R RHOME)}"
+  cc=$("${R_HOME}/bin/R" CMD config CC)
+  case "$(${cc} -dumpmachine 2>/dev/null)" in
+    aarch64*) rust_target=aarch64-pc-windows-gnullvm ;;
+    *) rust_target=x86_64-pc-windows-gnu ;;
+  esac
+fi
+if ! command -v rustc >/dev/null 2>&1; then
+  echo "configure.win: rustc >= 1.88 and cargo are required to build readcon-core" >&2
   exit 1
 fi
-sh tools/vendor.sh
+libdir=$(rustc --print target-libdir --target "${rust_target}" 2>/dev/null)
+found=
+if [ -n "${libdir}" ] && [ -d "${libdir}" ]; then
+  for f in "${libdir}"/libstd-*.rlib; do
+    if [ -f "${f}" ]; then
+      found=1
+    fi
+  done
+fi
+if [ -z "${found}" ]; then
+  echo "configure.win: the Rust standard library for ${rust_target} is not installed; run: rustup target add ${rust_target}" >&2
+  exit 1
+fi
+echo "RUST_TARGET ?= ${rust_target}" > src/rust-target.mk
+echo "configure.win: readcon-core builds for ${rust_target}"
