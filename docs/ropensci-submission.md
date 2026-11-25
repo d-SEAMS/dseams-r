@@ -329,7 +329,9 @@ The run history is the Actions page:
   and fail if objcopy, nm, ar, or the C compiler is missing. On the
   Linux release cell that job also checks that `cpp11::cpp_register()`
   leaves `R/cpp11.R` and `src/cpp11.cpp` unchanged. The linked job
-  builds seams-core at that pin, runs `tools/check-reader-symbols.sh`,
+  builds seams-core at that pin with `-Dwith_chemfiles=enabled
+  -Dwith_readcon=enabled`, so the linked engine has the chemfiles VMD
+  molfile readers and the `.con` readers the bundled copy has, runs `tools/check-reader-symbols.sh`,
   and runs `R CMD check --no-manual` with the package linked against
   that build. Both jobs set `_R_CHECK_FORCE_SUGGESTS_=true` and
   `DSEAMS_REQUIRE_DATA=1`, and after the check run

@@ -1,5 +1,8 @@
 # dseams (development version)
 
+* The R API page says a linked engine reads only the formats its seams-core
+  build enabled, and gives the `meson setup` line with the chemfiles and
+  readcon readers required, as the linked CI job builds it.
 * The bundled `FormatFactory.cpp` includes `<type_traits>` before
   `chemfiles/formats/MMTF.hpp`, as `MMTF.cpp` does, so neither source
   that reaches mmtf-cpp's msgpack-c depends on another header for
