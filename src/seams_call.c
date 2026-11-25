@@ -1,7 +1,14 @@
 /* Copyright (c) d-SEAMS developers */
 /* .Call shim over include/seams.h. No C++ and no engine headers. */
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <limits.h>
 #include <stdio.h>
+#ifndef SEAMS_STATIC
+#include <dlfcn.h>
+#endif
 
 #include <R.h>
 #include <Rinternals.h>
@@ -38,6 +45,40 @@ static void copy_error(const void *handle, char *saved, size_t cap) {
 }
 
 static SEXP real_n(R_xlen_t n) { return allocVector(REALSXP, n); }
+
+const char *seams_r_con_frames(const char *path, int *frames) {
+  size_t count = 0;
+#ifdef SEAMS_STATIC
+  const seams_status status = seams_path_nframes(path, &count);
+#else
+  // The language library exports the same name with a different signature.
+  // Resolve the frame counter from the library that owns the stable C API.
+  Dl_info info;
+  if (!dladdr((const void *)seams_system_create, &info) || !info.dli_fname) {
+    return "cannot locate the d-SEAMS C API library";
+  }
+  void *library = dlopen(info.dli_fname, RTLD_LAZY | RTLD_LOCAL);
+  if (!library) {
+    return "cannot open the d-SEAMS C API library";
+  }
+  typedef seams_status (*count_fn)(const char *, size_t *);
+  count_fn count_frames = (count_fn)dlsym(library, "seams_path_nframes");
+  if (!count_frames) {
+    dlclose(library);
+    return "the d-SEAMS C API library has no frame counter";
+  }
+  const seams_status status = count_frames(path, &count);
+  dlclose(library);
+#endif
+  if (status != SEAMS_OK) {
+    return seams_last_error_message();
+  }
+  if (count > INT_MAX) {
+    return "frame count exceeds the R integer range";
+  }
+  *frames = (int)count;
+  return NULL;
+}
 
 SEXP seams_r_system(void) {
   seams_system *sys = seams_system_create();

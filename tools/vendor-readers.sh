@@ -270,8 +270,6 @@ if missing:
     sys.exit("vendor-readers.sh: " + "; ".join(missing))
 PY
 
-python3 "$pkg/tools/patch-lang-nframes.py" "$pkg/src/seams/seams_lang.cpp"
-
 extdata=$pkg/inst/extdata
 mkdir -p "$extdata"
 con=$root/input/eon/tiny_multi_cuh2.con

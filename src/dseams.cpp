@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cctype>
 #include <vector>
 
 #include <cpp11.hpp>
@@ -16,6 +17,8 @@
 using namespace cpp11::literals;
 
 using frame_ptr = cpp11::external_pointer<seams_frame, seams_frame_free>;
+
+extern "C" const char *seams_r_con_frames(const char *path, int *frames);
 
 namespace {
 
@@ -51,6 +54,15 @@ cpp11::sexp read_frame_(std::string path, int frame, int type_filter) {
 
 [[cpp11::register]]
 int nframes_(std::string path) {
+  if (path.size() >= 4 &&
+      std::equal(path.end() - 4, path.end(), ".con",
+                 [](unsigned char ch, char suffix) { return std::tolower(ch) == suffix; })) {
+    int count = 0;
+    if (const char *message = seams_r_con_frames(path.c_str(), &count)) {
+      cpp11::stop("%s", message);
+    }
+    return count;
+  }
   const int n = seams_path_nframes(path.c_str());
   if (n < 0) {
     cpp11::stop("%s", seams_last_error());

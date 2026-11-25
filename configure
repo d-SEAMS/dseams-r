@@ -203,6 +203,10 @@ else
   fi
 fi
 
+if [ -n "${link_mode}" ] && [ "$(uname -s)" = Linux ]; then
+  SEAMS_LIBS="${SEAMS_LIBS} -ldl"
+fi
+
 sed -e "s|@SEAMS_CPPFLAGS@|${SEAMS_CPPFLAGS}|" \
   -e "s|@SEAMS_LIBS@|${SEAMS_LIBS}|" \
   -e "s|@OPENMP_CXXFLAGS@|${OPENMP_CXXFLAGS}|g" \

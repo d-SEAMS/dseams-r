@@ -2,6 +2,7 @@
 
 - The bundled engine uses Linkcell for neighbour lists. R source packages carry the Rust dependencies for offline installation.
 - `read_frame()` reports an error when an empty file yields a frame with zero atoms.
+- `nframes()` uses the core C API for CON files in bundled and linked-engine installs.
 
 * Register the C `.Call()` entry points under their `seams_r_*` symbol
   names so `cpp11::cpp_register()`, `pkgload::load_all()`, and
