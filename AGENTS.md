@@ -92,7 +92,9 @@ adds `-march=nocona`; `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`
 names it as a toolchain flag (the `pixi run check` task sets it).
 
 Every check must pass before a change is called done: no ERROR, no
-WARNING. The check reports one NOTE, which is expected. Fix the code under test; do
+WARNING. On Ubuntu's R 4.3.3 the bundled `--as-cran` check reports four
+NOTEs and the linked check three; `cran-comments.md` quotes them and says
+which come from the host. Fix the code under test; do
 not skip, loosen or delete a test to get there. A test changes only when the
 behavior it pins changes on purpose, and the commit says so. Without
 `DSEAMS_ROOT`, `SEAMS_BIN` and `SEAMS_CPP_ORACLE` some tests report a skip;
