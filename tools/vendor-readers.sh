@@ -146,6 +146,14 @@ find "$dest/vendor" -depth \( \
   -o -name '.rustfmt.toml' -o -name '.codecov.yml' -o -name '.gitignore' \
   -o -name '.clippy.toml' -o -name '.tombi.toml' -o -name 'changelog.d' \
   \) -exec rm -rf {} +
+# R CMD build hides dotted paths and drops every path under src/ that ends
+# in .d (its exclude pattern ^src/.*\.d$). A vendored path of either kind
+# left here is missing from the tarball while the checksums still list it.
+left=$(find "$dest/vendor" \( -name '.*' -o -name '*.d' \) -print)
+if [ -n "$left" ]; then
+  printf 'vendor-readers.sh: vendored paths R CMD build would hide or drop:\n%s\n' "$left" >&2
+  exit 1
+fi
 python3 - "$dest/vendor" << 'PY'
 import json
 import sys

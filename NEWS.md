@@ -1,5 +1,10 @@
 # dseams (development version)
 
+* `tools/vendor-readers.sh` stops when a vendored crate still has a
+  dotted path or a path ending in `.d` after its removal list runs.
+  R CMD build hides the first and drops the second (its exclude pattern
+  `^src/.*\.d$`), and a checksum that still lists such a file makes the
+  offline cargo build stop.
 * The bundled chemfiles writes its generated `config.h` and `exports.h`
   with LF line endings on every platform. `configure_file()` without
   `NEWLINE_STYLE` writes through a text-mode stream, which is CRLF on
