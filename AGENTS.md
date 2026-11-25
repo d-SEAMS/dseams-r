@@ -98,6 +98,12 @@ behavior it pins changes on purpose, and the commit says so. Without
 `DSEAMS_ROOT`, `SEAMS_BIN` and `SEAMS_CPP_ORACLE` some tests report a skip;
 CI sets them, and so should a local run that touches an analysis.
 `SEAMS_CPP_ORACLE` must come from the build the package links.
+The cubic-ice test needs `mW_cubic.lammpstrj` from the Hugging Face
+dataset `d-SEAMS/seams-core-inputs`. `tests/testthat/helper-inputs.R`
+fetches it at the revision and SHA-256 that `input/fetch.py` pins at the
+seams-core ref, so a check needs network access unless a verified copy
+is already in `$DSEAMS_ROOT/input/traj` or `DSEAMS_INPUT_CACHE`. Move
+those pins with `SEAMS_CORE_REF`.
 
 ## When the engine changes
 

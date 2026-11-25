@@ -1,5 +1,14 @@
 # dseams (development version)
 
+* The cubic-ice test runs on every check instead of skipping when
+  `DSEAMS_ROOT` has no `input/traj/mW_cubic.lammpstrj` (seams-core moved
+  that file out of git into the Hugging Face dataset
+  `d-SEAMS/seams-core-inputs`). The test helper fetches the copy pinned
+  by seams-core v2.14.2 and checks its SHA-256: through
+  `$DSEAMS_ROOT/input/fetch.py` when `DSEAMS_ROOT` and `python3` are
+  there, else with `download.file()` into `DSEAMS_INPUT_CACHE` or the
+  session temp directory. A verified copy is not fetched again, and a
+  failed download or a different digest fails the test.
 * The vendored `linkcell` and `minimage` crates no longer ship their
   `CITATION.cff`, which R CMD check reports as a CITATION file outside
   `inst/`. Their author, Rohit Goswami, is listed for both crates in

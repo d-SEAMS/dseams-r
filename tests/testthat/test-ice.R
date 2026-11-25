@@ -89,11 +89,9 @@ test_that("seeded cages match the seams CLI", {
 })
 
 test_that("cubic ice is 4096 cubic and 4096 double-diamond", {
-  # mW_cubic.lammpstrj (1.4 MB) is not shipped; DSEAMS_ROOT is a
-  # seams-core checkout.
-  root <- Sys.getenv("DSEAMS_ROOT", unset = "")
-  cubic <- file.path(root, "input", "traj", "mW_cubic.lammpstrj")
-  skip_if(root == "" || !file.exists(cubic), "DSEAMS_ROOT is not set")
+  # mW_cubic.lammpstrj (1.4 MB) is not shipped. seams_input() fetches
+  # the copy pinned by seams-core v2.14.2 and checks its SHA-256.
+  cubic <- seams_input("mW_cubic.lammpstrj")
   frame <- read_frame(cubic, type = 1L)
   ice <- chill_plus(frame)
   expect_identical(sum(ice$name == "cubic"), 4096L)
