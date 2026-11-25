@@ -17,6 +17,20 @@ console output and `exit` go through `src/dseams_r_io.cpp` to
 the bundled readers would otherwise resolve to `abort`, `exit`, and the
 C and C++ consoles.
 
+## R CMD check results for 2.14.2
+
+`R CMD check --no-manual` on R 4.5.3 (`x86_64-conda-linux-gnu`, Arch
+Linux) reported zero errors, zero warnings, and one note. The note
+listed the citation metadata that Cargo vendors with Linkcell and
+Minimage under `src/readcon-core/vendor/`.
+
+The source tarball check passed 167 assertions and skipped eight
+comparisons that need a seams-core checkout or executable. The installed
+package passed 195 assertions with zero skips when `DSEAMS_ROOT`,
+`SEAMS_BIN`, and `SEAMS_CPP_ORACLE` pointed to the matching 2.14.2
+fixtures, CLI, and C++ oracle. The standalone tarball check and the
+installed-package run both used the bundled engine.
+
 ## R CMD check results for 2.14.1
 
 0 errors | 0 warnings | 2 notes
