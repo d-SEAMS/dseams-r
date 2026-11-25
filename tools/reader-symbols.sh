@@ -30,6 +30,9 @@ fi
   --redefine-sym "${prefix}putchar=${prefix}dseams_r_putchar" \
   --redefine-sym "${prefix}sprintf=${prefix}dseams_r_sprintf" \
   --redefine-sym "${prefix}vsprintf=${prefix}dseams_r_vsprintf" \
+  --redefine-sym "${prefix}__printf_chk=${prefix}dseams_r_printf_chk" \
+  --redefine-sym "${prefix}__sprintf_chk=${prefix}dseams_r_sprintf_chk" \
+  --redefine-sym "${prefix}__vsprintf_chk=${prefix}dseams_r_vsprintf_chk" \
   --redefine-sym "${prefix}${stdout_symbol}=${prefix}dseams_r_stdout" \
   --redefine-sym "${prefix}${stderr_symbol}=${prefix}dseams_r_stderr" \
   --redefine-sym "${prefix}_ZSt4cout=dseams_r_cout" \

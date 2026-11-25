@@ -223,4 +223,30 @@ int dseams_r_vsprintf(char *buf, const char *fmt, va_list args) {
   return std::vsnprintf(buf, 4096, fmt, args);
 }
 
+int dseams_r_printf_chk(int, const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  Rvprintf(fmt, args);
+  va_end(args);
+  return 0;
+}
+
+int dseams_r_vsprintf_chk(char *buf, int, size_t capacity, const char *fmt,
+                         va_list args) {
+  const int size = std::vsnprintf(buf, capacity, fmt, args);
+  if (size >= 0 && static_cast<size_t>(size) >= capacity) {
+    Rf_error("bundled reader output exceeds its buffer");
+  }
+  return size;
+}
+
+int dseams_r_sprintf_chk(char *buf, int flags, size_t capacity, const char *fmt,
+                        ...) {
+  va_list args;
+  va_start(args, fmt);
+  const int size = dseams_r_vsprintf_chk(buf, flags, capacity, fmt, args);
+  va_end(args);
+  return size;
+}
+
 } // extern "C"
