@@ -106,7 +106,7 @@ readcon-core/target/release/libreadcon_core.a: readcon-core/Cargo.toml readcon-c
 chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	"$(CMAKE)" -S chemfiles -B "$(CHEMFILES_BUILD)" \
 	  -DCMAKE_BUILD_TYPE=Release \
-	  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+	  -DCMAKE_POLICY_VERSION_MINIMUM=3.10 \
 	  -DCMAKE_INSTALL_PREFIX="$(CURDIR)/chemfiles-install" \
 	  -DCMAKE_INSTALL_LIBDIR=lib \
 	  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
