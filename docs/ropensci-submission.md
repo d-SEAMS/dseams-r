@@ -29,7 +29,7 @@ Submitting Author Name: Rohit Goswami
 Submitting Author Github Handle: <!--author1-->@HaoZeke<!--end-author1-->
 Other Package Authors Github handles: (comma separated, delete if none) <!--author-others-->@amritagos, @RuhiRG<!--end-author-others-->
 Repository:  <!--repourl-->https://github.com/d-SEAMS/dseams-r<!--end-repourl-->
-Version submitted: 2.14.1
+Version submitted: 2.14.2
 Submission type: <!--submission-type-->Standard<!--end-submission-type-->
 Editor: <!--editor--> TBD <!--end-editor-->
 Reviewers: <!--reviewers-list--> TBD <!--end-reviewers-list-->
@@ -46,8 +46,8 @@ Language: <!--language-->en<!--end-language-->
 Package: dseams
 Type: Package
 Title: Ice Classification and Ring Statistics for Molecular Simulations
-Version: 2.14.1
-Date: 2026-11-17
+Version: 2.14.2
+Date: 2026-11-24
 Authors@R: c(
     person("Rohit", "Goswami", email = "rgoswami@ieee.org",
            role = c("aut", "cre"),
