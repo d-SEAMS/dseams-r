@@ -596,12 +596,13 @@ A later bundled check of this tree used pixi R 4.5.3 on the same
 Ubuntu 24.04.5 host, with `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`,
 `NOT_CRAN=true`, `DSEAMS_REQUIRE_DATA=1` and `DSEAMS_ROOT` unset. It
 finished with 0 errors, 0 warnings and 2 NOTEs: CRAN incoming
-feasibility (tarball 9501340 bytes) and future file timestamps.
-Installed size was INFO and the compilation-flags check was OK.
+feasibility (new submission, tarball 9511791 bytes) and a top-level
+`codemeta.json`. Future file timestamps were OK, installed size was
+INFO (14.8Mb, libs 14.0Mb) and the compilation-flags check was OK.
 testthat printed:
 
 ```
-[ FAIL 0 | WARN 0 | SKIP 7 | PASS 620 ]
+[ FAIL 0 | WARN 0 | SKIP 7 | PASS 871 ]
 ```
 
 Five skips are `DSEAMS_ROOT is not set` in `test-doc-examples.R`.
