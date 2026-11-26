@@ -2,7 +2,8 @@
 
 # R CMD check runs with the working directory set to tests/, and copies
 # that directory away from the rest of the source tree. Walk up from both
-# places, and from 00_pkg_src, until the checker script is found.
+# places, and from 00_pkg_src, until the checker script is found. covr has
+# no 00_pkg_src; kept_source_dir() is used only when that walk finds nothing.
 submission_root <- function() {
   starts <- unique(c(
     normalizePath(testthat::test_path("."), mustWork = FALSE),
@@ -31,6 +32,13 @@ submission_root <- function() {
         break
       }
       dir <- parent
+    }
+  }
+  kept <- kept_source_dir()
+  if (length(kept) == 1L && nzchar(kept)) {
+    helper <- file.path(kept, "tools", "check-submission.R")
+    if (file.exists(file.path(kept, "DESCRIPTION")) && file.exists(helper)) {
+      return(normalizePath(kept))
     }
   }
   NULL

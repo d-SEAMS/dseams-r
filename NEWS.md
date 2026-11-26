@@ -1,5 +1,10 @@
 # dseams (development version)
 
+* Portability tests that read `tools/` and `src/` use the source tree
+  named by the srcref of `nframes` when the walk from the test directory
+  and from `00_pkg_src` finds none. covr's installed run has no
+  `00_pkg_src`.
+
 * `codemeta.json` records the same version, licence, and authors as
   DESCRIPTION. Each `aut`, `ctb`, `cph`, and `cre` role is listed, and
   a holder with no family name is an Organization. The file is in the
