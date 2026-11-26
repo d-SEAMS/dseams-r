@@ -1,5 +1,10 @@
 # dseams (development version)
 
+* The submission checks live in `inst/check-submission.R`, which the
+  install keeps. `tools/check-submission.R` sources that file and stays
+  the command-line entry. The test of recorded testthat summaries
+  sources the installed file and builds its own draft, so it runs when
+  `tools/` is not beside the test.
 * `tools/check-submission.R` rejects a testthat summary in
   `cran-comments.md` or the rOpenSci draft that reports failures or
   warnings. `--test-log`, or `DSEAMS_TEST_LOG`, holds the draft's

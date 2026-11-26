@@ -51,7 +51,7 @@ test_that("the submission draft pastes DESCRIPTION and names Ruhila Goswami", {
     expect_true(any(grepl("0000-0002-5443-9356", desc, fixed = TRUE)))
     skip("tools/check-submission.R is not beside this test run")
   }
-  source(file.path(root, "tools", "check-submission.R"), local = TRUE)
+  source(file.path(root, "inst", "check-submission.R"), local = TRUE)
   desc <- read_text(file.path(root, "DESCRIPTION"))
   readme <- read_text(file.path(root, "README.md"))
   expect_true(grepl(ruhila_description, desc, fixed = TRUE))
@@ -68,13 +68,11 @@ test_that("the submission draft pastes DESCRIPTION and names Ruhila Goswami", {
 })
 
 test_that("recorded testthat summaries must pass and match a bundled test log", {
-  root <- submission_root()
-  if (is.null(root)) {
-    desc <- readLines(file.path(find.package("dseams"), "DESCRIPTION"))
-    expect_true(any(grepl("0000-0002-5443-9356", desc, fixed = TRUE)))
-    skip("tools/check-submission.R is not beside this test run")
-  }
-  source(file.path(root, "tools", "check-submission.R"), local = TRUE)
+  # inst/check-submission.R is installed. system.file finds it when the
+  # source walk cannot, including under covr's testInstalledPackage().
+  checker <- system.file("check-submission.R", package = "dseams")
+  expect_true(nzchar(checker) && file.exists(checker))
+  source(checker, local = TRUE)
   saved <- Sys.getenv("DSEAMS_TEST_LOG", unset = NA_character_)
   Sys.unsetenv("DSEAMS_TEST_LOG")
   on.exit(
@@ -95,13 +93,15 @@ test_that("recorded testthat summaries must pass and match a bundled test log", 
 
   tmp <- tempfile("dseams-submission-")
   dir.create(file.path(tmp, "docs"), recursive = TRUE)
-  file.copy(file.path(root, "DESCRIPTION"), tmp)
-  file.copy(file.path(root, "README.md"), tmp)
+  # The installed DESCRIPTION carries the Ruhila record. README.md is not
+  # installed, so the fixture writes the one line the checker requires.
+  file.copy(file.path(find.package("dseams"), "DESCRIPTION"), tmp)
+  put(paste0(ruhila_readme, "\n"), file.path(tmp, "README.md"))
   put(
     paste0("{\n  \"contributor\": [{\n", ruhila_codemeta, "\n  }]\n}\n"),
     file.path(tmp, "codemeta.json")
   )
-  desc <- read_text(file.path(root, "DESCRIPTION"))
+  desc <- read_text(file.path(tmp, "DESCRIPTION"))
   body <- substring(desc, 1L, nchar(desc) - 1L)
   draft_path <- file.path(tmp, "docs", "ropensci-submission.md")
   cran_path <- file.path(tmp, "cran-comments.md")
