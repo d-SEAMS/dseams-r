@@ -6,9 +6,16 @@
 #
 #   Rscript tools/check-submission.R
 #   Rscript tools/check-submission.R --write
+#   Rscript tools/check-submission.R --test-log PATH
 #
 # --write replaces the fenced block with the current DESCRIPTION. The
-# check fails when any required file is missing.
+# check fails when any required file is missing. Every testthat summary
+# in cran-comments.md and the draft must show FAIL 0 and WARN 0.
+# --test-log (or DSEAMS_TEST_LOG) is the output of a bundled test run:
+# its last summary must be that clean line, and it must be the summary
+# the draft records after "The testthat run inside the bundled check
+# printed". The log is matched by bytes, so reader output in it need
+# not be UTF-8.
 
 read_text <- function(path) {
   size <- file.info(path)$size
@@ -83,6 +90,43 @@ ruhila_codemeta <- paste0(
 ruhila_readme <- "Ruhila Goswami (`ctb`), ORCID 0000-0002-5443-9356"
 ruhila_draft <- "Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION."
 
+test_summary_pattern <- "\\[ FAIL [0-9]+ \\| WARN [0-9]+ \\| SKIP [0-9]+ \\| PASS [0-9]+ \\]"
+
+# The draft records the bundled R CMD check here. The summary is the
+# first testthat totals line after this sentence.
+bundled_marker <- "The testthat run inside the bundled check printed"
+
+extract_test_summaries <- function(text) {
+  regmatches(text, gregexpr(test_summary_pattern, text, useBytes = TRUE))[[1L]]
+}
+
+clean_summary <- function(summary) {
+  grepl("^\\[ FAIL 0 \\| WARN 0 \\| ", summary)
+}
+
+extract_bundled_summary <- function(md) {
+  flat <- gsub("\\s+", " ", md)
+  idx <- regexpr(bundled_marker, flat, fixed = TRUE)
+  if (idx < 0L) {
+    return(NULL)
+  }
+  found <- extract_test_summaries(substring(flat, idx))
+  if (length(found) == 0L) {
+    return(NULL)
+  }
+  found[[1L]]
+}
+
+# A test log can hold bytes that are not UTF-8. Do not mark the string.
+read_log_text <- function(path) {
+  size <- file.info(path)$size
+  if (is.na(size)) {
+    stop("missing file: ", path, call. = FALSE)
+  }
+  raw <- if (size == 0L) raw(0L) else readBin(path, "raw", n = size)
+  rawToChar(raw)
+}
+
 # cran-comments.md and the rOpenSci draft are plain ASCII. A Unicode
 # quotation mark copied out of a check log fails this.
 ascii_text <- function(path) {
@@ -94,7 +138,7 @@ ascii_text <- function(path) {
   !any(as.integer(raw) > 127L)
 }
 
-check_submission <- function(root) {
+check_submission <- function(root, test_log = NULL) {
   root <- normalizePath(root, mustWork = TRUE)
   problems <- character()
   need <- c(
@@ -118,6 +162,7 @@ check_submission <- function(root) {
   draft_path <- file.path(root, "docs", "ropensci-submission.md")
   comments_path <- file.path(root, "cran-comments.md")
   draft <- read_text(draft_path)
+  comments <- read_text(comments_path)
   if (!ascii_text(draft_path)) {
     problems <- c(problems, "docs/ropensci-submission.md is not ASCII")
   }
@@ -151,6 +196,50 @@ check_submission <- function(root) {
   if (!grepl("0000-0002-5443-9356", draft, fixed = TRUE)) {
     problems <- c(problems, "submission draft is missing Ruhila Goswami's ORCID")
   }
+  # Every test run either document records passes without warnings.
+  for (doc in list(
+    list(name = "docs/ropensci-submission.md", text = draft),
+    list(name = "cran-comments.md", text = comments)
+  )) {
+    for (summary in extract_test_summaries(doc$text)) {
+      if (!clean_summary(summary)) {
+        problems <- c(problems, paste0(
+          doc$name, " records a test run with failures or warnings: ", summary
+        ))
+      }
+    }
+  }
+  if (is.null(test_log)) {
+    env_log <- Sys.getenv("DSEAMS_TEST_LOG", unset = "")
+    if (nzchar(env_log)) {
+      test_log <- env_log
+    }
+  }
+  if (!is.null(test_log) && nzchar(test_log)) {
+    found <- extract_test_summaries(read_log_text(test_log))
+    if (length(found) == 0L) {
+      problems <- c(problems, "test log has no testthat summary line")
+    } else {
+      log_summary <- found[[length(found)]]
+      if (!clean_summary(log_summary)) {
+        problems <- c(problems, paste0(
+          "test log ends with failures or warnings: ", log_summary
+        ))
+      }
+      draft_summary <- extract_bundled_summary(draft)
+      if (is.null(draft_summary)) {
+        problems <- c(problems, paste0(
+          "docs/ropensci-submission.md has no bundled-check test_check() summary (after \"",
+          bundled_marker, "\")"
+        ))
+      } else if (!identical(charToRaw(draft_summary), charToRaw(log_summary))) {
+        problems <- c(problems, paste0(
+          "docs/ropensci-submission.md records the bundled check as ",
+          draft_summary, "; the test log ends with ", log_summary
+        ))
+      }
+    }
+  }
   problems
 }
 
@@ -178,18 +267,48 @@ script_root <- function() {
   normalizePath(file.path(dirname(sub("^--file=", "", file_arg[1L])), ".."))
 }
 
+parse_cli_args <- function(args) {
+  write_mode <- FALSE
+  test_log <- NULL
+  i <- 1L
+  while (i <= length(args)) {
+    arg <- args[[i]]
+    if (identical(arg, "--write")) {
+      write_mode <- TRUE
+    } else if (identical(arg, "--test-log")) {
+      if (i == length(args)) {
+        stop("--test-log requires a file path", call. = FALSE)
+      }
+      i <- i + 1L
+      test_log <- args[[i]]
+    } else if (startsWith(arg, "--test-log=")) {
+      test_log <- sub("^--test-log=", "", arg)
+    } else {
+      stop(
+        "usage: Rscript tools/check-submission.R [--write] [--test-log PATH]",
+        call. = FALSE
+      )
+    }
+    i <- i + 1L
+  }
+  list(write = write_mode, test_log = test_log)
+}
+
 if (sys.nframe() == 0L) {
   root <- script_root()
-  args <- commandArgs(trailingOnly = TRUE)
-  if (identical(args, "--write")) {
+  opts <- parse_cli_args(commandArgs(trailingOnly = TRUE))
+  if (opts$write) {
     write_submission_description(root)
     cat("rewrote the DESCRIPTION fence in docs/ropensci-submission.md\n")
-  } else if (length(args)) {
-    stop("usage: Rscript tools/check-submission.R [--write]", call. = FALSE)
   }
-  problems <- check_submission(root)
+  problems <- check_submission(root, test_log = opts$test_log)
   if (length(problems)) {
     stop(paste(problems, collapse = "\n"), call. = FALSE)
   }
-  cat("submission DESCRIPTION matches the file; Ruhila Goswami's record matches\n")
+  cat(
+    "submission DESCRIPTION matches the file; Ruhila Goswami's record matches",
+    if (!is.null(opts$test_log)) "; bundled-check summary matches the test log",
+    "\n",
+    sep = ""
+  )
 }

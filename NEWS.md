@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* `tools/check-submission.R` rejects a testthat summary in
+  `cran-comments.md` or the rOpenSci draft that reports failures or
+  warnings. `--test-log`, or `DSEAMS_TEST_LOG`, holds the draft's
+  bundled-check summary to the last summary in that log.
 * Portability tests that read `tools/` and `src/` use the source tree
   named by the srcref of `nframes` when the walk from the test directory
   and from `00_pkg_src` finds none. covr's installed run has no

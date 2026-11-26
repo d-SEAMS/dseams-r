@@ -66,3 +66,104 @@ test_that("the submission draft pastes DESCRIPTION and names Ruhila Goswami", {
     expect_length(problems, 0L)
   }
 })
+
+test_that("recorded testthat summaries must pass and match a bundled test log", {
+  root <- submission_root()
+  if (is.null(root)) {
+    desc <- readLines(file.path(find.package("dseams"), "DESCRIPTION"))
+    expect_true(any(grepl("0000-0002-5443-9356", desc, fixed = TRUE)))
+    skip("tools/check-submission.R is not beside this test run")
+  }
+  source(file.path(root, "tools", "check-submission.R"), local = TRUE)
+  saved <- Sys.getenv("DSEAMS_TEST_LOG", unset = NA_character_)
+  Sys.unsetenv("DSEAMS_TEST_LOG")
+  on.exit(
+    {
+      if (is.na(saved)) {
+        Sys.unsetenv("DSEAMS_TEST_LOG")
+      } else {
+        Sys.setenv(DSEAMS_TEST_LOG = saved)
+      }
+    },
+    add = TRUE
+  )
+
+  put <- function(text, path) writeBin(charToRaw(enc2utf8(text)), path)
+  has <- function(probs, text) any(grepl(text, probs, fixed = TRUE))
+  clean <- "[ FAIL 0 | WARN 0 | SKIP 1 | PASS 455 ]"
+  other <- "[ FAIL 0 | WARN 0 | SKIP 1 | PASS 454 ]"
+
+  tmp <- tempfile("dseams-submission-")
+  dir.create(file.path(tmp, "docs"), recursive = TRUE)
+  file.copy(file.path(root, "DESCRIPTION"), tmp)
+  file.copy(file.path(root, "README.md"), tmp)
+  put(
+    paste0("{\n  \"contributor\": [{\n", ruhila_codemeta, "\n  }]\n}\n"),
+    file.path(tmp, "codemeta.json")
+  )
+  desc <- read_text(file.path(root, "DESCRIPTION"))
+  body <- substring(desc, 1L, nchar(desc) - 1L)
+  draft_path <- file.path(tmp, "docs", "ropensci-submission.md")
+  cran_path <- file.path(tmp, "cran-comments.md")
+  write_draft <- function(summary = NULL, marker = TRUE) {
+    tail <- if (is.null(summary)) {
+      ""
+    } else if (marker) {
+      paste0(bundled_marker, ":\n", summary, "\n")
+    } else {
+      paste0(summary, "\n")
+    }
+    put(
+      paste0(
+        "Paste the full DESCRIPTION file inside a code block below:\n",
+        "```\n", body, "\n```\n",
+        ruhila_draft, "\n",
+        "0000-0002-5443-9356\n",
+        tail
+      ),
+      draft_path
+    )
+  }
+  write_draft(clean)
+  put("cran comments\n", cran_path)
+  test_log <- file.path(tmp, "testthat.Rout")
+  put(paste0("[ FAIL 0 | WARN 0 | SKIP 0 | PASS 1 ]\n", clean, "\n"), test_log)
+  expect_length(check_submission(tmp, test_log = test_log), 0L)
+
+  bare <- file.path(tmp, "bare.Rout")
+  put("no totals here\n", bare)
+  probs <- check_submission(tmp, test_log = bare)
+  expect_true(has(probs, "test log has no testthat summary line"))
+
+  write_draft(other)
+  probs <- check_submission(tmp, test_log = test_log)
+  expect_true(has(probs, "records the bundled check as"))
+
+  failing <- "[ FAIL 20 | WARN 8 | SKIP 9 | PASS 454 ]"
+  write_draft(failing)
+  put(paste0(failing, "\n"), test_log)
+  probs <- check_submission(tmp, test_log = test_log)
+  expect_true(has(probs, paste0(
+    "test log ends with failures or warnings: ", failing
+  )))
+  expect_true(has(
+    check_submission(tmp),
+    paste0(
+      "docs/ropensci-submission.md records a test run with failures or warnings: ",
+      failing
+    )
+  ))
+
+  write_draft(clean, marker = FALSE)
+  put(paste0(clean, "\n"), test_log)
+  probs <- check_submission(tmp, test_log = test_log)
+  expect_true(has(probs, "has no bundled-check test_check() summary"))
+
+  warned <- "[ FAIL 0 | WARN 2 | SKIP 0 | PASS 9 ]"
+  write_draft(clean)
+  put(paste0("note\n", warned, "\n"), cran_path)
+  expect_true(has(
+    check_submission(tmp),
+    "cran-comments.md records a test run with failures or warnings"
+  ))
+})
