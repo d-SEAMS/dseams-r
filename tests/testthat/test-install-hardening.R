@@ -155,6 +155,58 @@ test_that("cleanup.win removes the files a Windows build writes", {
   expect_identical(readLines(file.path(base, "DESCRIPTION")), "keep")
 })
 
+copyright_lines <- function(root) {
+  raw <- readLines(file.path(root, "inst", "COPYRIGHTS"), warn = FALSE)
+  raw <- trimws(sub("\r$", "", raw))
+  raw[nzchar(raw) & !startsWith(raw, "#")]
+}
+
+cph_display_names <- function(authors) {
+  out <- character()
+  for (p in authors) {
+    if (!("cph" %in% p$role)) {
+      next
+    }
+    name <- if (is.null(p$family) || !nzchar(p$family)) {
+      p$given
+    } else {
+      paste(p$given, p$family)
+    }
+    out <- c(out, name)
+  }
+  out
+}
+
+test_that("Authors@R cph names are the vendored copyright holders", {
+  root <- hardening_root()
+  expect_false(is.null(root))
+  listed <- copyright_lines(root)
+  expect_gt(length(listed), 0L)
+  desc <- read.dcf(file.path(root, "DESCRIPTION"))
+  authors <- utils:::.read_authors_at_R_field(desc[, "Authors@R"])
+  cph <- cph_display_names(authors)
+  expect_length(setdiff(listed, cph), 0L)
+  expect_length(setdiff(cph, listed), 0L)
+  expect_identical(sort(cph), sort(listed))
+  python <- Sys.which("python3")
+  expect_true(nzchar(python))
+  log <- tempfile("dseams-cph-")
+  on.exit(unlink(log), add = TRUE)
+  status <- system2(
+    python,
+    c(file.path(root, "tools", "check-copyright-holders.py"), root),
+    stdout = log,
+    stderr = log
+  )
+  out <- if (file.exists(log)) readLines(log, warn = FALSE) else character()
+  expect_identical(as.integer(status), 0L, info = paste(out, collapse = "\n"))
+  expect_true(any(grepl(
+    "vendored copyright holders match inst/COPYRIGHTS and LICENSE.note",
+    out,
+    fixed = TRUE
+  )), info = paste(out, collapse = "\n"))
+})
+
 test_that("configure requires R_HOME before it uses R", {
   root <- hardening_root()
   expect_false(is.null(root))

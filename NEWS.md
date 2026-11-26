@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* `inst/COPYRIGHTS` lists every copyright holder named by the vendored
+  sources. `Authors@R` gives each of them role `cph`, and `LICENSE.note`
+  names each one. `tools/check-copyright-holders.py` fails when a
+  vendored notice is missing from that list.
 * `configure` stops when `R_HOME` is unset, and when `R_HOME/bin/R` is
   not executable. It does not call `R` on `PATH` to choose an `R_HOME`.
 * The vendored chemfiles build uses a new `chemfiles-build.XXXXXX`
