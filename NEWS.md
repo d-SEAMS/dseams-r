@@ -1,5 +1,7 @@
 # dseams (development version)
 
+* `configure` stops when `R_HOME` is unset, and when `R_HOME/bin/R` is
+  not executable. It does not call `R` on `PATH` to choose an `R_HOME`.
 * The vendored chemfiles build uses a new `chemfiles-build.XXXXXX`
   directory under `src` for that build, and removes it afterwards.
   `$(TEMP)/dseams-chemfiles-build` is not used, so two installs do not

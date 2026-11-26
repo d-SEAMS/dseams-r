@@ -155,6 +155,46 @@ test_that("cleanup.win removes the files a Windows build writes", {
   expect_identical(readLines(file.path(base, "DESCRIPTION")), "keep")
 })
 
+test_that("configure requires R_HOME before it uses R", {
+  root <- hardening_root()
+  expect_false(is.null(root))
+  base <- tempfile("dseams-rhome-")
+  dir.create(base)
+  on.exit(unlink(base, recursive = TRUE), add = TRUE)
+  expect_true(file.copy(file.path(root, "configure"), file.path(base, "configure")))
+  # A script file, not sh -c. The -c text is expanded by the caller
+  # before unset runs, so R_HOME would still be set.
+  writeLines(
+    c("unset R_HOME", "exec sh ./configure"),
+    file.path(base, "run-unset-r-home.sh")
+  )
+
+  missing <- capture_sh(base, "run-unset-r-home.sh")
+  expect_identical(
+    missing$status,
+    1L,
+    info = paste(missing$out, collapse = "\n")
+  )
+  expect_true(any(grepl(
+    "configure: R_HOME is not set. Run R CMD INSTALL, which sets it, or export R_HOME.",
+    missing$out,
+    fixed = TRUE
+  )), info = paste(missing$out, collapse = "\n"))
+  expect_false(file.exists(file.path(base, "src", "Makevars")))
+
+  bogus <- tempfile("dseams-no-r-")
+  dir.create(bogus)
+  on.exit(unlink(bogus, recursive = TRUE), add = TRUE)
+  bad <- capture_sh(base, "configure", env = child_env(set = c(R_HOME = bogus)))
+  expect_identical(bad$status, 1L, info = paste(bad$out, collapse = "\n"))
+  expect_true(any(grepl(
+    paste0("configure: R_HOME=", bogus, " does not contain an executable R at bin/R"),
+    bad$out,
+    fixed = TRUE
+  )), info = paste(bad$out, collapse = "\n"))
+  expect_false(file.exists(file.path(base, "src", "Makevars")))
+})
+
 test_that("chemfiles builds in a directory private to that install", {
   root <- hardening_root()
   expect_false(is.null(root))
