@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* `codemeta.json` records the same version, licence, and authors as
+  DESCRIPTION. Each `aut`, `ctb`, `cph`, and `cre` role is listed, and
+  a holder with no family name is an Organization. The file is in the
+  source package so that comparison runs under `R CMD check`.
 * After `tools/vendor.sh`, configure checks the vendored sentinels again
   and stops, naming each file that is still missing, instead of writing
   `src/Makevars` for an incomplete tree.

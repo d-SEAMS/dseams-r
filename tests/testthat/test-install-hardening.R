@@ -391,3 +391,113 @@ test_that("a missing vendored sentinel stops configure before Makevars", {
     }
   }
 })
+
+# A holder with no family name is an Organization. Everyone else is a
+# Person, and aut/ctb/cph/cre map onto the four codemeta arrays.
+codemeta_rows <- function(path) {
+  script <- tempfile("dseams-codemeta-", fileext = ".py")
+  writeLines(
+    c(
+      "import json, sys",
+      "data = json.load(open(sys.argv[1], encoding='utf-8'))",
+      "print('version\\t' + str(data.get('version', '')))",
+      "print('license\\t' + str(data.get('license', '')))",
+      "for key in ('author', 'contributor', 'copyrightHolder', 'maintainer'):",
+      "    for item in data[key]:",
+      "        kind = item.get('@type', '')",
+      "        if kind == 'Organization':",
+      "            name = item.get('name', '')",
+      "            email = ''",
+      "            orcid = ''",
+      "        elif kind == 'Person':",
+      "            given = item.get('givenName', '')",
+      "            family = item.get('familyName') or ''",
+      "            name = given if family == '' else given + ' ' + family",
+      "            email = item.get('email') or ''",
+      "            orcid = item.get('@id') or ''",
+      "        else:",
+      "            sys.exit('codemeta ' + key + ' has @type ' + kind)",
+      "        sys.stdout.write(key + '\\t' + kind + '\\t' + name + '\\t' + email + '\\t' + orcid + '\\n')"
+    ),
+    script
+  )
+  log <- tempfile("dseams-codemeta-out-")
+  status <- system2("python3", c(script, path), stdout = log, stderr = log)
+  out <- if (file.exists(log)) readLines(log, warn = FALSE) else character()
+  unlink(c(script, log))
+  list(status = as.integer(status), out = out)
+}
+
+description_codemeta_rows <- function(path) {
+  desc <- read.dcf(path)
+  authors <- utils:::.read_authors_at_R_field(desc[, "Authors@R"])
+  orcid_of <- function(p) {
+    if (is.null(p$comment) || is.null(names(p$comment))) {
+      return("")
+    }
+    hit <- unname(p$comment["ORCID"])
+    if (length(hit) != 1L || is.na(hit) || !nzchar(hit)) {
+      return("")
+    }
+    paste0("https://orcid.org/", hit)
+  }
+  email_of <- function(p) {
+    if (is.null(p$email) || is.na(p$email) || !nzchar(p$email)) {
+      return("")
+    }
+    p$email
+  }
+  family_of <- function(p) {
+    if (is.null(p$family) || is.na(p$family)) {
+      return("")
+    }
+    p$family
+  }
+  role_key <- c(
+    aut = "author",
+    ctb = "contributor",
+    cph = "copyrightHolder",
+    cre = "maintainer"
+  )
+  rows <- character()
+  for (key in role_key) {
+    role <- names(role_key)[role_key == key]
+    for (p in authors) {
+      if (!(role %in% p$role)) {
+        next
+      }
+      family <- family_of(p)
+      kind <- if (nzchar(family)) "Person" else "Organization"
+      name <- if (nzchar(family)) paste(p$given, family) else p$given
+      email <- if (kind == "Person") email_of(p) else ""
+      orcid <- if (kind == "Person") orcid_of(p) else ""
+      rows <- c(rows, paste(key, kind, name, email, orcid, sep = "\t"))
+    }
+  }
+  list(
+    version = unname(desc[, "Version"]),
+    license = unname(desc[, "License"]),
+    rows = rows
+  )
+}
+
+test_that("codemeta.json agrees with DESCRIPTION", {
+  root <- hardening_root()
+  expect_false(is.null(root))
+  meta <- file.path(root, "codemeta.json")
+  expect_true(file.exists(meta))
+  got <- codemeta_rows(meta)
+  expect_identical(got$status, 0L, info = paste(got$out, collapse = "\n"))
+  version <- got$out[startsWith(got$out, "version\t")]
+  license <- got$out[startsWith(got$out, "license\t")]
+  expect_length(version, 1L)
+  expect_length(license, 1L)
+  listed <- got$out[startsWith(got$out, "author\t") |
+    startsWith(got$out, "contributor\t") |
+    startsWith(got$out, "copyrightHolder\t") |
+    startsWith(got$out, "maintainer\t")]
+  expected <- description_codemeta_rows(file.path(root, "DESCRIPTION"))
+  expect_identical(sub("^version\t", "", version), expected$version)
+  expect_identical(sub("^license\t", "", license), expected$license)
+  expect_identical(listed, expected$rows)
+})

@@ -612,9 +612,10 @@ skipped with `... and huggingface.co is not reachable` when
 `R CMD check` runs `test_check("dseams")` from `tests/testthat.R`
 inside the unpacked source, where `00_pkg_src` still has
 `tools/check-submission.R` and `tools/reader-symbols.sh`, so that run
-does not skip the submission test or the symbol-map tests. `docs/` and
-`codemeta.json` are listed in `.Rbuildignore` and are not in
-`00_pkg_src`.
+does not skip the submission test or the symbol-map tests. `docs/` is
+listed in `.Rbuildignore` and is not in `00_pkg_src`. `codemeta.json`
+is in the source package, and the install test compares its version,
+licence, and authors with DESCRIPTION.
 
 Names shared with other packages stay. `positions()` is the frame
 coordinate matrix and `symmetry()` is the shell-symmetry code. `dseams` does not depend on the other packages that export
