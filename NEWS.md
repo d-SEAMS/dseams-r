@@ -1,5 +1,11 @@
 # dseams (development version)
 
+* `configure.win` refuses `SEAMS_LIBDIR` and `DSEAMS_SYSTEM_ENGINE`.
+  Windows builds only the bundled engine. `cleanup.win` removes
+  `src/rust-target.mk` and the object files, reader build trees and
+  `src/Makevars` that a Windows build writes. R runs `cleanup.win`
+  instead of `cleanup`.
+
 * `License` stays `MIT + file LICENSE`, and `License_restricts_use` is
   `yes`. File `LICENSE` names the restricted components whose terms
   `LICENSE.note` quotes: `abinitplugin.c` may not be part of a
