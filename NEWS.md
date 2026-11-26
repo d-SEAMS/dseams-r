@@ -1,5 +1,8 @@
 # dseams (development version)
 
+* After `tools/vendor.sh`, configure checks the vendored sentinels again
+  and stops, naming each file that is still missing, instead of writing
+  `src/Makevars` for an incomplete tree.
 * `inst/COPYRIGHTS` lists every copyright holder named by the vendored
   sources. `Authors@R` gives each of them role `cph`, and `LICENSE.note`
   names each one. `tools/check-copyright-holders.py` fails when a

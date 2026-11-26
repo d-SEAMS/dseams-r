@@ -6,8 +6,12 @@
 #
 # LABEL is the calling script name and prefixes every message. A complete
 # tree exits 0 without calling tools/vendor.sh. An incomplete tree calls
-# it. A missing list, or a checker that fails without naming a path, is
-# an error and does not vendor.
+# it, then checks the sentinels again. vendor.sh can exit 0 without
+# restoring a file (a stub, or a download that was refused). Configuring
+# on from there writes src/Makevars for a package that cannot build, so
+# a sentinel that is still missing is an error. A missing list, or a
+# checker that fails without naming a path, is an error and does not
+# vendor.
 
 label=${1:-configure}
 if [ ! -f tools/vendored-tree.sh ]; then
@@ -30,3 +34,16 @@ if [ ! -f tools/vendor.sh ]; then
   exit 1
 fi
 R_HOME=${R_HOME:-} sh tools/vendor.sh || exit 1
+missing=$(sh tools/vendored-tree.sh)
+status=$?
+if [ "${status}" -eq 0 ]; then
+  exit 0
+fi
+if [ -z "${missing}" ]; then
+  printf '%s\n' "${label}: could not check the vendored tree after tools/vendor.sh" >&2
+  exit 1
+fi
+printf '%s\n' "${label}: the vendored tree is still incomplete after tools/vendor.sh:" >&2
+printf '%s\n' "${missing}" >&2
+printf '%s\n' "${label}: refusing to configure a package with a missing vendored file" >&2
+exit 1

@@ -292,3 +292,102 @@ test_that("chemfiles builds in a directory private to that install", {
   expect_identical(got$status, 0L, info = paste(got$out, collapse = "\n"))
   expect_false(length(list.files(base, pattern = "^chemfiles-build")) > 0L)
 })
+
+sentinel_lines <- function(root) {
+  raw <- readLines(file.path(root, "tools", "vendored-sentinels"), warn = FALSE)
+  raw <- trimws(sub("\r$", "", raw))
+  raw[nzchar(raw) & !startsWith(raw, "#")]
+}
+
+# A tree configure can finish: every sentinel, the readcon checksum, and
+# a Makevars.in. tools/vendor.sh exits 0 and restores nothing, which is
+# what a refused download does.
+plant_configure_tree <- function(root, base, listed) {
+  dir.create(file.path(base, "tools"), recursive = TRUE, showWarnings = FALSE)
+  dir.create(file.path(base, "src"), recursive = TRUE, showWarnings = FALSE)
+  rels <- c(
+    "configure",
+    "configure.win",
+    "tools/ensure-vendored.sh",
+    "tools/vendored-tree.sh",
+    "tools/vendored-sentinels",
+    "tools/bundled-tools.sh"
+  )
+  for (rel in rels) {
+    ok <- file.copy(file.path(root, rel), file.path(base, rel), overwrite = TRUE)
+    expect_true(ok, info = rel)
+  }
+  writeLines(
+    c("Package: dseams", "Version: 0.0.0"),
+    file.path(base, "DESCRIPTION")
+  )
+  writeLines("kept", file.path(base, "src", "Makevars.in"))
+  writeLines(
+    "SEAMS_LANG_VERSION='\"0.0.0\"'",
+    file.path(base, "src", "Makevars.win")
+  )
+  for (path in listed) {
+    rel <- sub("/$", "", path)
+    dest <- file.path(base, rel)
+    unlink(dest, recursive = TRUE)
+    dir.create(dirname(dest), recursive = TRUE, showWarnings = FALSE)
+    if (endsWith(path, "/")) {
+      dir.create(dest, recursive = TRUE, showWarnings = FALSE)
+    } else {
+      writeLines("x", dest)
+    }
+  }
+  checksum <- file.path(base, "src", "readcon-core", "vendor", "dlpk")
+  dir.create(checksum, recursive = TRUE, showWarnings = FALSE)
+  writeLines("{}", file.path(checksum, "cargo-checksum.json"))
+  writeLines(c("#!/bin/sh", "exit 0"), file.path(base, "tools", "vendor.sh"))
+}
+
+test_that("a missing vendored sentinel stops configure before Makevars", {
+  root <- hardening_root()
+  expect_false(is.null(root))
+  r_home <- Sys.getenv("R_HOME")
+  expect_true(nzchar(r_home))
+  expect_true(file.exists(file.path(r_home, "bin", "R")))
+  listed <- sentinel_lines(root)
+  expect_gt(length(listed), 0L)
+  base <- tempfile("dseams-sentinel-")
+  dir.create(base)
+  on.exit(unlink(base, recursive = TRUE), add = TRUE)
+  plant_configure_tree(root, base, listed)
+
+  complete <- capture_sh(base, "configure")
+  expect_identical(
+    complete$status,
+    0L,
+    info = paste(complete$out, collapse = "\n")
+  )
+  expect_false(any(grepl("still incomplete", complete$out, fixed = TRUE)))
+  expect_identical(readLines(file.path(base, "src", "Makevars")), "kept")
+  unlink(file.path(base, "src", "Makevars"))
+
+  refusal <- "refusing to configure a package with a missing vendored file"
+  for (path in listed) {
+    plant_configure_tree(root, base, listed)
+    unlink(file.path(base, sub("/$", "", path)), recursive = TRUE)
+    expect_false(file.exists(file.path(base, sub("/$", "", path))), info = path)
+    for (script in c("configure", "configure.win")) {
+      got <- capture_sh(base, script)
+      info <- paste(script, path, paste(got$out, collapse = "\n"))
+      expect_identical(got$status, 1L, info = info)
+      expect_true(path %in% got$out, info = info)
+      expect_true(any(grepl(
+        paste0(script, ": the vendored tree is still incomplete after tools/vendor.sh:"),
+        got$out,
+        fixed = TRUE
+      )), info = info)
+      expect_true(any(grepl(
+        paste0(script, ": ", refusal),
+        got$out,
+        fixed = TRUE
+      )), info = info)
+      expect_false(file.exists(file.path(base, "src", "Makevars")), info = info)
+      expect_false(file.exists(file.path(base, "src", "rust-target.mk")), info = info)
+    }
+  }
+})
