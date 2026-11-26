@@ -1,5 +1,11 @@
 # dseams (development version)
 
+* The vendored chemfiles build uses a new `chemfiles-build.XXXXXX`
+  directory under `src` for that build, and removes it afterwards.
+  `$(TEMP)/dseams-chemfiles-build` is not used, so two installs do not
+  share one cmake build directory. `cleanup` and `cleanup.win` remove
+  a directory that a stopped build leaves behind.
+
 * `configure.win` refuses `SEAMS_LIBDIR` and `DSEAMS_SYSTEM_ENGINE`.
   Windows builds only the bundled engine. `cleanup.win` removes
   `src/rust-target.mk` and the object files, reader build trees and

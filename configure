@@ -50,7 +50,6 @@ fi
 # discover_reader_tools prints nothing; it sets CARGO, CMAKE and OBJCOPY.
 . ./tools/bundled-tools.sh
 discover_reader_tools
-CHEMFILES_BUILD=""
 CHEMFILES_CMAKE_ARGS=""
 READER_DEPS=""
 
@@ -114,7 +113,6 @@ else
   # The tarball stores cargo's checksum under a name that is not hidden.
   # The Makevars rule restores the name cargo looks up, before the build.
   sh tools/vendored-tree.sh --require-checksum configure || exit 1
-  CHEMFILES_BUILD=$(mktemp -d "${TMPDIR:-/tmp}/dseams-chemfiles.XXXXXX")
   # Linux and other ELF hosts need libdl and libm beside the Rust staticlib.
   # macOS exports those from libSystem. Windows is src/Makevars.win.
   reader_syslibs="-lpthread -ldl -lm"
@@ -165,7 +163,6 @@ sed -e "s|@SEAMS_CPPFLAGS@|${SEAMS_CPPFLAGS}|" \
   -e "s|@CARGO@|${CARGO}|" \
   -e "s|@CMAKE@|${CMAKE}|" \
   -e "s|@OBJCOPY@|${OBJCOPY}|" \
-  -e "s|@CHEMFILES_BUILD@|${CHEMFILES_BUILD}|" \
   -e "s|@CHEMFILES_CMAKE_ARGS@|${CHEMFILES_CMAKE_ARGS}|" \
   -e "s|@READER_DEPS@|${READER_DEPS}|" \
   src/Makevars.in > src/Makevars

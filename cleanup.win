@@ -4,4 +4,4 @@
 # directories. src/Makevars is removed as well, so a Unix configure in
 # this tree does not leave its output behind. The set matches cleanup.
 rm -f src/Makevars src/*.o src/*.so src/*.dll src/seams/*.o src/reader-stamp src/rust-target.mk
-rm -rf src/readcon-core/target src/readcon-core/cargo-home src/chemfiles-build src/chemfiles-install
+rm -rf src/readcon-core/target src/readcon-core/cargo-home src/chemfiles-build src/chemfiles-build.* src/chemfiles-install

@@ -6,6 +6,7 @@ src/seams/
 src/readcon-core/
 src/chemfiles/
 src/chemfiles-build/
+src/chemfiles-build.*
 src/chemfiles-install/
 src/reader-stamp
 inst/extdata/

@@ -120,6 +120,7 @@ test_that("cleanup.win removes the files a Windows build writes", {
   dir.create(file.path(base, "src", "readcon-core", "target"), recursive = TRUE)
   dir.create(file.path(base, "src", "readcon-core", "cargo-home"), recursive = TRUE)
   dir.create(file.path(base, "src", "chemfiles-build"), recursive = TRUE)
+  dir.create(file.path(base, "src", "chemfiles-build.abc123"), recursive = TRUE)
   dir.create(file.path(base, "src", "chemfiles-install"), recursive = TRUE)
   on.exit(unlink(base, recursive = TRUE), add = TRUE)
   generated <- c(
@@ -148,7 +149,54 @@ test_that("cleanup.win removes the files a Windows build writes", {
   expect_false(dir.exists(file.path(base, "src", "readcon-core", "target")))
   expect_false(dir.exists(file.path(base, "src", "readcon-core", "cargo-home")))
   expect_false(dir.exists(file.path(base, "src", "chemfiles-build")))
+  expect_false(dir.exists(file.path(base, "src", "chemfiles-build.abc123")))
   expect_false(dir.exists(file.path(base, "src", "chemfiles-install")))
   expect_identical(readLines(file.path(base, "src", "Makevars.win")), "keep")
   expect_identical(readLines(file.path(base, "DESCRIPTION")), "keep")
+})
+
+test_that("chemfiles builds in a directory private to that install", {
+  root <- hardening_root()
+  expect_false(is.null(root))
+  needle <- 'mktemp -d "chemfiles-build.XXXXXX"'
+  for (rel in c("src/Makevars.in", "src/Makevars.win")) {
+    lines <- readLines(file.path(root, rel), warn = FALSE)
+    expect_true(any(grepl(needle, lines, fixed = TRUE)), info = rel)
+    expect_false(any(grepl("CHEMFILES_BUILD =", lines, fixed = TRUE)), info = rel)
+    expect_false(any(grepl(
+      "-B \"$(CHEMFILES_BUILD)\"",
+      lines,
+      fixed = TRUE
+    )), info = rel)
+  }
+  configure <- readLines(file.path(root, "configure"), warn = FALSE)
+  expect_false(any(grepl("dseams-chemfiles", configure, fixed = TRUE)))
+  expect_false(any(grepl("@CHEMFILES_BUILD@", configure, fixed = TRUE)))
+
+  # The recipe's mktemp line, run twice in one directory, yields two
+  # directories. A fixed name would make the second call the same path.
+  base <- tempfile("dseams-cf-build-")
+  dir.create(base)
+  on.exit(unlink(base, recursive = TRUE), add = TRUE)
+  script <- c(
+    "set -e",
+    "one=$(mktemp -d \"chemfiles-build.XXXXXX\")",
+    "two=$(mktemp -d \"chemfiles-build.XXXXXX\")",
+    "test \"$one\" != \"$two\"",
+    "test -d \"$one\"",
+    "test -d \"$two\"",
+    "case \"$one\" in",
+    "  chemfiles-build.*) ;;",
+    "  *) echo \"fixed build directory: $one\"; exit 1 ;;",
+    "esac",
+    "case \"$two\" in",
+    "  chemfiles-build.*) ;;",
+    "  *) echo \"fixed build directory: $two\"; exit 1 ;;",
+    "esac",
+    "rm -rf \"$one\" \"$two\""
+  )
+  writeLines(script, file.path(base, "alloc.sh"))
+  got <- capture_sh(base, "alloc.sh")
+  expect_identical(got$status, 0L, info = paste(got$out, collapse = "\n"))
+  expect_false(length(list.files(base, pattern = "^chemfiles-build")) > 0L)
 })
