@@ -245,6 +245,49 @@ test_that("configure requires R_HOME before it uses R", {
     fixed = TRUE
   )), info = paste(bad$out, collapse = "\n"))
   expect_false(file.exists(file.path(base, "src", "Makevars")))
+
+  expect_true(file.copy(
+    file.path(root, "configure.win"),
+    file.path(base, "configure.win"),
+    overwrite = TRUE
+  ))
+  writeLines(
+    c("unset R_HOME", "exec sh ./configure.win"),
+    file.path(base, "run-unset-r-home-win.sh")
+  )
+  missing_win <- capture_sh(base, "run-unset-r-home-win.sh")
+  expect_identical(
+    missing_win$status,
+    1L,
+    info = paste(missing_win$out, collapse = "\n")
+  )
+  expect_true(any(grepl(
+    paste0(
+      "configure.win: R_HOME is not set. Run R CMD INSTALL, which sets it, ",
+      "or export R_HOME."
+    ),
+    missing_win$out,
+    fixed = TRUE
+  )), info = paste(missing_win$out, collapse = "\n"))
+  bad_win <- capture_sh(
+    base,
+    "configure.win",
+    env = child_env(set = c(R_HOME = bogus))
+  )
+  expect_identical(
+    bad_win$status,
+    1L,
+    info = paste(bad_win$out, collapse = "\n")
+  )
+  expect_true(any(grepl(
+    paste0(
+      "configure.win: R_HOME=",
+      bogus,
+      " does not contain an executable R at bin/R"
+    ),
+    bad_win$out,
+    fixed = TRUE
+  )), info = paste(bad_win$out, collapse = "\n"))
 })
 
 test_that("chemfiles builds in a directory private to that install", {

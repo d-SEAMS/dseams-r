@@ -1,5 +1,8 @@
 # dseams (development version)
 
+* `configure.win` stops when `R_HOME` is unset, and when `R_HOME/bin/R`
+  is not executable. It does not call `R` on `PATH` to choose an
+  `R_HOME`.
 * `codemeta.json` records the same version, licence, and authors as
   DESCRIPTION. Each `aut`, `ctb`, `cph`, and `cre` role is listed, and
   a holder with no family name is an Organization. The file is in the
