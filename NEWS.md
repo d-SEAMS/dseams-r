@@ -1,12 +1,15 @@
 # dseams (development version)
 
+* `codemeta.json` is listed in `.Rbuildignore` again, so the built
+  source has no top-level copy. The install test parses that file with
+  base R. `tests/testthat/codemeta.json` is the same document, and it
+  must match the checkout copy when both are visible.
 * `configure.win` stops when `R_HOME` is unset, and when `R_HOME/bin/R`
   is not executable. It does not call `R` on `PATH` to choose an
   `R_HOME`.
 * `codemeta.json` records the same version, licence, and authors as
   DESCRIPTION. Each `aut`, `ctb`, `cph`, and `cre` role is listed, and
-  a holder with no family name is an Organization. The file is in the
-  source package so that comparison runs under `R CMD check`.
+  a holder with no family name is an Organization.
 * After `tools/vendor.sh`, configure checks the vendored sentinels again
   and stops, naming each file that is still missing, instead of writing
   `src/Makevars` for an incomplete tree.

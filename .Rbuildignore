@@ -17,6 +17,7 @@
 ^cran-comments\.md$
 ^LICENSE\.md$
 ^srr-standards\.md$
+^codemeta\.json$
 ^CITATION\.cff$
 ^CODE_OF_CONDUCT\.md$
 ^CONTRIBUTING\.md$

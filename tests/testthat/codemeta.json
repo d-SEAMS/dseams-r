@@ -1,0 +1,497 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "dseams",
+  "description": "Structural analysis of water and ice in molecular dynamics trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh (2020) <doi:10.1021/acs.jcim.0c00031>). Reads 'LAMMPS' dumps, 'XYZ' files, 'CON' files, and the trajectory formats from 'chemfiles', and returns data frames of 'CHILL+' ice labels (Nguyen and Molinero (2015) <doi:10.1021/jp510289t>), primitive ring counts (Franzblau (1991) <doi:10.1103/PhysRevB.44.4925>), hexagonal and double-diamond cages, and Steinhardt bond-orientational order parameters (Steinhardt, Nelson and Ronchetti (1983) <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled C++ sources.",
+  "name": "dseams: Ice Classification and Ring Statistics for Molecular Simulations",
+  "relatedLink": ["https://docs.dseams.info", "https://github.com/d-SEAMS/seams-core"],
+  "codeRepository": "https://github.com/d-SEAMS/dseams-r",
+  "issueTracker": "https://github.com/d-SEAMS/dseams-r/issues",
+  "license": "MIT + file LICENSE",
+  "version": "2.14.2",
+  "datePublished": "2026-11-17",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "R",
+    "url": "https://r-project.org"
+  },
+  "runtimePlatform": "R version 4.4.3 (2025-02-28)",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Rohit",
+      "familyName": "Goswami",
+      "email": "rgoswami@ieee.org",
+      "@id": "https://orcid.org/0000-0002-2393-8056"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Amrita",
+      "familyName": "Goswami",
+      "@id": "https://orcid.org/0000-0001-8706-2383"
+    }
+  ],
+  "contributor": [
+    {
+      "@type": "Person",
+      "givenName": "Ruhila",
+      "familyName": "Goswami",
+      "@id": "https://orcid.org/0000-0002-5443-9356"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Rob",
+      "familyName": "Lahaye"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Greg",
+      "familyName": "Turk"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Axel",
+      "familyName": "Kohlmeyer"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Henri",
+      "familyName": "Menke"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Olaf",
+      "familyName": "Lenz"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Miha",
+      "familyName": "Gunde"
+    }
+  ],
+  "copyrightHolder": [
+    {
+      "@type": "Organization",
+      "name": "d-SEAMS core team"
+    },
+    {
+      "@type": "Organization",
+      "name": "The Board of Trustees of the University of Illinois"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Rob",
+      "familyName": "Lahaye"
+    },
+    {
+      "@type": "Organization",
+      "name": "Georgia Institute of Technology"
+    },
+    {
+      "@type": "Organization",
+      "name": "D. E. Shaw Research, LLC"
+    },
+    {
+      "@type": "Organization",
+      "name": "The Regents of the University of California"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Axel",
+      "familyName": "Kohlmeyer"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Miha",
+      "familyName": "Gunde"
+    },
+    {
+      "@type": "Organization",
+      "name": "Aladdin Enterprises"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Alexander",
+      "familyName": "Huszagh"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Andrzej",
+      "familyName": "Krzemienski"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Arseny",
+      "familyName": "Kapoulkine"
+    },
+    {
+      "@type": "Organization",
+      "name": "CNRI"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Chad",
+      "familyName": "Austin"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Charly",
+      "familyName": "Chevalier"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Colin",
+      "familyName": "Hirsch"
+    },
+    {
+      "@type": "Organization",
+      "name": "Continuum Analytics, Inc."
+    },
+    {
+      "@type": "Person",
+      "givenName": "Dan",
+      "familyName": "Burkert"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Daniel",
+      "familyName": "Frey"
+    },
+    {
+      "@type": "Person",
+      "givenName": "David",
+      "familyName": "van der Spoel"
+    },
+    {
+      "@type": "Organization",
+      "name": "DutchGhost"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Edward",
+      "familyName": "Diener"
+    },
+    {
+      "@type": "Organization",
+      "name": "Enthought, Inc."
+    },
+    {
+      "@type": "Person",
+      "givenName": "Erik",
+      "familyName": "Lindahl"
+    },
+    {
+      "@type": "Person",
+      "givenName": "FURUHASHI",
+      "familyName": "Sadayuki"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Franz",
+      "familyName": "Detro"
+    },
+    {
+      "@type": "Organization",
+      "name": "Global Phasing Ltd."
+    },
+    {
+      "@type": "Organization",
+      "name": "Google Inc."
+    },
+    {
+      "@type": "Person",
+      "givenName": "Guillaume",
+      "familyName": "Fraux"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Jean-loup",
+      "familyName": "Gailly"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Jessica",
+      "familyName": "Hamilton"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Joel",
+      "familyName": "Falcou"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Julian",
+      "familyName": "Seward"
+    },
+    {
+      "@type": "Person",
+      "givenName": "KONDO",
+      "familyName": "Takatoshi"
+    },
+    {
+      "@type": "Organization",
+      "name": "Kitware, Inc."
+    },
+    {
+      "@type": "Person",
+      "givenName": "Kristen",
+      "familyName": "Wegner"
+    },
+    {
+      "@type": "Person",
+      "givenName": "MIZUKI",
+      "familyName": "Hirata"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Mark",
+      "familyName": "Adler"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Martin",
+      "familyName": "Moene"
+    },
+    {
+      "@type": "Organization",
+      "name": "Massachusetts Institute of Technology"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Matteo",
+      "familyName": "Frigo"
+    },
+    {
+      "@type": "Organization",
+      "name": "Max-Planck-Society"
+    },
+    {
+      "@type": "Organization",
+      "name": "Microsoft Corporation"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Nicholas",
+      "familyName": "Allegra"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Paul",
+      "familyName": "Dreik"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Paul",
+      "familyName": "Mensonides"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Peter",
+      "familyName": "Bell"
+    },
+    {
+      "@type": "Organization",
+      "name": "Remotion (Igor Schulz)"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Rene",
+      "familyName": "Rivera"
+    },
+    {
+      "@type": "Organization",
+      "name": "SciPy Developers"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Sean",
+      "familyName": "Barrett"
+    },
+    {
+      "@type": "Organization",
+      "name": "Sphinx team, see AUTHORS"
+    },
+    {
+      "@type": "Organization",
+      "name": "Stichting Mathematisch Centrum Amsterdam"
+    },
+    {
+      "@type": "Organization",
+      "name": "The GROMACS development team"
+    },
+    {
+      "@type": "Organization",
+      "name": "The Rust Project Developers"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Toru",
+      "familyName": "Niina"
+    },
+    {
+      "@type": "Organization",
+      "name": "Twitter, Inc."
+    },
+    {
+      "@type": "Person",
+      "givenName": "Ulrik",
+      "familyName": "Sverdrup"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Victor",
+      "familyName": "Zverovich"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Vladimir",
+      "familyName": "Keleshev"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Vladimir",
+      "familyName": "Volodko"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Yevhenii",
+      "familyName": "Reizner"
+    }
+  ],
+  "maintainer": [
+    {
+      "@type": "Person",
+      "givenName": "Rohit",
+      "familyName": "Goswami",
+      "email": "rgoswami@ieee.org",
+      "@id": "https://orcid.org/0000-0002-2393-8056"
+    }
+  ],
+  "softwareSuggestions": [
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "covr",
+      "name": "covr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=covr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "knitr",
+      "name": "knitr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=knitr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "rmarkdown",
+      "name": "rmarkdown",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=rmarkdown"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "testthat",
+      "name": "testthat",
+      "version": ">= 3.0.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=testthat"
+    }
+  ],
+  "softwareRequirements": {
+    "1": {
+      "@type": "SoftwareApplication",
+      "identifier": "R",
+      "name": "R",
+      "version": ">= 4.2.0"
+    },
+    "SystemRequirements": "C++20, GNU make, Cargo (Rust's package manager), rustc (>= 1.88; on Windows with the x86_64-pc-windows-gnu target), cmake (>= 3.15), objcopy (GNU binutils or LLVM), SQLite3 (library and headers)"
+  },
+  "keywords": ["molecular-dynamics", "trajectory-analysis", "ice", "clathrate-hydrates", "ring-statistics", "d-seams"],
+  "fileSize": "142.736KB",
+  "citation": [
+    {
+      "@type": "ScholarlyArticle",
+      "datePublished": "2020",
+      "author": [
+        {
+          "@type": "Person",
+          "givenName": "Rohit",
+          "familyName": "Goswami",
+          "@id": "https://orcid.org/0000-0002-2393-8056"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Amrita",
+          "familyName": "Goswami",
+          "@id": "https://orcid.org/0000-0001-8706-2383"
+        },
+        {
+          "@type": "Person",
+          "givenName": ["Jayant", "K."],
+          "familyName": "Singh",
+          "@id": "https://orcid.org/0000-0001-8056-2115"
+        }
+      ],
+      "name": "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations",
+      "identifier": "10.1021/acs.jcim.0c00031",
+      "pagination": "2169--2177",
+      "@id": "https://doi.org/10.1021/acs.jcim.0c00031",
+      "sameAs": "https://doi.org/10.1021/acs.jcim.0c00031",
+      "isPartOf": {
+        "@type": "PublicationIssue",
+        "issueNumber": "4",
+        "datePublished": "2020",
+        "isPartOf": {
+          "@type": ["PublicationVolume", "Periodical"],
+          "volumeNumber": "60",
+          "name": "Journal of Chemical Information and Modeling"
+        }
+      }
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "datePublished": "2026-11-17",
+      "author": [
+        {
+          "@type": "Person",
+          "givenName": "Rohit",
+          "familyName": "Goswami",
+          "email": "rgoswami@ieee.org",
+          "@id": "https://orcid.org/0000-0002-2393-8056"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Amrita",
+          "familyName": "Goswami",
+          "@id": "https://orcid.org/0000-0001-8706-2383"
+        }
+      ],
+      "name": "dseams: Ice Classification and Ring Statistics for Molecular Simulations",
+      "url": "https://github.com/d-SEAMS/dseams-r",
+      "description": "R package version 2.14.2"
+    }
+  ],
+  "releaseNotes": "https://github.com/d-SEAMS/dseams-r/blob/main/NEWS.md",
+  "readme": "https://github.com/d-SEAMS/dseams-r/blob/main/README.md"
+}

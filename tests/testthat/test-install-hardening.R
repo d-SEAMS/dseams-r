@@ -435,40 +435,314 @@ test_that("a missing vendored sentinel stops configure before Makevars", {
   }
 })
 
+# jsonlite is not a Depends, Imports, or Suggests package. Read the
+# document with base R so the comparison does not need another package
+# or python. Objects and arrays keep a class because a JSON null has to
+# stay in the list, and `[[<-` would drop it.
+parse_json_text <- function(text) {
+  chars <- strsplit(text, "", fixed = TRUE)[[1L]]
+  n <- length(chars)
+  pos <- 1L
+
+  peek <- function() {
+    if (pos > n) "" else chars[[pos]]
+  }
+  advance <- function() {
+    ch <- peek()
+    pos <<- pos + 1L
+    ch
+  }
+  skip_ws <- function() {
+    while (pos <= n && chars[[pos]] %in% c(" ", "\t", "\r", "\n")) {
+      pos <<- pos + 1L
+    }
+  }
+  put <- function(box, key, value) {
+    kind <- class(box)
+    box[key] <- list(value)
+    class(box) <- kind
+    box
+  }
+  parse_string <- function() {
+    if (advance() != "\"") {
+      stop("codemeta JSON string does not open", call. = FALSE)
+    }
+    out <- character()
+    repeat {
+      ch <- advance()
+      if (ch == "\"") {
+        return(paste0(out, collapse = ""))
+      }
+      if (!nzchar(ch)) {
+        stop("codemeta JSON string does not close", call. = FALSE)
+      }
+      if (ch == "\\") {
+        esc <- advance()
+        ch <- if (esc == "\"" || esc == "\\" || esc == "/") {
+          esc
+        } else if (esc == "b") {
+          "\b"
+        } else if (esc == "f") {
+          "\f"
+        } else if (esc == "n") {
+          "\n"
+        } else if (esc == "r") {
+          "\r"
+        } else if (esc == "t") {
+          "\t"
+        } else if (esc == "u") {
+          hex <- paste0(advance(), advance(), advance(), advance())
+          if (!grepl("^[0-9A-Fa-f]{4}$", hex)) {
+            stop("codemeta JSON has a bad unicode escape", call. = FALSE)
+          }
+          intToUtf8(strtoi(hex, 16L))
+        } else {
+          stop("codemeta JSON has a bad escape", call. = FALSE)
+        }
+      }
+      out <- c(out, ch)
+    }
+  }
+  parse_number <- function() {
+    start <- pos
+    if (peek() == "-") {
+      advance()
+    }
+    if (peek() == "0") {
+      advance()
+    } else if (grepl("^[1-9]$", peek())) {
+      while (grepl("^[0-9]$", peek())) {
+        advance()
+      }
+    } else {
+      stop("codemeta JSON has a bad number", call. = FALSE)
+    }
+    if (peek() == ".") {
+      advance()
+      if (!grepl("^[0-9]$", peek())) {
+        stop("codemeta JSON has a bad number", call. = FALSE)
+      }
+      while (grepl("^[0-9]$", peek())) {
+        advance()
+      }
+    }
+    if (peek() %in% c("e", "E")) {
+      advance()
+      if (peek() %in% c("+", "-")) {
+        advance()
+      }
+      if (!grepl("^[0-9]$", peek())) {
+        stop("codemeta JSON has a bad number", call. = FALSE)
+      }
+      while (grepl("^[0-9]$", peek())) {
+        advance()
+      }
+    }
+    as.numeric(paste0(chars[start:(pos - 1L)], collapse = ""))
+  }
+  parse_literal <- function(word, value) {
+    end <- pos + nchar(word) - 1L
+    if (end > n) {
+      stop("codemeta JSON has a bad literal", call. = FALSE)
+    }
+    got <- paste0(chars[pos:end], collapse = "")
+    if (!identical(got, word)) {
+      stop("codemeta JSON has a bad literal", call. = FALSE)
+    }
+    pos <<- end + 1L
+    value
+  }
+  parse_value <- function() {
+    skip_ws()
+    ch <- peek()
+    if (ch == "{") {
+      return(parse_object())
+    }
+    if (ch == "[") {
+      return(parse_array())
+    }
+    if (ch == "\"") {
+      return(parse_string())
+    }
+    if (ch == "t") {
+      return(parse_literal("true", TRUE))
+    }
+    if (ch == "f") {
+      return(parse_literal("false", FALSE))
+    }
+    if (ch == "n") {
+      return(parse_literal("null", NULL))
+    }
+    if (ch == "-" || grepl("^[0-9]$", ch)) {
+      return(parse_number())
+    }
+    stop("codemeta JSON has an unexpected character", call. = FALSE)
+  }
+  parse_object <- function() {
+    if (advance() != "{") {
+      stop("codemeta JSON object does not open", call. = FALSE)
+    }
+    box <- structure(list(), class = "json_object")
+    skip_ws()
+    if (peek() == "}") {
+      advance()
+      return(box)
+    }
+    repeat {
+      skip_ws()
+      if (peek() != "\"") {
+        stop("codemeta JSON object key is not a string", call. = FALSE)
+      }
+      key <- parse_string()
+      skip_ws()
+      if (advance() != ":") {
+        stop("codemeta JSON object is missing a colon", call. = FALSE)
+      }
+      box <- put(box, key, parse_value())
+      skip_ws()
+      ch <- advance()
+      if (ch == "}") {
+        return(box)
+      }
+      if (ch != ",") {
+        stop("codemeta JSON object does not continue", call. = FALSE)
+      }
+    }
+  }
+  parse_array <- function() {
+    if (advance() != "[") {
+      stop("codemeta JSON array does not open", call. = FALSE)
+    }
+    box <- structure(list(), class = "json_array")
+    skip_ws()
+    if (peek() == "]") {
+      advance()
+      return(box)
+    }
+    i <- 0L
+    repeat {
+      i <- i + 1L
+      box <- put(box, i, parse_value())
+      skip_ws()
+      ch <- advance()
+      if (ch == "]") {
+        return(box)
+      }
+      if (ch != ",") {
+        stop("codemeta JSON array does not continue", call. = FALSE)
+      }
+    }
+  }
+
+  if (!n) {
+    stop("codemeta JSON is empty", call. = FALSE)
+  }
+  value <- parse_value()
+  skip_ws()
+  if (pos <= n) {
+    stop("codemeta JSON has trailing text", call. = FALSE)
+  }
+  value
+}
+
+parse_json_file <- function(path) {
+  size <- file.info(path)$size
+  if (is.na(size)) {
+    stop("missing file: ", path, call. = FALSE)
+  }
+  raw <- if (size == 0L) raw(0L) else readBin(path, "raw", n = size)
+  if (length(raw) >= 3L && identical(as.integer(raw[1:3]), c(0xef, 0xbb, 0xbf))) {
+    raw <- raw[-c(1L, 2L, 3L)]
+  }
+  text <- rawToChar(raw)
+  Encoding(text) <- "UTF-8"
+  parse_json_text(text)
+}
+
+json_field <- function(object, key) {
+  if (!inherits(object, "json_object") || !key %in% names(object)) {
+    return(NULL)
+  }
+  object[[key]]
+}
+
+json_string <- function(value) {
+  if (is.null(value)) {
+    return("")
+  }
+  if (!is.character(value) || length(value) != 1L || anyNA(value)) {
+    stop("codemeta field is not a string", call. = FALSE)
+  }
+  value
+}
+
 # A holder with no family name is an Organization. Everyone else is a
 # Person, and aut/ctb/cph/cre map onto the four codemeta arrays.
 codemeta_rows <- function(path) {
-  script <- tempfile("dseams-codemeta-", fileext = ".py")
-  writeLines(
-    c(
-      "import json, sys",
-      "data = json.load(open(sys.argv[1], encoding='utf-8'))",
-      "print('version\\t' + str(data.get('version', '')))",
-      "print('license\\t' + str(data.get('license', '')))",
-      "for key in ('author', 'contributor', 'copyrightHolder', 'maintainer'):",
-      "    for item in data[key]:",
-      "        kind = item.get('@type', '')",
-      "        if kind == 'Organization':",
-      "            name = item.get('name', '')",
-      "            email = ''",
-      "            orcid = ''",
-      "        elif kind == 'Person':",
-      "            given = item.get('givenName', '')",
-      "            family = item.get('familyName') or ''",
-      "            name = given if family == '' else given + ' ' + family",
-      "            email = item.get('email') or ''",
-      "            orcid = item.get('@id') or ''",
-      "        else:",
-      "            sys.exit('codemeta ' + key + ' has @type ' + kind)",
-      "        sys.stdout.write(key + '\\t' + kind + '\\t' + name + '\\t' + email + '\\t' + orcid + '\\n')"
-    ),
-    script
+  data <- parse_json_file(path)
+  if (!inherits(data, "json_object")) {
+    stop("codemeta.json is not a JSON object", call. = FALSE)
+  }
+  rows <- character()
+  for (key in c("author", "contributor", "copyrightHolder", "maintainer")) {
+    items <- json_field(data, key)
+    if (!inherits(items, "json_array")) {
+      stop("codemeta.json has no ", key, " array", call. = FALSE)
+    }
+    for (item in items) {
+      kind <- json_string(json_field(item, "@type"))
+      if (identical(kind, "Organization")) {
+        name <- json_string(json_field(item, "name"))
+        email <- ""
+        orcid <- ""
+      } else if (identical(kind, "Person")) {
+        given <- json_string(json_field(item, "givenName"))
+        family <- json_string(json_field(item, "familyName"))
+        name <- if (!nzchar(family)) given else paste(given, family)
+        email <- json_string(json_field(item, "email"))
+        orcid <- json_string(json_field(item, "@id"))
+      } else {
+        stop("codemeta ", key, " has @type ", kind, call. = FALSE)
+      }
+      rows <- c(rows, paste(key, kind, name, email, orcid, sep = "\t"))
+    }
+  }
+  list(
+    version = json_string(json_field(data, "version")),
+    license = json_string(json_field(data, "license")),
+    rows = rows
   )
-  log <- tempfile("dseams-codemeta-out-")
-  status <- system2("python3", c(script, path), stdout = log, stderr = log)
-  out <- if (file.exists(log)) readLines(log, warn = FALSE) else character()
-  unlink(c(script, log))
-  list(status = as.integer(status), out = out)
+}
+
+file_bytes <- function(path) {
+  size <- file.info(path)$size
+  if (is.na(size)) {
+    stop("missing file: ", path, call. = FALSE)
+  }
+  if (size == 0L) {
+    return(raw(0L))
+  }
+  readBin(path, "raw", n = size)
+}
+
+# .Rbuildignore omits the top-level file from the built tree. A check
+# started inside a checkout still has that file above 00_pkg_src.
+checkout_codemeta <- function(root) {
+  dir <- root
+  for (i in seq_len(8L)) {
+    meta <- file.path(dir, "codemeta.json")
+    if (file.exists(meta) &&
+        file.exists(file.path(dir, "DESCRIPTION")) &&
+        file.exists(file.path(dir, "configure"))) {
+      return(normalizePath(meta, mustWork = TRUE))
+    }
+    parent <- dirname(dir)
+    if (identical(parent, dir)) {
+      break
+    }
+    dir <- parent
+  }
+  NULL
 }
 
 description_codemeta_rows <- function(path) {
@@ -527,20 +801,15 @@ description_codemeta_rows <- function(path) {
 test_that("codemeta.json agrees with DESCRIPTION", {
   root <- hardening_root()
   expect_false(is.null(root))
-  meta <- file.path(root, "codemeta.json")
-  expect_true(file.exists(meta))
-  got <- codemeta_rows(meta)
-  expect_identical(got$status, 0L, info = paste(got$out, collapse = "\n"))
-  version <- got$out[startsWith(got$out, "version\t")]
-  license <- got$out[startsWith(got$out, "license\t")]
-  expect_length(version, 1L)
-  expect_length(license, 1L)
-  listed <- got$out[startsWith(got$out, "author\t") |
-    startsWith(got$out, "contributor\t") |
-    startsWith(got$out, "copyrightHolder\t") |
-    startsWith(got$out, "maintainer\t")]
+  shipped <- testthat::test_path("codemeta.json")
+  expect_true(file.exists(shipped))
+  found <- checkout_codemeta(root)
+  if (!is.null(found)) {
+    expect_identical(file_bytes(found), file_bytes(shipped))
+  }
+  got <- codemeta_rows(shipped)
   expected <- description_codemeta_rows(file.path(root, "DESCRIPTION"))
-  expect_identical(sub("^version\t", "", version), expected$version)
-  expect_identical(sub("^license\t", "", license), expected$license)
-  expect_identical(listed, expected$rows)
+  expect_identical(got$version, expected$version)
+  expect_identical(got$license, expected$license)
+  expect_identical(got$rows, expected$rows)
 })
