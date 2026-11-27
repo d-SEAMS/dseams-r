@@ -157,7 +157,7 @@ jobs:
           repository: ${{ needs.pin.outputs.repo }}
           ref: ${{ needs.pin.outputs.ref }}
           path: seams-core
-      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
         with:
           manifest-path: seams-core/pixi.toml
           environments: default
@@ -171,7 +171,7 @@ jobs:
         run: |
           pixi run meson setup build -Dwith_chemfiles=enabled -Dwith_readcon=enabled
           pixi run ninja -C build seams src/libseams.so bindings/libseams_lang.so bindings/binding_oracle
-      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
         with:
           manifest-path: dseams/pixi.toml
           cache-key: pixi-dseams-
