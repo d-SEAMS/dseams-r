@@ -58,13 +58,14 @@ test_that("the submission draft pastes DESCRIPTION and names Ruhila Goswami", {
   expect_true(grepl(ruhila_readme, readme, fixed = TRUE))
 
   # docs/ and codemeta.json are in .Rbuildignore, so the built source
-  # tree does not contain them. A git checkout does.
+  # tree does not contain them. A git checkout does. The length
+  # expectation is recorded either way: zero problems when both files
+  # are visible, and no problems to report when they are not.
   draft <- file.path(root, "docs", "ropensci-submission.md")
   meta <- file.path(root, "codemeta.json")
-  if (file.exists(draft) && file.exists(meta)) {
-    problems <- check_submission(root)
-    expect_length(problems, 0L)
-  }
+  visible <- file.exists(draft) && file.exists(meta)
+  problems <- if (visible) check_submission(root) else character()
+  expect_length(problems, 0L)
 })
 
 test_that("recorded testthat summaries must pass and match a bundled test log", {

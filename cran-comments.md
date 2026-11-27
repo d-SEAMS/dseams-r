@@ -74,8 +74,8 @@ Where each note comes from:
   chemfiles with every reader and format it builds, so installing needs
   no network. No reader, format or licence file is left out to make it
   smaller. Both checks in this run read one tarball, so both incoming
-  notes quote the same size. A second build of the same tree differs by
-  a few hundred bytes, because the tarball records when it was built.
+  notes quote the same size. Rebuilds of the same tree on the same
+  toolchain gave 9491496 to 9501629 bytes, so the size is not fixed.
 - Installed size: the package. `libs` is the one shared library, which
   holds the engine and the chemfiles and readcon-core readers. After
   linking, `src/Makevars` removes its debug sections with the debug-only
@@ -116,27 +116,29 @@ check, with `SEAMS_BIN` and `SEAMS_CPP_ORACLE` from that build, printed:
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 629 ]
 ```
 
-Before `codemeta.json` left the source package, a later bundled check
-used pixi R 4.5.3 on the same Ubuntu 24.04.5 host, with
-`_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`, `NOT_CRAN=true`,
-`DSEAMS_REQUIRE_DATA=1` and `DSEAMS_ROOT` unset. It
-finished with 0 errors, 0 warnings and 2 NOTEs: CRAN incoming
-feasibility (new submission, tarball 9511791 bytes) and that top-level
-`codemeta.json`. Future file timestamps were OK, installed size was
-INFO (14.8Mb, libs 14.0Mb) and the compilation-flags check was OK.
-testthat printed:
+A bundled check of this tree, with `DSEAMS_ROOT` unset, used pixi
+R 4.5.3 and rustc 1.88.0 (6b00bc388 2025-06-23) on Ubuntu 24.04.5 LTS,
+and `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`. It finished
+with 0 errors, 0 warnings and 1 NOTE (CRAN incoming feasibility, new
+submission). The tarball on that run was 9501511 bytes, from that
+toolchain (R 4.5.3, rustc 1.88.0, Ubuntu 24.04.5 LTS). Rebuilds of
+the same tree on the same toolchain gave 9491496 to 9501629 bytes. Installed size was INFO (14.0Mb, libs
+13.3Mb) from the same toolchain (R 4.5.3, rustc 1.88.0, Ubuntu
+24.04.5 LTS). Future file timestamps were OK and the compilation-flags
+check was OK. testthat printed:
 
 ```
-[ FAIL 0 | WARN 0 | SKIP 7 | PASS 871 ]
+[ FAIL 0 | WARN 0 | SKIP 8 | PASS 884 ]
 ```
 
 Five skips are `DSEAMS_ROOT is not set` in `test-doc-examples.R`.
 One is `DSEAMS_ROOT is not set; SEAMS_CPP_ORACLE is not set`
-(`test-doc-examples.R` line 99) and one is `SEAMS_BIN is not set`
-(`test-ice.R` line 77). The linked check above was not re-run.
+(`test-doc-examples.R` line 99), one is `SEAMS_BIN is not set`
+(`test-ice.R` line 77), and one is the cubic-ice file missing from
+the cache (`test-ice.R` line 95), because network tests do not run
+on CRAN. The linked check above was not re-run.
 This tree lists `codemeta.json` in `.Rbuildignore`, so the built source
 has no top-level copy and a check of this tree does not report that NOTE.
-Those totals are from the tree that still had the top-level file.
 The install test parses `tests/testthat/codemeta.json`.
 
 In the Ubuntu bundled check and the linked check, the cubic-ice test read `mW_cubic.lammpstrj` with SHA-256

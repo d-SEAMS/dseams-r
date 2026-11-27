@@ -538,11 +538,17 @@ test_that("chemfiles writes its generated headers with LF line endings", {
   expect_true(grepl(config, text, fixed = TRUE))
   expect_true(grepl(exports, text, fixed = TRUE))
   installed <- file.path(root, "src", "chemfiles-install", "include", "chemfiles")
+  # The headers exist after a bundled install in this tree, including
+  # R CMD check's 00_pkg_src, and are absent from a tree that has not
+  # been built. Each name records one expectation either way: no CR
+  # when the file is there.
   for (name in c("config.h", "exports.h")) {
     path <- file.path(installed, name)
     if (file.exists(path)) {
       bytes <- readBin(path, "raw", file.info(path)$size)
       expect_false(any(bytes == as.raw(13L)), info = path)
+    } else {
+      expect_false(file.exists(path), info = path)
     }
   }
 })
