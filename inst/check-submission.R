@@ -16,10 +16,10 @@
 # check fails when any required file is missing. Every testthat summary
 # in cran-comments.md and the draft must show FAIL 0 and WARN 0.
 # --test-log (or DSEAMS_TEST_LOG) is the output of a bundled test run:
-# its last summary must be that clean line, and it must be the summary
-# the draft records after "The testthat run inside the bundled check
-# printed". The log is matched by bytes, so reader output in it need
-# not be UTF-8.
+# its last summary must be that clean line, and it must be the latest
+# summary the draft records. That is the last testthat totals line
+# after the last "The testthat run inside the bundled check printed".
+# The log is matched by bytes, so reader output in it need not be UTF-8.
 
 read_text <- function(path) {
   size <- file.info(path)$size
@@ -96,8 +96,9 @@ ruhila_draft <- "Ruhila Goswami a contributor (`ctb`) in the DESCRIPTION."
 
 test_summary_pattern <- "\\[ FAIL [0-9]+ \\| WARN [0-9]+ \\| SKIP [0-9]+ \\| PASS [0-9]+ \\]"
 
-# The draft records the bundled R CMD check here. The summary is the
-# first testthat totals line after this sentence.
+# Each bundled-check record in the draft opens with this sentence.
+# The latest record is the last testthat totals line after the last
+# copy. The first totals line after an earlier copy is a previous run.
 bundled_marker <- "The testthat run inside the bundled check printed"
 
 extract_test_summaries <- function(text) {
@@ -110,15 +111,19 @@ clean_summary <- function(summary) {
 
 extract_bundled_summary <- function(md) {
   flat <- gsub("\\s+", " ", md)
-  idx <- regexpr(bundled_marker, flat, fixed = TRUE)
-  if (idx < 0L) {
+  hits <- gregexpr(bundled_marker, flat, fixed = TRUE)[[1L]]
+  if (hits[[1L]] < 0L) {
     return(NULL)
   }
+  # The last copy of the marker opens the latest record. Totals lines
+  # that follow an earlier copy are history, including when the latest
+  # record does not repeat the marker and only adds a later totals line.
+  idx <- hits[[length(hits)]]
   found <- extract_test_summaries(substring(flat, idx))
   if (length(found) == 0L) {
     return(NULL)
   }
-  found[[1L]]
+  found[[length(found)]]
 }
 
 # A test log can hold bytes that are not UTF-8. Do not mark the string.

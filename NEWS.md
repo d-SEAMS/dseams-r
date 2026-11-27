@@ -1,5 +1,10 @@
 # dseams (development version)
 
+* `--test-log` compares a bundled test log with the latest recorded
+  bundled-check summary in the rOpenSci draft: the last testthat totals
+  line after the last "The testthat run inside the bundled check
+  printed". The first totals line after an earlier copy of that sentence
+  is a previous run.
 * The submission checks live in `inst/check-submission.R`, which the
   install keeps. `tools/check-submission.R` sources that file and stays
   the command-line entry. The test of recorded testthat summaries
