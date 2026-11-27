@@ -184,7 +184,8 @@ ndarray 0.17.2
   Text: vendor/ndarray/LICENSE-APACHE, vendor/ndarray/LICENSE-MIT
   vendor/ndarray/src/doc/ndarray_for_numpy_users/rk_step.rs quotes
     SciPy code under SciPy's BSD-3-Clause licence, text in the file,
-    and carries Copyright 2001, 2002 Enthought, Inc.
+    and carries Copyright 2001, 2002 Enthought, Inc. and
+    Copyright (c) 2003-2017 SciPy Developers.
 
 num-complex 0.4.6
   License: MIT OR Apache-2.0
@@ -380,7 +381,8 @@ fmt.tar.gz
   Text: fmt/LICENSE.rst
   Files under other terms, none of them compiled:
     fmt/test/gtest, fmt/test/gmock, fmt/test/gmock-gtest-all.cc
-      (Google Test and Google Mock): BSD-3-Clause, text in the headers
+      (Google Test and Google Mock): BSD-3-Clause, Copyright 2005,
+      Google Inc., text in the headers
     fmt/support/docopt.py: MIT, text in the file
     fmt/doc/python-license.txt: Python Software Foundation License, for
       the parts of fmt's documentation taken from Python's; the file is
@@ -391,7 +393,8 @@ fmt.tar.gz
       Halflings fonts): MIT,
       https://github.com/twbs/bootstrap/blob/v3.3.4/LICENSE
     fmt/doc/basic-bootstrap/layout.html, fmt/doc/_templates/search.html
-      (Sphinx templates): BSD, https://github.com/sphinx-doc/sphinx
+      (Sphinx templates): BSD, Copyright 2007-2015 by the Sphinx team,
+      see AUTHORS, https://github.com/sphinx-doc/sphinx
   Header copyright holders and credited authors: Victor Zverovich,
   Paul Dreik, Remotion (Igor Schulz), Chris Foster, Vladimir Keleshev,
   Zhanyong Wan, Marcus Boerger and Markus Heule. fmt/doc/_static names
@@ -457,7 +460,7 @@ molfiles.tar.gz
       condition that the software is not sold. Quoted at the end of
       this file.
     molfiles/src/ReadPARM.h, molfiles/src/ReadPARM7.h: Copyright 1992
-      Regents of the University of California (Bill Ross, UCSF). They
+      The Regents of the University of California (Bill Ross, UCSF). They
       may be distributed if the notice is kept unmodified and changes
       to the rest of the file are noted in comments.
     molfiles/src/tngplugin.cxx: BSD. Its header has no copyright line

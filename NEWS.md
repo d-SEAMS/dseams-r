@@ -1,5 +1,30 @@
 # dseams (development version)
 
+* `codemeta.json` records the same version, licence, and authors as
+  DESCRIPTION. Each `aut`, `ctb`, `cph`, and `cre` role is listed, and
+  a holder with no family name is an Organization. The file is in the
+  source package so that comparison runs under `R CMD check`.
+* After `tools/vendor.sh`, configure checks the vendored sentinels again
+  and stops, naming each file that is still missing, instead of writing
+  `src/Makevars` for an incomplete tree.
+* `inst/COPYRIGHTS` lists every copyright holder named by the vendored
+  sources. `Authors@R` gives each of them role `cph`, and `LICENSE.note`
+  names each one. `tools/check-copyright-holders.py` fails when a
+  vendored notice is missing from that list.
+* `configure` stops when `R_HOME` is unset, and when `R_HOME/bin/R` is
+  not executable. It does not call `R` on `PATH` to choose an `R_HOME`.
+* The vendored chemfiles build uses a new `chemfiles-build.XXXXXX`
+  directory under `src` for that build, and removes it afterwards.
+  `$(TEMP)/dseams-chemfiles-build` is not used, so two installs do not
+  share one cmake build directory. `cleanup` and `cleanup.win` remove
+  a directory that a stopped build leaves behind.
+
+* `configure.win` refuses `SEAMS_LIBDIR` and `DSEAMS_SYSTEM_ENGINE`.
+  Windows builds only the bundled engine. `cleanup.win` removes
+  `src/rust-target.mk` and the object files, reader build trees and
+  `src/Makevars` that a Windows build writes. R runs `cleanup.win`
+  instead of `cleanup`.
+
 * `License` stays `MIT + file LICENSE`, and `License_restricts_use` is
   `yes`. File `LICENSE` names the restricted components whose terms
   `LICENSE.note` quotes: `abinitplugin.c` may not be part of a

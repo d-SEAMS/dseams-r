@@ -1,0 +1,66 @@
+# Copyright holders named by the vendored sources.
+# One holder per line. DESCRIPTION Authors@R gives each line role cph.
+# tools/check-copyright-holders.py checks this file against those
+# sources and against LICENSE.note.
+Aladdin Enterprises
+Alexander Huszagh
+Andrzej Krzemienski
+Arseny Kapoulkine
+Axel Kohlmeyer
+CNRI
+Chad Austin
+Charly Chevalier
+Colin Hirsch
+Continuum Analytics, Inc.
+D. E. Shaw Research, LLC
+Dan Burkert
+Daniel Frey
+David van der Spoel
+DutchGhost
+Edward Diener
+Enthought, Inc.
+Erik Lindahl
+FURUHASHI Sadayuki
+Franz Detro
+Georgia Institute of Technology
+Global Phasing Ltd.
+Google Inc.
+Guillaume Fraux
+Jean-loup Gailly
+Jessica Hamilton
+Joel Falcou
+Julian Seward
+KONDO Takatoshi
+Kitware, Inc.
+Kristen Wegner
+MIZUKI Hirata
+Mark Adler
+Martin Moene
+Massachusetts Institute of Technology
+Matteo Frigo
+Max-Planck-Society
+Microsoft Corporation
+Miha Gunde
+Nicholas Allegra
+Paul Dreik
+Paul Mensonides
+Peter Bell
+Remotion (Igor Schulz)
+Rene Rivera
+Rob Lahaye
+SciPy Developers
+Sean Barrett
+Sphinx team, see AUTHORS
+Stichting Mathematisch Centrum Amsterdam
+The Board of Trustees of the University of Illinois
+The GROMACS development team
+The Regents of the University of California
+The Rust Project Developers
+Toru Niina
+Twitter, Inc.
+Ulrik Sverdrup
+Victor Zverovich
+Vladimir Keleshev
+Vladimir Volodko
+Yevhenii Reizner
+d-SEAMS core team

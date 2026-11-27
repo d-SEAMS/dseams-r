@@ -4,7 +4,9 @@ PKG_CPPFLAGS = -I. -Iseams -Iseams/include -Ireadcon-core/include -Ireadcon-core
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(READER_DEPS) -lsqlite3 -lws2_32 -luserenv -lbcrypt -lntdll -ldbghelp -lsynchronization -lpthread
 
-CHEMFILES_BUILD = $(TEMP)/dseams-chemfiles-build
+# The chemfiles recipe creates chemfiles-build.XXXXXX under src for this
+# build and removes it. A fixed $(TEMP)/dseams-chemfiles-build would be
+# shared by every install.
 # The Rust archive uses the same GNU ABI as the Rtools C++ objects.
 # configure.win writes rust-target.mk with the GNU target of the C
 # compiler, aarch64-pc-windows-gnullvm for an aarch64 compiler, and the
@@ -130,7 +132,10 @@ $(READCON_ARCHIVE): readcon-core/Cargo.toml readcon-core/Cargo.lock
 # dmsplugin links SQLite3, which Rtools installs under the compiler's
 # prefix; CMAKE_PREFIX_PATH points find_package(SQLite3) there.
 chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
-	"$(CMAKE)" -G "Unix Makefiles" -S chemfiles -B "$(CHEMFILES_BUILD)" \
+	set -e; \
+	build=$$(mktemp -d "chemfiles-build.XXXXXX"); \
+	trap 'rm -rf "$$build"' EXIT; \
+	"$(CMAKE)" -G "Unix Makefiles" -S chemfiles -B "$$build" \
 	  -DCMAKE_BUILD_TYPE=Release \
 	  -DCMAKE_PREFIX_PATH="$$(dirname "$$(command -v $(firstword $(CC)))")/.." \
 	  -DCMAKE_POLICY_VERSION_MINIMUM=3.10 \
@@ -148,8 +153,7 @@ chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	  -DCHFL_BUILD_DOCUMENTATION=OFF \
 	  -DCHFL_SYSTEM_ZLIB=OFF \
 	  -DCHFL_SYSTEM_LZMA=OFF \
-	  -DCHFL_SYSTEM_BZIP2=OFF
-	"$(CMAKE)" --build "$(CHEMFILES_BUILD)" --parallel 2
-	"$(CMAKE)" --install "$(CHEMFILES_BUILD)"
-	rm -rf "$(CHEMFILES_BUILD)"
+	  -DCHFL_SYSTEM_BZIP2=OFF; \
+	"$(CMAKE)" --build "$$build" --parallel 2; \
+	"$(CMAKE)" --install "$$build"; \
 	sh ../tools/reader-symbols.sh "$(OBJCOPY)" "$@"

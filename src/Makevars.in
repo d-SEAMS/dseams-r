@@ -9,7 +9,6 @@ PKG_LIBS = @OPENMP_CXXFLAGS@ @SEAMS_LIBS@
 CARGO = @CARGO@
 CMAKE = @CMAKE@
 OBJCOPY = @OBJCOPY@
-CHEMFILES_BUILD = @CHEMFILES_BUILD@
 CHEMFILES_CMAKE_ARGS = @CHEMFILES_CMAKE_ARGS@
 READER_DEPS = @READER_DEPS@
 
@@ -120,8 +119,15 @@ readcon-core/target/release/libreadcon_core.a: readcon-core/Cargo.toml readcon-c
 	sh ../tools/reader-symbols.sh "$(OBJCOPY)" "$@"
 	find readcon-core/vendor -name '.cargo-checksum.json' -delete
 
+# A new directory for this build, under src. A fixed name in the source
+# tree, or one shared path under TEMP, is reused by a second install and
+# the two cmake runs overwrite each other. mktemp picks a fresh name.
+# The trap removes it when the recipe exits, including when cmake fails.
 chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
-	"$(CMAKE)" -S chemfiles -B "$(CHEMFILES_BUILD)" \
+	set -e; \
+	build=$$(mktemp -d "chemfiles-build.XXXXXX"); \
+	trap 'rm -rf "$$build"' EXIT; \
+	"$(CMAKE)" -S chemfiles -B "$$build" \
 	  -DCMAKE_BUILD_TYPE=Release \
 	  -DCMAKE_POLICY_VERSION_MINIMUM=3.10 \
 	  -DCMAKE_INSTALL_PREFIX="$(CURDIR)/chemfiles-install" \
@@ -139,8 +145,7 @@ chemfiles-install/lib/libchemfiles.a: chemfiles/CMakeLists.txt
 	  -DCHFL_SYSTEM_ZLIB=OFF \
 	  -DCHFL_SYSTEM_LZMA=OFF \
 	  -DCHFL_SYSTEM_BZIP2=OFF \
-	  $(CHEMFILES_CMAKE_ARGS)
-	"$(CMAKE)" --build "$(CHEMFILES_BUILD)" --parallel 2
-	"$(CMAKE)" --install "$(CHEMFILES_BUILD)"
-	rm -rf "$(CHEMFILES_BUILD)"
+	  $(CHEMFILES_CMAKE_ARGS); \
+	"$(CMAKE)" --build "$$build" --parallel 2; \
+	"$(CMAKE)" --install "$$build"; \
 	sh ../tools/reader-symbols.sh "$(OBJCOPY)" "$@"

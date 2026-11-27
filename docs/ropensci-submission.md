@@ -77,7 +77,115 @@ Authors@R: c(
     person("Olaf", "Lenz", role = "ctb",
            comment = "vtfplugin.c in the bundled VMD molfile plugins"),
     person("Miha", "Gunde", role = c("ctb", "cph"),
-           comment = "iralib_interf.h (IRA/SOFI C API) in src/seams")
+           comment = "iralib_interf.h (IRA/SOFI C API) in src/seams"),
+    person("Aladdin Enterprises", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Alexander", "Huszagh", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Andrzej", "Krzemienski", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Arseny", "Kapoulkine", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("CNRI", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Chad", "Austin", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Charly", "Chevalier", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Colin", "Hirsch", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Continuum Analytics, Inc.", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Dan", "Burkert", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Daniel", "Frey", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("David", "van der Spoel", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("DutchGhost", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Edward", "Diener", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Enthought, Inc.", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Erik", "Lindahl", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("FURUHASHI", "Sadayuki", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Franz", "Detro", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Global Phasing Ltd.", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Google Inc.", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Guillaume", "Fraux", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Jean-loup", "Gailly", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Jessica", "Hamilton", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Joel", "Falcou", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Julian", "Seward", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("KONDO", "Takatoshi", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Kitware, Inc.", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Kristen", "Wegner", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("MIZUKI", "Hirata", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Mark", "Adler", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Martin", "Moene", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Massachusetts Institute of Technology", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Matteo", "Frigo", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Max-Planck-Society", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Microsoft Corporation", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Nicholas", "Allegra", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Paul", "Dreik", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Paul", "Mensonides", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Peter", "Bell", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Remotion (Igor Schulz)", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Rene", "Rivera", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("SciPy Developers", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Sean", "Barrett", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Sphinx team, see AUTHORS", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Stichting Mathematisch Centrum Amsterdam", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("The GROMACS development team", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("The Rust Project Developers", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Toru", "Niina", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Twitter, Inc.", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Ulrik", "Sverdrup", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Victor", "Zverovich", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Vladimir", "Keleshev", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Vladimir", "Volodko", role = "cph",
+           comment = "copyright holder named by the vendored sources"),
+    person("Yevhenii", "Reizner", role = "cph",
+           comment = "copyright holder named by the vendored sources")
     )
 Description: Structural analysis of water and ice in molecular dynamics
     trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh
@@ -92,7 +200,8 @@ Description: Structural analysis of water and ice in molecular dynamics
     C++ sources.
 License: MIT + file LICENSE
 License_restricts_use: yes
-Copyright: See file inst/AUTHORS for the copyright holders of the
+Copyright: See file inst/COPYRIGHTS for the copyright holders in
+    Authors@R, and inst/AUTHORS for the copyright holders of the
     bundled engine, readcon-core, Rust crates, the Rust standard library
     and compiler-rt rustc links into that library, chemfiles, and the
     libraries chemfiles bundles, including the VMD molfile plugins and
@@ -503,9 +612,10 @@ skipped with `... and huggingface.co is not reachable` when
 `R CMD check` runs `test_check("dseams")` from `tests/testthat.R`
 inside the unpacked source, where `00_pkg_src` still has
 `tools/check-submission.R` and `tools/reader-symbols.sh`, so that run
-does not skip the submission test or the symbol-map tests. `docs/` and
-`codemeta.json` are listed in `.Rbuildignore` and are not in
-`00_pkg_src`.
+does not skip the submission test or the symbol-map tests. `docs/` is
+listed in `.Rbuildignore` and is not in `00_pkg_src`. `codemeta.json`
+is in the source package, and the install test compares its version,
+licence, and authors with DESCRIPTION.
 
 Names shared with other packages stay. `positions()` is the frame
 coordinate matrix and `symmetry()` is the shell-symmetry code. `dseams` does not depend on the other packages that export

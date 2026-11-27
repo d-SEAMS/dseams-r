@@ -2,6 +2,20 @@
 # src/Makevars.win is static. A source package carries the vendored tree.
 # In a git checkout tools/vendor.sh makes whatever tools/vendored-sentinels
 # is missing, the same list configure reads.
+#
+# Windows builds the bundled engine only. configure selects a linked engine
+# with these variables; here either one is an error, before R or the
+# vendored tree is used.
+case "${DSEAMS_SYSTEM_ENGINE:-}" in
+  1|yes|true|TRUE)
+    echo "configure.win: DSEAMS_SYSTEM_ENGINE is set, but Windows supports only the bundled build. Unset DSEAMS_SYSTEM_ENGINE." >&2
+    exit 1
+    ;;
+esac
+if [ -n "${SEAMS_LIBDIR:-}" ]; then
+  echo "configure.win: SEAMS_LIBDIR is set, but Windows supports only the bundled build. Unset SEAMS_LIBDIR." >&2
+  exit 1
+fi
 : "${R_HOME:=$(R RHOME)}"
 if [ ! -x "${R_HOME}/bin/R" ]; then
   echo "configure.win: could not find R under R_HOME=${R_HOME}" >&2
