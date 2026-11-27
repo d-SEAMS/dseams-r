@@ -3,7 +3,8 @@
 # R CMD check runs with the working directory set to tests/, and copies
 # that directory away from the rest of the source tree. Walk up from both
 # places, and from 00_pkg_src, until the symbol script is found. The same
-# walk is in test-submission.R.
+# walk is in test-submission.R. covr has no 00_pkg_src; kept_source_dir()
+# is used only when that walk finds nothing.
 portability_root <- function() {
   starts <- unique(c(
     normalizePath(testthat::test_path("."), mustWork = FALSE),
@@ -32,6 +33,13 @@ portability_root <- function() {
         break
       }
       dir <- parent
+    }
+  }
+  kept <- kept_source_dir()
+  if (length(kept) == 1L && nzchar(kept)) {
+    helper <- file.path(kept, "tools", "reader-symbols.sh")
+    if (file.exists(file.path(kept, "DESCRIPTION")) && file.exists(helper)) {
+      return(normalizePath(kept))
     }
   }
   NULL
@@ -979,4 +987,15 @@ test_that("the license field names the vendored restrictions", {
   parsed <- utils:::.read_authors_at_R_field(desc[, "Authors@R"])
   expect_true(any(grepl("Olaf", parsed$given, fixed = TRUE)))
   expect_true(any(grepl("Lenz", parsed$family, fixed = TRUE)))
+})
+
+test_that("a kept srcref names the source tree the portability checks read", {
+  root <- portability_root()
+  expect_false(is.null(root))
+  got <- kept_source_dir()
+  # One result either way: no srcref leaves the walk in place, and a srcref
+  # names that same tree. The expectation count does not depend on which.
+  expect_true(
+    length(got) == 0L || identical(normalizePath(got, mustWork = TRUE), root)
+  )
 })
