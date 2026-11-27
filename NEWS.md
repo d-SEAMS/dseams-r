@@ -1,9 +1,10 @@
 # dseams (development version)
 
 * `codemeta.json` is listed in `.Rbuildignore` again, so the built
-  source has no top-level copy. The install test parses that file with
-  base R. `tests/testthat/codemeta.json` is the same document, and it
-  must match the checkout copy when both are visible.
+  source has no top-level copy. The install test parses
+  `tests/testthat/codemeta.json` with base R. That file is the same
+  document as the checkout copy, and the two must match when both
+  are visible.
 * `configure.win` stops when `R_HOME` is unset, and when `R_HOME/bin/R`
   is not executable. It does not call `R` on `PATH` to choose an
   `R_HOME`.

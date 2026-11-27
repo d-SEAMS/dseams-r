@@ -251,8 +251,18 @@ test_that("configure requires R_HOME before it uses R", {
     file.path(base, "configure.win"),
     overwrite = TRUE
   ))
+  # configure.win exits on SEAMS_LIBDIR or DSEAMS_SYSTEM_ENGINE before
+  # it reads R_HOME. A linked check exports SEAMS_LIBDIR. The script
+  # clears those names, then sets R_HOME. system2(env=) would leave the
+  # parent values set, and on Windows that assignment is an argument
+  # of sh, which exits 127.
   writeLines(
-    c("unset R_HOME", "exec sh ./configure.win"),
+    c(
+      "unset SEAMS_LIBDIR",
+      "unset DSEAMS_SYSTEM_ENGINE",
+      "unset R_HOME",
+      "exec sh ./configure.win"
+    ),
     file.path(base, "run-unset-r-home-win.sh")
   )
   missing_win <- capture_sh(base, "run-unset-r-home-win.sh")
@@ -269,11 +279,17 @@ test_that("configure requires R_HOME before it uses R", {
     missing_win$out,
     fixed = TRUE
   )), info = paste(missing_win$out, collapse = "\n"))
-  bad_win <- capture_sh(
-    base,
-    "configure.win",
-    env = child_env(set = c(R_HOME = bogus))
+  bogus_quoted <- paste0("'", gsub("'", "'\\''", bogus, fixed = TRUE), "'")
+  writeLines(
+    c(
+      "unset SEAMS_LIBDIR",
+      "unset DSEAMS_SYSTEM_ENGINE",
+      paste0("export R_HOME=", bogus_quoted),
+      "exec sh ./configure.win"
+    ),
+    file.path(base, "run-bogus-r-home-win.sh")
   )
+  bad_win <- capture_sh(base, "run-bogus-r-home-win.sh")
   expect_identical(
     bad_win$status,
     1L,
