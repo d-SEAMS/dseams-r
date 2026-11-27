@@ -116,10 +116,10 @@ check, with `SEAMS_BIN` and `SEAMS_CPP_ORACLE` from that build, printed:
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 629 ]
 ```
 
-A later bundled check of the tree that still had a top-level
-`codemeta.json` used pixi R 4.5.3 on the same
-Ubuntu 24.04.5 host, with `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`,
-`NOT_CRAN=true`, `DSEAMS_REQUIRE_DATA=1` and `DSEAMS_ROOT` unset. It
+Before `codemeta.json` left the source package, a later bundled check
+used pixi R 4.5.3 on the same Ubuntu 24.04.5 host, with
+`_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`, `NOT_CRAN=true`,
+`DSEAMS_REQUIRE_DATA=1` and `DSEAMS_ROOT` unset. It
 finished with 0 errors, 0 warnings and 2 NOTEs: CRAN incoming
 feasibility (new submission, tarball 9511791 bytes) and that top-level
 `codemeta.json`. Future file timestamps were OK, installed size was
