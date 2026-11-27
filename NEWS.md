@@ -1,5 +1,12 @@
 # dseams (development version)
 
+* The checks that run `configure` and `configure.win` clear link-selection
+  variables, then export only the values set for that run. A linked
+  `R CMD check` exports `SEAMS_LIBDIR`, and `system2(env=)` left it set,
+  so `configure.win` refused before the vendored-tree check. On Windows
+  that `env` string is an argument of `sh` and the command exits 127.
+  The same checks accept `R_HOME/bin/R.exe` when `R_HOME/bin/R` is absent.
+
 * `codemeta.json` records the same version, licence, and authors as
   DESCRIPTION. Each `aut`, `ctb`, `cph`, and `cre` role is listed, and
   a holder with no family name is an Organization. The file is in the
