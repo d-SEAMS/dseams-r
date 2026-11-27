@@ -34,6 +34,27 @@ hardening_root <- function() {
   NULL
 }
 
+# system2(env=) does not set the process environment. It pastes the
+# strings into the command. Unix runs NAME=value sh script, which leaves
+# every other exported name in place, so a linked R CMD check keeps
+# SEAMS_LIBDIR and configure.win refuses before the vendored-tree check.
+# Windows runs sh NAME=value script, and sh exits 127 because the
+# assignment is not a program. The script below unsets the link-selection
+# names, then exports only the values this test set.
+shell_single_quote <- function(value) {
+  paste0("'", gsub("'", "'\\''", as.character(value), fixed = TRUE), "'")
+}
+
+link_env_names <- c(
+  "SEAMS_LIBDIR",
+  "SEAMS_INCLUDE",
+  "SEAMS_H_DIR",
+  "SEAMS_SO_DIR",
+  "DSEAMS_SYSTEM_ENGINE",
+  "DSEAMS_ROOT",
+  "SEAMS_CORE_SRC"
+)
+
 capture_sh <- function(dir, script, env = NULL) {
   log <- tempfile("dseams-harden-")
   old <- getwd()
@@ -45,15 +66,31 @@ capture_sh <- function(dir, script, env = NULL) {
     add = TRUE
   )
   setwd(dir)
-  status <- system2("sh", script, stdout = log, stderr = log, env = env)
+  wrapper <- file.path(dir, "dseams-run-capture.sh")
+  on.exit(unlink(wrapper), add = TRUE)
+  lines <- c("#!/bin/sh", paste("unset", link_env_names))
+  if (length(env)) {
+    for (item in env) {
+      pos <- regexpr("=", item, fixed = TRUE)[1]
+      if (pos < 2L) {
+        stop("capture_sh env entry has no NAME=value form")
+      }
+      name <- substr(item, 1L, pos - 1L)
+      if (!grepl("^[A-Za-z_][A-Za-z0-9_]*$", name)) {
+        stop("capture_sh env name is not a shell identifier")
+      }
+      value <- substr(item, pos + 1L, nchar(item))
+      lines <- c(lines, paste0("export ", name, "=", shell_single_quote(value)))
+    }
+  }
+  lines <- c(lines, paste("exec sh", shell_single_quote(script)))
+  writeLines(lines, wrapper)
+  status <- system2("sh", "dseams-run-capture.sh", stdout = log, stderr = log)
   out <- if (file.exists(log)) readLines(log, warn = FALSE) else character()
   list(status = as.integer(status), out = out)
 }
 
-# system2(env=) adds NAME=value strings to the child. It does not take a
-# named vector, and copying this process's environment into that form
-# feeds shell text in some values back to sh. Pass only the names the
-# test sets. Dropping a variable is done by the command, with unset.
+# NAME=value strings for capture_sh. The shell script reads that form.
 child_env <- function(set = character()) {
   if (!length(set)) {
     return(NULL)
@@ -343,12 +380,49 @@ plant_configure_tree <- function(root, base, listed) {
   writeLines(c("#!/bin/sh", "exit 0"), file.path(base, "tools", "vendor.sh"))
 }
 
+test_that("a caller SEAMS_LIBDIR does not select configure.win's link refusal", {
+  root <- hardening_root()
+  expect_false(is.null(root))
+  listed <- sentinel_lines(root)
+  expect_gt(length(listed), 0L)
+  base <- tempfile("dseams-inherit-")
+  dir.create(base)
+  on.exit(unlink(base, recursive = TRUE), add = TRUE)
+  plant_configure_tree(root, base, listed)
+  path <- sub("/$", "", listed[[1]])
+  unlink(file.path(base, path), recursive = TRUE)
+  old <- Sys.getenv("SEAMS_LIBDIR")
+  Sys.setenv(SEAMS_LIBDIR = "/nonexistent/seams-lib")
+  on.exit(
+    {
+      if (nzchar(old)) {
+        Sys.setenv(SEAMS_LIBDIR = old)
+      } else {
+        Sys.unsetenv("SEAMS_LIBDIR")
+      }
+    },
+    add = TRUE
+  )
+  got <- capture_sh(base, "configure.win")
+  info <- paste(got$out, collapse = "\n")
+  expect_identical(got$status, 1L, info = info)
+  expect_true(any(grepl(
+    "configure.win: the vendored tree is still incomplete after tools/vendor.sh:",
+    got$out,
+    fixed = TRUE
+  )), info = info)
+  expect_false(any(grepl("Unset SEAMS_LIBDIR", got$out, fixed = TRUE)), info = info)
+})
+
 test_that("a missing vendored sentinel stops configure before Makevars", {
   root <- hardening_root()
   expect_false(is.null(root))
   r_home <- Sys.getenv("R_HOME")
   expect_true(nzchar(r_home))
-  expect_true(file.exists(file.path(r_home, "bin", "R")))
+  # Windows installs R.exe. The shell test [ -x "$R_HOME/bin/R" ] follows
+  # that suffix; file.exists does not.
+  r_bin <- file.path(r_home, "bin", "R")
+  expect_true(file.exists(r_bin) || file.exists(paste0(r_bin, ".exe")))
   listed <- sentinel_lines(root)
   expect_gt(length(listed), 0L)
   base <- tempfile("dseams-sentinel-")
