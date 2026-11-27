@@ -8,6 +8,8 @@ Ih
 LAMMPS
 Lechner
 Lua
+Makefiles
+MinGW
 Molinero
 Neighbour
 Neighbourhood
@@ -19,6 +21,7 @@ PhysRevB
 README
 RMSD
 Ronchetti
+Rtools
 Steinhardt
 XYZ
 acs
@@ -27,12 +30,14 @@ apolar
 clathrate
 doi
 favicon
+fmt
 glibc
 hydrogens
 interClathrate
 interfacial
 jcim
 jp
+lzma
 mW
 membered
 monolayer
@@ -43,6 +48,7 @@ orientational
 orthorhombic
 oxygens
 parallelises
+pugixml
 pydseamslib
 rOpenSci
 reCubic
@@ -50,4 +56,6 @@ reHex
 runnable
 sI
 srr
+tng
+toml
 triclinic

@@ -1,5 +1,24 @@
 # dseams (development version)
 
+* `--test-log` compares a bundled test log with the latest recorded
+  bundled-check summary in the rOpenSci draft: the last testthat totals
+  line after the last "The testthat run inside the bundled check
+  printed". The first totals line after an earlier copy of that sentence
+  is a previous run.
+* The submission checks live in `inst/check-submission.R`, which the
+  install keeps. `tools/check-submission.R` sources that file and stays
+  the command-line entry. The test of recorded testthat summaries
+  sources the installed file and builds its own draft, so it runs when
+  `tools/` is not beside the test.
+* `tools/check-submission.R` rejects a testthat summary in
+  `cran-comments.md` or the rOpenSci draft that reports failures or
+  warnings. `--test-log`, or `DSEAMS_TEST_LOG`, holds the draft's
+  bundled-check summary to the last summary in that log.
+* Portability tests that read `tools/` and `src/` use the source tree
+  named by the srcref of `nframes` when the walk from the test directory
+  and from `00_pkg_src` finds none. covr's installed run has no
+  `00_pkg_src`.
+
 * The checks that run `configure` and `configure.win` clear link-selection
   variables, then export only the values set for that run. A linked
   `R CMD check` exports `SEAMS_LIBDIR`, and `system2(env=)` left it set,
