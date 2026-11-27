@@ -592,11 +592,12 @@ check, with `SEAMS_BIN` and `SEAMS_CPP_ORACLE` from that build, printed:
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 629 ]
 ```
 
-A later bundled check of this tree used pixi R 4.5.3 on the same
-Ubuntu 24.04.5 host, with `_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`,
-`NOT_CRAN=true`, `DSEAMS_REQUIRE_DATA=1` and `DSEAMS_ROOT` unset. It
+Before `codemeta.json` left the source package, a later bundled check
+used pixi R 4.5.3 on the same Ubuntu 24.04.5 host, with
+`_R_CHECK_COMPILATION_FLAGS_KNOWN_=-march=nocona`, `NOT_CRAN=true`,
+`DSEAMS_REQUIRE_DATA=1` and `DSEAMS_ROOT` unset. It
 finished with 0 errors, 0 warnings and 2 NOTEs: CRAN incoming
-feasibility (new submission, tarball 9511791 bytes) and a top-level
+feasibility (new submission, tarball 9511791 bytes) and that top-level
 `codemeta.json`. Future file timestamps were OK, installed size was
 INFO (14.8Mb, libs 14.0Mb) and the compilation-flags check was OK.
 testthat printed:
@@ -609,6 +610,10 @@ Five skips are `DSEAMS_ROOT is not set` in `test-doc-examples.R`.
 One is `DSEAMS_ROOT is not set; SEAMS_CPP_ORACLE is not set`
 (`test-doc-examples.R` line 99) and one is `SEAMS_BIN is not set`
 (`test-ice.R` line 77). The linked check above was not re-run.
+This tree lists `codemeta.json` in `.Rbuildignore`, so the built source
+has no top-level copy and a check of this tree does not report that NOTE.
+Those totals are from the tree that still had the top-level file.
+The install test parses `tests/testthat/codemeta.json`.
 
 In the Ubuntu bundled check and the linked check, the cubic-ice test read `mW_cubic.lammpstrj` with SHA-256
 `66d854880bb9431abc9eb25d68b0622d94a0160dd03e1ac7d636343d9830485d`.
@@ -630,10 +635,11 @@ skipped with `... and huggingface.co is not reachable` when
 `R CMD check` runs `test_check("dseams")` from `tests/testthat.R`
 inside the unpacked source, where `00_pkg_src` still has
 `tools/check-submission.R` and `tools/reader-symbols.sh`, so that run
-does not skip the submission test or the symbol-map tests. `docs/` is
-listed in `.Rbuildignore` and is not in `00_pkg_src`. `codemeta.json`
-is in the source package, and the install test compares its version,
-licence, and authors with DESCRIPTION.
+does not skip the submission test or the symbol-map tests. `docs/` and
+`codemeta.json` are listed in `.Rbuildignore` and are not in
+`00_pkg_src`. The install test parses `tests/testthat/codemeta.json`
+with base R and compares its version, licence, and authors with
+DESCRIPTION.
 
 Names shared with other packages stay. `positions()` is the frame
 coordinate matrix and `symmetry()` is the shell-symmetry code. `dseams` does not depend on the other packages that export

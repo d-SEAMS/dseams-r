@@ -1,5 +1,14 @@
 # dseams (development version)
 
+* `codemeta.json` is listed in `.Rbuildignore` again, so the built
+  source has no top-level copy. The install test parses
+  `tests/testthat/codemeta.json` with base R. That file is the same
+  document as the checkout copy, and the two must match when both
+  are visible.
+* `configure.win` stops when `R_HOME` is unset, and when `R_HOME/bin/R`
+  is not executable. It does not call `R` on `PATH` to choose an
+  `R_HOME`.
+
 * `--test-log` compares a bundled test log with the latest recorded
   bundled-check summary in the rOpenSci draft: the last testthat totals
   line after the last "The testthat run inside the bundled check
@@ -28,8 +37,7 @@
 
 * `codemeta.json` records the same version, licence, and authors as
   DESCRIPTION. Each `aut`, `ctb`, `cph`, and `cre` role is listed, and
-  a holder with no family name is an Organization. The file is in the
-  source package so that comparison runs under `R CMD check`.
+  a holder with no family name is an Organization.
 * After `tools/vendor.sh`, configure checks the vendored sentinels again
   and stops, naming each file that is still missing, instead of writing
   `src/Makevars` for an incomplete tree.
