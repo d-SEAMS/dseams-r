@@ -1,7 +1,10 @@
 # Copyright (c) d-SEAMS developers
 
 # The package root during R CMD check is the 00_pkg_src copy. A direct
-# test_file() run walks up from tests/testthat.
+# test_file() run walks up from tests/testthat. covr installs the tests
+# with tools::testInstalledPackage(), which has neither configure nor
+# 00_pkg_src. kept_source_dir() is the source directory recorded in the
+# srcref of nframes, and it is used only when that walk finds nothing.
 hardening_root <- function() {
   starts <- unique(c(
     normalizePath(testthat::test_path("."), mustWork = FALSE),
@@ -29,6 +32,13 @@ hardening_root <- function() {
         break
       }
       dir <- parent
+    }
+  }
+  kept <- kept_source_dir()
+  if (length(kept) == 1L && nzchar(kept)) {
+    if (file.exists(file.path(kept, "DESCRIPTION")) &&
+        file.exists(file.path(kept, "configure"))) {
+      return(normalizePath(kept))
     }
   }
   NULL

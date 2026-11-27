@@ -1,5 +1,9 @@
 # dseams (development version)
 
+* Install-hardening tests find the package source from the srcref of
+  `nframes` when the walk from the test directory and from `00_pkg_src`
+  finds neither `configure` nor that copy. covr's installed run has
+  neither.
 * `codemeta.json` is listed in `.Rbuildignore` again, so the built
   source has no top-level copy. The install test parses
   `tests/testthat/codemeta.json` with base R. That file is the same
